@@ -23,6 +23,15 @@
     "prettier": "3.2.4",
     "typescript": "5.3.3"
   },
+  "pnpm": {
+    "overrides": {
+      "msgpackr": "^1.11.5",
+      "content-security-policy-parser": "^0.6.0",
+      "svelte": "^4.2.19",
+      "esbuild": "^0.25.0",
+      "tsup": "^8.5.1"
+    }
+  },
   "manifest": {
     "host_permissions": [
       "https://*/*"
