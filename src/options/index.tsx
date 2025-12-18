@@ -76,6 +76,14 @@ export default function OptionsPage() {
     await refreshState()
   }
 
+  const handleCleanup = async () => {
+    await chrome.runtime.sendMessage({
+      type: MESSAGE_TYPES.metaAction,
+      payload: { action: "cleanup" }
+    })
+    await refreshState()
+  }
+
   return (
     <main style={containerStyle}>
       <h1>NiconiCompare Options</h1>
@@ -119,6 +127,12 @@ export default function OptionsPage() {
                   クリーンアップ完了にする
                 </button>
               )}
+              <button
+                type="button"
+                style={secondaryButtonStyle}
+                onClick={handleCleanup}>
+                孤立データを削除
+              </button>
             </div>
             <div>
               <div style={metaLabelStyle}>retryQueue</div>

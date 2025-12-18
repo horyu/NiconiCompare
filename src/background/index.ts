@@ -25,6 +25,22 @@ import type {
   VideoSnapshot
 } from "../lib/types"
 
+const RETRY_DELAYS = [1000, 3000, 5000]
+
+processRetryQueue().catch((error) =>
+  console.error("Retry queue processing failed", error)
+)
+
+if (chrome?.alarms) {
+  chrome.alarms.create("nc.processRetry", { periodInMinutes: 1 })
+  chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === "nc.processRetry") {
+      processRetryQueue().catch((error) =>
+        console.error("Retry queue processing failed", error)
+      )
+    }
+  })
+}
 type RegisterSnapshotMessage = {
   type: typeof MESSAGE_TYPES.registerSnapshot
   payload: { video: VideoSnapshot; author: AuthorProfile }
@@ -59,6 +75,7 @@ type MetaActionMessage = {
   payload:
     | { action: "ackCleanup" }
     | { action: "clearRetry"; clearFailed?: boolean }
+    | { action: "cleanup" }
 }
 
 type RequestStateMessage = {
@@ -231,7 +248,7 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     rightVideoId: payload.rightVideoId,
     verdict: payload.verdict,
     deleted: false,
-    persistent: true
+    persistent: false
   }
 
   const updatedEvents: NcEventsBucket = {
@@ -271,13 +288,20 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     )
   })
 
-  await chrome.storage.local.set({
-    [STORAGE_KEYS.events]: updatedEvents,
-    [STORAGE_KEYS.state]: updatedState,
-    [STORAGE_KEYS.ratings]: nextRatings
-  })
-
-  return eventId
+  try {
+    await chrome.storage.local.set({
+      [STORAGE_KEYS.events]: updatedEvents,
+      [STORAGE_KEYS.state]: updatedState,
+      [STORAGE_KEYS.ratings]: nextRatings
+    })
+    await markEventPersistent(eventId)
+    await removeRetryEntry(eventId)
+    return eventId
+  } catch (error) {
+    console.error("Failed to persist event", error)
+    await queueEventRetry(eventId)
+    throw error
+  }
 }
 
 async function handleToggleOverlay(enabled: boolean) {
@@ -387,6 +411,11 @@ async function handleMetaAction(payload: MetaActionMessage["payload"]) {
     return
   }
 
+  if (payload.action === "cleanup") {
+    await performCleanup()
+    return
+  }
+
   if (payload.action === "clearRetry") {
     await storage.set({
       [STORAGE_KEYS.meta]: {
@@ -427,6 +456,185 @@ function buildRecentWindow(
   )
   const next = [leftVideoId, rightVideoId, ...deduped].filter(Boolean)
   return next.slice(0, Math.max(1, size))
+}
+
+async function markEventPersistent(eventId: number) {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    return false
+  }
+  const result = await storage.get(STORAGE_KEYS.events)
+  const events =
+    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
+  const index = events.items.findIndex((event) => event.id === eventId)
+  if (index === -1) {
+    return true
+  }
+  if (events.items[index].persistent) {
+    return true
+  }
+  events.items[index] = {
+    ...events.items[index],
+    persistent: true
+  }
+  await storage.set({
+    [STORAGE_KEYS.events]: events
+  })
+  return true
+}
+
+async function queueEventRetry(eventId: number) {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    return
+  }
+  const result = await storage.get(STORAGE_KEYS.meta)
+  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  if (meta.retryQueue.some((entry) => entry.eventId === eventId)) {
+    return
+  }
+  meta.retryQueue.push({
+    eventId,
+    retryCount: 0,
+    lastAttempt: Date.now()
+  })
+  await storage.set({
+    [STORAGE_KEYS.meta]: meta
+  })
+}
+
+async function removeRetryEntry(eventId: number) {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    return
+  }
+  const result = await storage.get(STORAGE_KEYS.meta)
+  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const nextQueue = meta.retryQueue.filter((entry) => entry.eventId !== eventId)
+  const nextFailed = meta.failedWrites.filter((id) => id !== eventId)
+  if (
+    nextQueue.length === meta.retryQueue.length &&
+    nextFailed.length === meta.failedWrites.length
+  ) {
+    return
+  }
+  await storage.set({
+    [STORAGE_KEYS.meta]: {
+      ...meta,
+      retryQueue: nextQueue,
+      failedWrites: nextFailed
+    }
+  })
+}
+
+async function processRetryQueue() {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    return
+  }
+  const result = await storage.get([STORAGE_KEYS.meta, STORAGE_KEYS.events])
+  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const queue = [...meta.retryQueue]
+  const remaining = []
+  const now = Date.now()
+
+  for (const entry of queue) {
+    const delay =
+      RETRY_DELAYS[Math.min(entry.retryCount, RETRY_DELAYS.length - 1)]
+    if (now - entry.lastAttempt < delay) {
+      remaining.push(entry)
+      continue
+    }
+    try {
+      const success = await markEventPersistent(entry.eventId)
+      if (!success) {
+        throw new Error("markEventPersistent returned false")
+      }
+      await removeRetryEntry(entry.eventId)
+    } catch (error) {
+      console.error("Retry failed", error)
+      if (entry.retryCount + 1 >= RETRY_DELAYS.length) {
+        meta.failedWrites = Array.from(
+          new Set([...meta.failedWrites, entry.eventId])
+        )
+      } else {
+        remaining.push({
+          ...entry,
+          retryCount: entry.retryCount + 1,
+          lastAttempt: now
+        })
+      }
+    }
+  }
+
+  await storage.set({
+    [STORAGE_KEYS.meta]: {
+      ...meta,
+      retryQueue: remaining
+    }
+  })
+}
+
+async function performCleanup() {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    return
+  }
+  const result = await storage.get([
+    STORAGE_KEYS.events,
+    STORAGE_KEYS.videos,
+    STORAGE_KEYS.authors,
+    STORAGE_KEYS.ratings,
+    STORAGE_KEYS.meta
+  ])
+  const events =
+    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
+  const videos = (result[STORAGE_KEYS.videos] as NcVideos) ?? {}
+  const authors = (result[STORAGE_KEYS.authors] as NcAuthors) ?? {}
+  const ratings = (result[STORAGE_KEYS.ratings] as NcRatings) ?? {}
+  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+
+  const referencedVideos = new Set<string>()
+  const referencedAuthors = new Set<string>()
+
+  events.items
+    .filter((event) => !event.deleted)
+    .forEach((event) => {
+      if (event.leftVideoId) {
+        referencedVideos.add(event.leftVideoId)
+      }
+      if (event.rightVideoId) {
+        referencedVideos.add(event.rightVideoId)
+      }
+    })
+
+  Object.values(videos).forEach((video) => {
+    if (video.authorUrl) {
+      referencedAuthors.add(video.authorUrl)
+    }
+  })
+
+  const cleanedVideos = Object.fromEntries(
+    Object.entries(videos).filter(([videoId]) => referencedVideos.has(videoId))
+  )
+  const cleanedRatings = Object.fromEntries(
+    Object.entries(ratings).filter(([videoId]) => referencedVideos.has(videoId))
+  )
+  const cleanedAuthors = Object.fromEntries(
+    Object.entries(authors).filter(([authorUrl]) =>
+      referencedAuthors.has(authorUrl)
+    )
+  )
+
+  await storage.set({
+    [STORAGE_KEYS.videos]: cleanedVideos,
+    [STORAGE_KEYS.ratings]: cleanedRatings,
+    [STORAGE_KEYS.authors]: cleanedAuthors,
+    [STORAGE_KEYS.meta]: {
+      ...meta,
+      needsCleanup: false
+    }
+  })
 }
 
 function rebuildRecentWindowFromEvents(events: CompareEvent[], size: number) {

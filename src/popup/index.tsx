@@ -68,6 +68,7 @@ export default function Popup() {
 
   const lastEvents = buildRecentEvents(snapshot.events)
   const unresolvedRatings = findUnresolvedRatings(snapshot.ratings)
+  const meta = snapshot.meta
 
   return (
     <main style={containerStyle}>
@@ -132,6 +133,22 @@ export default function Popup() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section>
+        <h3 style={sectionTitleStyle}>Storage 状態</h3>
+        <ul style={listStyle}>
+          <li>
+            needsCleanup:{" "}
+            {meta.needsCleanup ? (
+              <span style={{ color: "#dc2626" }}>要対応</span>
+            ) : (
+              "OK"
+            )}
+          </li>
+          <li>retryQueue: {meta.retryQueue.length} 件</li>
+          <li>failedWrites: {meta.failedWrites.length} 件</li>
+        </ul>
       </section>
 
       {error && <small style={{ color: "#ff8080" }}>{error}</small>}
