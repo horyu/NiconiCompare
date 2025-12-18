@@ -44,5 +44,6 @@ export const MESSAGE_TYPES = {
   updateCurrentVideo: "nc/updateCurrentVideo",
   recordEvent: "nc/recordEvent",
   toggleOverlay: "nc/toggleOverlay",
-  requestState: "nc/requestState"
+  requestState: "nc/requestState",
+  updateSettings: "nc/updateSettings"
 } as const
