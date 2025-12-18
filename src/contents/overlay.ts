@@ -1,6 +1,6 @@
 import type { PlasmoCSConfig } from "plasmo"
 
-import { MESSAGE_TYPES } from "../lib/constants"
+import { DEFAULT_SETTINGS, MESSAGE_TYPES, STORAGE_KEYS } from "../lib/constants"
 import type {
   AuthorProfile,
   NcSettings,
@@ -40,6 +40,19 @@ overlayRoot.style.gap = "8px"
 let recentWindow: string[] = []
 let currentVideoId: string | undefined
 let selectedLeftVideoId: string | undefined
+let overlaySettings: NcSettings = DEFAULT_SETTINGS
+let autoCloseTimer: number | undefined
+
+if (chrome.storage?.onChanged) {
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === "local" && changes[STORAGE_KEYS.settings]?.newValue) {
+      overlaySettings =
+        (changes[STORAGE_KEYS.settings].newValue as NcSettings) ??
+        DEFAULT_SETTINGS
+      applyOverlaySettings()
+    }
+  })
+}
 
 const title = document.createElement("strong")
 title.textContent = "NiconiCompare"
@@ -61,6 +74,11 @@ select.addEventListener("change", () => {
 const buttonRow = document.createElement("div")
 buttonRow.style.display = "flex"
 buttonRow.style.gap = "6px"
+
+const controlsContainer = document.createElement("div")
+controlsContainer.style.display = "flex"
+controlsContainer.style.flexDirection = "column"
+controlsContainer.style.gap = "8px"
 
 const verdictButtons: Array<{ label: string; verdict: Verdict }> = [
   { label: "良い", verdict: "better" },
@@ -87,8 +105,24 @@ verdictButtons.forEach(({ label, verdict }) => {
 
 overlayRoot.appendChild(title)
 overlayRoot.appendChild(statusText)
-overlayRoot.appendChild(select)
-overlayRoot.appendChild(buttonRow)
+controlsContainer.appendChild(select)
+controlsContainer.appendChild(buttonRow)
+overlayRoot.appendChild(controlsContainer)
+
+overlayRoot.addEventListener("mouseenter", () => {
+  if (!overlaySettings.overlayEnabled) {
+    return
+  }
+  showControls()
+  clearAutoClose()
+})
+
+overlayRoot.addEventListener("mouseleave", () => {
+  if (!overlaySettings.overlayEnabled) {
+    return
+  }
+  scheduleAutoClose()
+})
 
 async function bootstrap() {
   document.body.appendChild(overlayRoot)
@@ -244,6 +278,8 @@ async function refreshState() {
   }
 
   const data = response.data as StateResponse
+  overlaySettings = data.settings
+  applyOverlaySettings()
   recentWindow = data.state.recentWindow
   currentVideoId = data.state.currentVideoId
   updateUI()
@@ -299,6 +335,44 @@ function toggleVerdictButtons(enabled: boolean) {
     button.style.opacity = enabled ? "1" : "0.4"
     button.style.cursor = enabled ? "pointer" : "not-allowed"
   })
+}
+
+function applyOverlaySettings() {
+  if (!overlaySettings.overlayEnabled) {
+    overlayRoot.style.display = "none"
+    hideControls()
+    clearAutoClose()
+    return
+  }
+  overlayRoot.style.display = "flex"
+  showControls()
+  scheduleAutoClose()
+}
+
+function showControls() {
+  controlsContainer.style.display = "flex"
+}
+
+function hideControls() {
+  controlsContainer.style.display = "none"
+}
+
+function scheduleAutoClose() {
+  clearAutoClose()
+  const delay = overlaySettings.overlayAutoCloseMs
+  if (!delay || delay <= 0) {
+    return
+  }
+  autoCloseTimer = window.setTimeout(() => {
+    hideControls()
+  }, delay)
+}
+
+function clearAutoClose() {
+  if (autoCloseTimer) {
+    window.clearTimeout(autoCloseTimer)
+    autoCloseTimer = undefined
+  }
 }
 
 const start = () =>
