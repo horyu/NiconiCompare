@@ -23,8 +23,8 @@ const overlayId = "nc-compare-overlay"
 const overlayRoot = document.createElement("div")
 overlayRoot.id = overlayId
 overlayRoot.style.position = "fixed"
-overlayRoot.style.top = "12px"
-overlayRoot.style.right = "12px"
+overlayRoot.style.top = "0px"
+overlayRoot.style.right = "0px"
 overlayRoot.style.zIndex = "2147483647"
 overlayRoot.style.fontFamily = "system-ui, sans-serif"
 overlayRoot.style.background = "rgba(0,0,0,0.75)"
@@ -91,74 +91,167 @@ overlayRoot.appendChild(select)
 overlayRoot.appendChild(buttonRow)
 
 async function bootstrap() {
-  const videoId = resolveVideoId()
-  if (!videoId) {
+  document.body.appendChild(overlayRoot)
+  observeLdJsonChanges()
+
+  const videoData = extractVideoDataFromLdJson()
+  if (videoData) {
+    await handleVideoChange(videoData)
+  } else {
+    statusText.textContent = "動画情報を取得中..."
+    toggleVerdictButtons(false)
+  }
+}
+
+async function handleVideoChange(videoData: {
+  video: VideoSnapshot
+  author: AuthorProfile
+}) {
+  if (currentVideoId === videoData.video.videoId) {
     return
   }
 
-  document.body.appendChild(overlayRoot)
+  currentVideoId = videoData.video.videoId
 
-  currentVideoId = videoId
   await chrome.runtime.sendMessage({
     type: MESSAGE_TYPES.registerSnapshot,
     payload: {
-      video: buildVideoSnapshot(videoId),
-      author: buildAuthorSnapshot()
+      video: videoData.video,
+      author: videoData.author
     }
   })
 
   await chrome.runtime.sendMessage({
     type: MESSAGE_TYPES.updateCurrentVideo,
-    payload: { videoId }
+    payload: { videoId: videoData.video.videoId }
   })
 
   await refreshState()
 }
 
-function resolveVideoId() {
-  try {
-    const url = new URL(window.location.href)
-    const parts = url.pathname.split("/")
-    return parts.pop()
-  } catch (error) {
-    console.error("failed to parse video id", error)
+function observeLdJsonChanges() {
+  const attachObserver = () => {
+    const scripts = findLdJsonScripts()
+    if (scripts.length === 0) {
+      return
+    }
+    scripts.forEach((script) => {
+      ldObserver.observe(script, {
+        characterData: true,
+        childList: true,
+        subtree: true
+      })
+    })
+  }
+
+  const ldObserver = new MutationObserver(() => {
+    const videoData = extractVideoDataFromLdJson()
+    if (videoData) {
+      handleVideoChange(videoData)
+    }
+  })
+
+  const documentObserver = new MutationObserver(() => {
+    attachObserver()
+  })
+
+  documentObserver.observe(document.head ?? document.documentElement, {
+    childList: true,
+    subtree: true
+  })
+
+  attachObserver()
+}
+
+function extractVideoDataFromLdJson():
+  | {
+      video: VideoSnapshot
+      author: AuthorProfile
+    }
+  | undefined {
+  const scripts = findLdJsonScripts()
+  if (scripts.length === 0) {
     return undefined
   }
+
+  for (const script of scripts) {
+    if (!script.textContent) {
+      continue
+    }
+    try {
+      const parsed = JSON.parse(script.textContent)
+      const videoObject = Array.isArray(parsed)
+        ? parsed.find((item) => item?.["@type"] === "VideoObject")
+        : parsed
+
+      if (!videoObject) {
+        continue
+      }
+
+      const authorData = Array.isArray(videoObject.author)
+        ? videoObject.author[0]
+        : videoObject.author
+
+      const videoId =
+        videoObject.identifier ||
+        videoObject.videoId ||
+        extractVideoIdFromUrl(videoObject.url) ||
+        extractVideoIdFromUrl(window.location.pathname)
+
+      if (!videoId) {
+        continue
+      }
+
+      const author: AuthorProfile = {
+        authorUrl:
+          authorData?.url ||
+          authorData?.["@id"] ||
+          document.querySelector<HTMLAnchorElement>('[rel="author"]')?.href ||
+          window.location.origin,
+        name:
+          authorData?.name ||
+          document.querySelector('[rel="author"]')?.textContent ||
+          "unknown",
+        capturedAt: Date.now()
+      }
+
+      const video: VideoSnapshot = {
+        videoId,
+        title: videoObject.name || document.title || videoId,
+        authorUrl: author.authorUrl,
+        authorName: author.name,
+        thumbnailUrls: Array.isArray(videoObject.thumbnailUrl)
+          ? videoObject.thumbnailUrl
+          : videoObject.thumbnailUrl
+            ? [videoObject.thumbnailUrl]
+            : [],
+        lengthSeconds: Number(videoObject.duration ?? 0),
+        capturedAt: Date.now()
+      }
+
+      return { video, author }
+    } catch (error) {
+      console.error("Failed to parse ld+json", error)
+    }
+  }
+  return undefined
 }
 
-function buildVideoSnapshot(videoId: string): VideoSnapshot {
-  const ogTitle = document
-    .querySelector('meta[property="og:title"]')
-    ?.getAttribute("content")
-  const thumbnail = document
-    .querySelector('meta[property="og:image"]')
-    ?.getAttribute("content")
-
-  return {
-    videoId,
-    title: ogTitle ?? document.title ?? videoId,
-    authorUrl: buildAuthorSnapshot().authorUrl,
-    authorName: buildAuthorSnapshot().name,
-    thumbnailUrls: thumbnail ? [thumbnail] : [],
-    lengthSeconds: 0,
-    capturedAt: Date.now()
-  }
+function findLdJsonScripts() {
+  return Array.from(
+    document.querySelectorAll('script[type="application/ld+json"]')
+  )
 }
 
-function buildAuthorSnapshot(): AuthorProfile {
-  const authorLink = document.querySelector(
-    '[itemprop="author"] a'
-  ) as HTMLAnchorElement
-  const name =
-    authorLink?.textContent ??
-    document.querySelector('[rel="author"]')?.textContent ??
-    "unknown"
-  const href = authorLink?.href ?? window.location.origin
-  return {
-    authorUrl: href,
-    name: name.trim(),
-    capturedAt: Date.now()
+function extractVideoIdFromUrl(target?: string) {
+  if (!target) {
+    return undefined
   }
+  const url = target.startsWith("http")
+    ? new URL(target)
+    : new URL(target, window.location.origin)
+  const segments = url.pathname.split("/")
+  return segments.pop() || segments.pop()
 }
 
 async function refreshState() {
