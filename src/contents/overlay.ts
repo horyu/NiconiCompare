@@ -42,6 +42,7 @@ let currentVideoId: string | undefined
 let selectedLeftVideoId: string | undefined
 let overlaySettings: NcSettings = DEFAULT_SETTINGS
 let autoCloseTimer: number | undefined
+let observerScheduled = false
 
 if (chrome.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -137,6 +138,25 @@ async function bootstrap() {
   }
 }
 
+function scheduleLdJsonProcessing() {
+  if (observerScheduled) {
+    return
+  }
+  observerScheduled = true
+  const runner = () => {
+    observerScheduled = false
+    const videoData = extractVideoDataFromLdJson()
+    if (videoData) {
+      handleVideoChange(videoData)
+    }
+  }
+  if ("requestIdleCallback" in window) {
+    ;(window.requestIdleCallback as (cb: () => void) => number)(runner)
+  } else {
+    setTimeout(runner, 0)
+  }
+}
+
 async function handleVideoChange(videoData: {
   video: VideoSnapshot
   author: AuthorProfile
@@ -165,12 +185,7 @@ async function handleVideoChange(videoData: {
 
 function observeLdJsonChanges() {
   const head = document.head ?? document.documentElement
-  const observer = new MutationObserver(() => {
-    const videoData = extractVideoDataFromLdJson()
-    if (videoData) {
-      handleVideoChange(videoData)
-    }
-  })
+  const observer = new MutationObserver(() => scheduleLdJsonProcessing())
   observer.observe(head, {
     childList: true,
     subtree: true
