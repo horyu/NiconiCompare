@@ -184,7 +184,13 @@ async function handleVideoChange(videoData: {
 }
 
 function observeLdJsonChanges() {
-  const head = document.head ?? document.documentElement
+  const head = document.head
+  if (!head) {
+    console.error("document.head is missing; ld+json observer disabled.")
+    statusText.textContent = "動画情報を取得できません"
+    toggleVerdictButtons(false)
+    return
+  }
   const observer = new MutationObserver(() => scheduleLdJsonProcessing())
   observer.observe(head, {
     childList: true,
