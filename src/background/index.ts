@@ -14,6 +14,7 @@ import type {
   CompareEvent,
   NcAuthors,
   NcEventsBucket,
+  NcMeta,
   NcRatings,
   NcSettings,
   NcState,
@@ -53,6 +54,13 @@ type UpdateSettingsMessage = {
   payload: Partial<NcSettings>
 }
 
+type MetaActionMessage = {
+  type: typeof MESSAGE_TYPES.metaAction
+  payload:
+    | { action: "ackCleanup" }
+    | { action: "clearRetry"; clearFailed?: boolean }
+}
+
 type RequestStateMessage = {
   type: typeof MESSAGE_TYPES.requestState
 }
@@ -63,6 +71,7 @@ type Message =
   | RecordEventMessage
   | ToggleOverlayMessage
   | UpdateSettingsMessage
+  | MetaActionMessage
   | RequestStateMessage
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -99,6 +108,10 @@ chrome.runtime.onMessage.addListener(
             break
           case MESSAGE_TYPES.updateSettings:
             await handleUpdateSettings(message.payload)
+            sendResponse({ ok: true })
+            break
+          case MESSAGE_TYPES.metaAction:
+            await handleMetaAction(message.payload)
             sendResponse({ ok: true })
             break
           case MESSAGE_TYPES.requestState: {
@@ -297,21 +310,24 @@ async function readStateSnapshot() {
       settings: DEFAULT_SETTINGS,
       state: DEFAULT_STATE,
       events: DEFAULT_EVENTS_BUCKET,
-      ratings: {}
+      ratings: {},
+      meta: DEFAULT_META
     }
   }
   const result = await storage.get([
     STORAGE_KEYS.settings,
     STORAGE_KEYS.state,
     STORAGE_KEYS.events,
-    STORAGE_KEYS.ratings
+    STORAGE_KEYS.ratings,
+    STORAGE_KEYS.meta
   ])
   return {
     settings: (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS,
     state: (result[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE,
     events:
       (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET,
-    ratings: (result[STORAGE_KEYS.ratings] as NcRatings) ?? {}
+    ratings: (result[STORAGE_KEYS.ratings] as NcRatings) ?? {},
+    meta: (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
   }
 }
 
@@ -350,6 +366,36 @@ async function handleUpdateSettings(partial: Partial<NcSettings>) {
   }
 
   await storage.set(updates)
+}
+
+async function handleMetaAction(payload: MetaActionMessage["payload"]) {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    console.warn("chrome.storage.local is unavailable.")
+    return
+  }
+  const result = await storage.get(STORAGE_KEYS.meta)
+  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+
+  if (payload.action === "ackCleanup") {
+    await storage.set({
+      [STORAGE_KEYS.meta]: {
+        ...meta,
+        needsCleanup: false
+      }
+    })
+    return
+  }
+
+  if (payload.action === "clearRetry") {
+    await storage.set({
+      [STORAGE_KEYS.meta]: {
+        ...meta,
+        retryQueue: [],
+        failedWrites: payload.clearFailed ? [] : meta.failedWrites
+      }
+    })
+  }
 }
 
 function getOrCreateRatingSnapshot(

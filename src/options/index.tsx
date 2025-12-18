@@ -1,10 +1,11 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
 
 import { MESSAGE_TYPES } from "../lib/constants"
-import type { NcSettings } from "../lib/types"
+import type { NcMeta, NcSettings } from "../lib/types"
 
 export default function OptionsPage() {
   const [settings, setSettings] = useState<NcSettings>()
+  const [meta, setMeta] = useState<NcMeta>()
   const [form, setForm] = useState({
     recentWindowSize: "5",
     overlayAutoCloseSeconds: "1.5"
@@ -27,6 +28,7 @@ export default function OptionsPage() {
         recentWindowSize: String(next.recentWindowSize),
         overlayAutoCloseSeconds: String(next.overlayAutoCloseMs / 1000)
       })
+      setMeta(response.data.meta as NcMeta)
     }
   }
 
@@ -59,6 +61,22 @@ export default function OptionsPage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleAckCleanup = async () => {
+    await chrome.runtime.sendMessage({
+      type: MESSAGE_TYPES.metaAction,
+      payload: { action: "ackCleanup" }
+    })
+    await refreshState()
+  }
+
+  const handleClearRetry = async (clearFailed = false) => {
+    await chrome.runtime.sendMessage({
+      type: MESSAGE_TYPES.metaAction,
+      payload: { action: "clearRetry", clearFailed }
+    })
+    await refreshState()
   }
 
   return (
@@ -99,6 +117,52 @@ export default function OptionsPage() {
           <p>読込中...</p>
         )}
         {message && <p style={messageStyle}>{message}</p>}
+      </section>
+
+      <section>
+        <h2>Storage メタデータ</h2>
+        {meta ? (
+          <div style={metaGridStyle}>
+            <div>
+              <div style={metaLabelStyle}>needsCleanup</div>
+              <div>{meta.needsCleanup ? "要クリーンアップ" : "OK"}</div>
+              {meta.needsCleanup && (
+                <button
+                  type="button"
+                  style={secondaryButtonStyle}
+                  onClick={handleAckCleanup}>
+                  クリーンアップ完了にする
+                </button>
+              )}
+            </div>
+            <div>
+              <div style={metaLabelStyle}>retryQueue</div>
+              <div>{meta.retryQueue.length} 件</div>
+              {meta.retryQueue.length > 0 && (
+                <button
+                  type="button"
+                  style={secondaryButtonStyle}
+                  onClick={() => handleClearRetry()}>
+                  再試行キューをクリア
+                </button>
+              )}
+            </div>
+            <div>
+              <div style={metaLabelStyle}>failedWrites</div>
+              <div>{meta.failedWrites.length} 件</div>
+              {meta.failedWrites.length > 0 && (
+                <button
+                  type="button"
+                  style={secondaryButtonStyle}
+                  onClick={() => handleClearRetry(true)}>
+                  failedWritesもクリア
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <p>読込中...</p>
+        )}
       </section>
     </main>
   )
@@ -147,4 +211,25 @@ const buttonStyle: React.CSSProperties = {
 const messageStyle: React.CSSProperties = {
   fontSize: 12,
   color: "#2563eb"
+}
+
+const metaGridStyle: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+  gap: 16
+}
+
+const metaLabelStyle: React.CSSProperties = {
+  fontSize: 12,
+  opacity: 0.7,
+  marginBottom: 4
+}
+
+const secondaryButtonStyle: React.CSSProperties = {
+  marginTop: 8,
+  padding: "6px 10px",
+  borderRadius: 4,
+  border: "1px solid #94a3b8",
+  background: "transparent",
+  cursor: "pointer"
 }

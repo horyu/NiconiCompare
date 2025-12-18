@@ -45,5 +45,6 @@ export const MESSAGE_TYPES = {
   recordEvent: "nc/recordEvent",
   toggleOverlay: "nc/toggleOverlay",
   requestState: "nc/requestState",
-  updateSettings: "nc/updateSettings"
+  updateSettings: "nc/updateSettings",
+  metaAction: "nc/metaAction"
 } as const

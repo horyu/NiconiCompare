@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { MESSAGE_TYPES } from "../lib/constants"
 import type {
   NcEventsBucket,
+  NcMeta,
   NcRatings,
   NcSettings,
   NcState
@@ -13,6 +14,7 @@ type PopupSnapshot = {
   state: NcState
   events: NcEventsBucket
   ratings: NcRatings
+  meta: NcMeta
 }
 
 export default function Popup() {
