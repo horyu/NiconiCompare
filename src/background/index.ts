@@ -207,19 +207,32 @@ async function handleRegisterSnapshot(payload: {
 }
 
 async function handleUpdateCurrentVideo(videoId: string) {
-  const data = await chrome.storage.local.get(STORAGE_KEYS.state)
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    console.warn("chrome.storage.local is unavailable.")
+    return
+  }
+  const data = await storage.get([STORAGE_KEYS.state, STORAGE_KEYS.settings])
   const state = (data[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
+  const settings =
+    (data[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
 
   if (state.currentVideoId === videoId) {
     return
   }
 
-  const nextState: NcState = {
-    ...state,
-    currentVideoId: videoId
-  }
+  const nextState = produce(state, (draft) => {
+    if (state.currentVideoId && state.currentVideoId !== videoId) {
+      draft.recentWindow = insertVideoIntoRecentWindow(
+        draft.recentWindow,
+        settings.recentWindowSize,
+        state.currentVideoId
+      )
+    }
+    draft.currentVideoId = videoId
+  })
 
-  await chrome.storage.local.set({
+  await storage.set({
     [STORAGE_KEYS.state]: nextState
   })
 }
@@ -456,6 +469,18 @@ function buildRecentWindow(
   )
   const next = [leftVideoId, rightVideoId, ...deduped].filter(Boolean)
   return next.slice(0, Math.max(1, size))
+}
+
+function insertVideoIntoRecentWindow(
+  current: string[],
+  size: number,
+  videoId: string
+) {
+  if (!videoId) {
+    return current
+  }
+  const deduped = current.filter((id) => id !== videoId)
+  return [videoId, ...deduped].slice(0, Math.max(1, size))
 }
 
 async function markEventPersistent(eventId: number) {

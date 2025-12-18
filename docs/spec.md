@@ -44,7 +44,7 @@
     - VideoSnapshot が存在しない場合：オーバーレイにエラーメッセージを表示し、比較入力を完全に抑制
     - いずれの場合もエラーログに記録し、ユーザーはページリロードで再取得を試行できる
     - JSON-LD の構造変更やフィールド欠損（`author.url` 不在など）も同様に扱う
-- `nc_state.recentWindow` として leftVideo 候補 (選択肢) の LRU を設定値の件数だけ保持する。LRU 更新は「比較イベントの storage 書き込み成功後」に行い、比較に登場した leftVideo/rightVideo を最新順に並び替える（書き込み失敗時は LRU を更新しない）。rightVideo（現在再生中の動画）は別途 `nc_state.currentVideoId` で管理する。
+- `nc_state.recentWindow` として leftVideo 候補 (選択肢) の LRU を設定値の件数だけ保持する。LRU 更新は「比較イベントの storage 書き込み成功後」および「`currentVideoId` が新しい動画へ切り替わった際」に行い、比較に登場した leftVideo/rightVideo や直前まで視聴していた動画を最新順に並べる（書き込み失敗時は LRU を更新しない）。rightVideo（現在再生中の動画）は別途 `nc_state.currentVideoId` で管理する。
   - **設定値変更時の LRU 再構築**: 「直近 100 件までの CompareEvent（deleted = true を除外）を時系列逆順に走査し、登場した leftVideo を重複除去しながら新しい設定値ぶん埋める」アルゴリズムで LRU を再構築する。100 件の根拠は「最大設定値 10 × 10 倍のバッファ」として十分なイベント履歴を確保するため。`currentVideoId` は LRU に含めず、別途保持し続ける。
 - 削除はまず CompareEvent に `deleted = true` をセットする論理削除とし、Options から「完全削除」操作を行うまでは `nc_events.items` から除去しない。
 
@@ -142,8 +142,8 @@ type RatingSnapshot = {
 - **常駐/展開**: 右上のミニアイコン（24×24px、半透明背景）をホバーするとカードが展開。マウスアウト後は即座に閉じる。Popup から `overlayEnabled` が OFF の場合はアイコン自体を表示せず、動画・author 情報の取得も行わない。
 - **アクセシビリティ**: アイコンに `role="button"` と `aria-label="動画比較カードを開く"` を付与。Tab キーでフォーカス可能、Enter/Space キーでカード展開。カード内の評価ボタンもキーボード操作対応。
 - **比較候補 Select**:
-  - `nc_settings.recentWindow` (1〜10) は Options で設定。内部 LRU は設定値の件数だけ leftVideo を保持し、右側に表示される現動画 (rightVideo) と比較する候補を提供する。
-  - Select で表示する候補数も設定値と同件数。選択するとサムネイル／メタ表示を更新。
+  - 比較は常に「現在再生中の動画（右）」 vs 「Select で選んだ過去動画（左）」の形式で行う。Select には直近再生してきた動画の LRU（`nc_settings.recentWindow` 件）だけが並び、ユーザーが任意の動画を選択できる。
+  - Select で表示する候補数も設定値と同件数。候補リストは `currentVideoId` の切り替わり時と比較イベント記録時に更新される。選択するとサムネイル／メタ表示を更新。
   - 設定値変更時は LRU を再構築し、新しい設定値に合わせて truncate する。
 - **評価ボタン**: 良い・同じ・悪い。チェックボックスのように常に選択状態が表示され、カードを閉じても選択内容が残る。直近イベントと同じ動画ペアであれば該当 CompareEvent の verdict を上書きし、異なるペアであれば新しい CompareEvent を追加する。
   - **選択状態の永続化**: カード内のメモリ上で保持し、ページ遷移またはリロード時はリセットされる。過去の CompareEvent を復元して表示することはしない（混乱防止のため）。
