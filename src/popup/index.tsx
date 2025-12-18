@@ -64,10 +64,8 @@ export default function Popup() {
     )
   }
 
-  const lastEvents = [...snapshot.events.items]
-    .filter((event) => !event.deleted)
-    .slice(-5)
-    .reverse()
+  const lastEvents = buildRecentEvents(snapshot.events)
+  const unresolvedRatings = findUnresolvedRatings(snapshot.ratings)
 
   return (
     <main style={containerStyle}>
@@ -104,8 +102,30 @@ export default function Popup() {
           <ul style={listStyle}>
             {lastEvents.map((event) => (
               <li key={event.id}>
-                #{event.id} {event.leftVideoId} vs {event.rightVideoId} →{" "}
-                {event.verdict}
+                <strong>#{event.id}</strong> {event.leftVideoId} vs{" "}
+                {event.rightVideoId}{" "}
+                <span style={verdictStyle(event.verdict)}>
+                  {labelVerdict(event.verdict)}
+                </span>
+                <small style={timestampStyle}>
+                  {new Date(event.timestamp).toLocaleString()}
+                </small>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <h3 style={sectionTitleStyle}>未確定動画 (RD &gt; 100)</h3>
+        {unresolvedRatings.length === 0 ? (
+          <p style={mutedStyle}>未確定なし</p>
+        ) : (
+          <ul style={listStyle}>
+            {unresolvedRatings.map((rating) => (
+              <li key={rating.videoId}>
+                {rating.videoId} — Rating {rating.rating.toFixed(0)} / RD{" "}
+                {rating.rd.toFixed(0)}
               </li>
             ))}
           </ul>
@@ -157,4 +177,54 @@ const toggleLabelStyle: React.CSSProperties = {
   display: "flex",
   gap: 8,
   alignItems: "center"
+}
+
+const timestampStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 11,
+  opacity: 0.6
+}
+
+function buildRecentEvents(events: NcEventsBucket) {
+  return [...events.items]
+    .filter((event) => !event.deleted)
+    .sort((a, b) => b.id - a.id)
+    .slice(0, 5)
+}
+
+function findUnresolvedRatings(ratings: NcRatings) {
+  return Object.values(ratings)
+    .filter((rating) => rating.rd > 100)
+    .sort((a, b) => b.rd - a.rd)
+    .slice(0, 5)
+}
+
+function labelVerdict(verdict: string) {
+  switch (verdict) {
+    case "better":
+      return "良い"
+    case "same":
+      return "同じ"
+    case "worse":
+      return "悪い"
+    default:
+      return verdict
+  }
+}
+
+function verdictStyle(verdict: string): React.CSSProperties {
+  const colors: Record<string, string> = {
+    better: "#16a34a",
+    same: "#52525b",
+    worse: "#dc2626"
+  }
+  return {
+    display: "inline-block",
+    marginLeft: 4,
+    padding: "2px 6px",
+    borderRadius: 999,
+    fontSize: 11,
+    background: colors[verdict] ?? "#64748b",
+    color: "#fff"
+  }
 }
