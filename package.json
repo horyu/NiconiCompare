@@ -48,6 +48,10 @@
     ]
   },
   "manifest": {
+    "permissions": [
+      "activeTab",
+      "storage"
+    ],
     "host_permissions": [
       "https://*/*"
     ]
