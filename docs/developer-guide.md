@@ -31,6 +31,7 @@ mise install
 ```bash
 pnpm install
 pnpm approve-builds   # 初回のみ、esbuild/@parcel/watcher 等の build script を許可
+pnpm lint             # 型チェック + Prettier チェック
 ```
 
 > `pnpm approve-builds` は対話式で、依存の build script 実行を明示的に承認する必要がある。`esbuild`、`@parcel/watcher`、`@swc/core` などが選択対象として表示されるので、画面の指示に従って次工程へ進むこと。
@@ -85,6 +86,7 @@ pnpm test:e2e    # E2Eテスト (Playwright)
 ## 4. ビルド
 
 ```bash
+pnpm lint   # ビルド前に型/フォーマット崩れがないかを確認
 pnpm build
 ```
 
