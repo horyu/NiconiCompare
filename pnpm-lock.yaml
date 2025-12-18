@@ -15,6 +15,12 @@ importers:
 
   .:
     dependencies:
+      glicko2-lite:
+        specifier: ^1.0.2
+        version: 1.0.2
+      immer:
+        specifier: ^10.1.1
+        version: 10.2.0
       plasmo:
         specifier: 0.90.5
         version: 0.90.5(@swc/core@1.15.5(@swc/helpers@0.5.17))(@swc/helpers@0.5.17)(@types/node@20.11.5)(postcss@8.5.6)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -2141,6 +2147,10 @@ packages:
     resolution: {integrity: sha512-kVCxPF3vQM/N0B1PmoqVUqgHP+EeVjmZSQn+1oCRPxd2P21P2F19lIgbR3HBosbB1PUhOAoctJnfEn2GbN2eZA==}
     engines: {node: '>=18'}
 
+  glicko2-lite@1.0.2:
+    resolution: {integrity: sha512-ILiDI6eioKu1m07P6ohdw3jyiyX+4DbeQxnx8iBeltdmA9x2rUWB+j/Fba2eFzw5o+C4rYsg8tX0RLMTCbmukg==}
+    engines: {node: 10 || 12 || 14 || >=16}
+
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
     engines: {node: '>= 6'}
@@ -2232,6 +2242,9 @@ packages:
     resolution: {integrity: sha512-6TDAlDPZxUFCv+fuOkIoXT/V/f3Qbq8e37p+YOiYrUv3v9cc3/6x78VdfPgFVaB9dZYeLUfKgHRebpkm/oP2VQ==}
     engines: {node: '>=0.10.0'}
     hasBin: true
+
+  immer@10.2.0:
+    resolution: {integrity: sha512-d/+XTN3zfODyjr89gM3mPq1WNX2B8pYsu7eORitdwyA2sBubnTl3laYlBk4sXY5FUa5qTZGBDPJICVbvqzjlbw==}
 
   immutable@5.1.4:
     resolution: {integrity: sha512-p6u1bG3YSnINT5RQmx/yRZBpenIl30kVxkTLDyHLIMk0gict704Q9n+thfDI7lTRm9vXdDYutVzXhzcThxTnXA==}
@@ -2504,6 +2517,15 @@ packages:
 
   locate-character@3.0.0:
     resolution: {integrity: sha512-SW13ws7BjaeJ6p7Q6CO2nchbYEc3X3J6WrmTTDto7yMPqVSZTUyY5Tjbid+Ab8gLnATtygYtiDIJGQRRn2ZOiA==}
+
+  lodash.assign@4.2.0:
+    resolution: {integrity: sha512-hFuH8TY+Yji7Eja3mGiuAxBqLagejScbG8GbG0j6o9vzn0YL14My+ktnqtZgFTosKymC9/44wP6s7xyuLfnClw==}
+
+  lodash.map@4.6.0:
+    resolution: {integrity: sha512-worNHGKLDetmcEYDvh2stPCrrQRkP20E4l0iIS7F8EvzMqBBi7ltvFN5m1HvTf1P7Jk1txKhvFcmYsCr8O2F1Q==}
+
+  lodash.reduce@4.6.0:
+    resolution: {integrity: sha512-6raRe2vxCYBhpBu+B+TtNGUzah+hQjVdu3E17wfusjyrXBka2nBS8OH/gjVZ5PvHOhWmIZTYri09Z6n/QfnNMw==}
 
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
@@ -5390,6 +5412,12 @@ snapshots:
       '@sec-ant/readable-stream': 0.4.1
       is-stream: 4.0.1
 
+  glicko2-lite@1.0.2:
+    dependencies:
+      lodash.assign: 4.2.0
+      lodash.map: 4.6.0
+      lodash.reduce: 4.6.0
+
   glob-parent@5.1.2:
     dependencies:
       is-glob: 4.0.3
@@ -5478,6 +5506,8 @@ snapshots:
 
   image-size@0.5.5:
     optional: true
+
+  immer@10.2.0: {}
 
   immutable@5.1.4: {}
 
@@ -5706,6 +5736,12 @@ snapshots:
   load-tsconfig@0.2.5: {}
 
   locate-character@3.0.0: {}
+
+  lodash.assign@4.2.0: {}
+
+  lodash.map@4.6.0: {}
+
+  lodash.reduce@4.6.0: {}
 
   loose-envify@1.4.0:
     dependencies:
