@@ -359,13 +359,7 @@ function hideControls() {
 
 function scheduleAutoClose() {
   clearAutoClose()
-  const delay = overlaySettings.overlayAutoCloseMs
-  if (!delay || delay <= 0) {
-    return
-  }
-  autoCloseTimer = window.setTimeout(() => {
-    hideControls()
-  }, delay)
+  hideControls()
 }
 
 function clearAutoClose() {
