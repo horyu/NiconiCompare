@@ -68,6 +68,8 @@ const verdictButtons: Array<{ label: string; verdict: Verdict }> = [
   { label: "悪い", verdict: "worse" }
 ]
 
+const verdictButtonElements: HTMLButtonElement[] = []
+
 verdictButtons.forEach(({ label, verdict }) => {
   const button = document.createElement("button")
   button.textContent = label
@@ -80,6 +82,7 @@ verdictButtons.forEach(({ label, verdict }) => {
   button.style.color = "#fff"
   button.addEventListener("click", () => submitVerdict(verdict))
   buttonRow.appendChild(button)
+  verdictButtonElements.push(button)
 })
 
 overlayRoot.appendChild(title)
@@ -185,6 +188,7 @@ function updateUI() {
     option.textContent = "比較候補なし"
     select.appendChild(option)
     selectedLeftVideoId = undefined
+    toggleVerdictButtons(false)
     return
   }
 
@@ -196,6 +200,7 @@ function updateUI() {
   })
   selectedLeftVideoId = recentWindow[0]
   select.value = selectedLeftVideoId
+  toggleVerdictButtons(true)
 }
 
 async function submitVerdict(verdict: Verdict) {
@@ -213,6 +218,14 @@ async function submitVerdict(verdict: Verdict) {
   if (response?.ok) {
     await refreshState()
   }
+}
+
+function toggleVerdictButtons(enabled: boolean) {
+  verdictButtonElements.forEach((button) => {
+    button.disabled = !enabled
+    button.style.opacity = enabled ? "1" : "0.4"
+    button.style.cursor = enabled ? "pointer" : "not-allowed"
+  })
 }
 
 const start = () =>
