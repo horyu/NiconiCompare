@@ -30,7 +30,16 @@
       "svelte": "^4.2.19",
       "esbuild": "^0.25.0",
       "tsup": "^8.5.1"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@swc/core",
+      "esbuild",
+      "less",
+      "lmdb",
+      "msgpackr-extract",
+      "sharp"
+    ]
   },
   "manifest": {
     "host_permissions": [

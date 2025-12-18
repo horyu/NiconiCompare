@@ -30,7 +30,10 @@ mise install
 
 ```bash
 pnpm install
+pnpm approve-builds   # 初回のみ、esbuild/@parcel/watcher 等の build script を許可
 ```
+
+> `pnpm approve-builds` は対話式で、依存の build script 実行を明示的に承認する必要がある。`esbuild`、`@parcel/watcher`、`@swc/core` などが選択対象として表示されるので、画面の指示に従って次工程へ進むこと。
 
 ### 1.3 主要依存関係
 
