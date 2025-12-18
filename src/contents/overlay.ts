@@ -130,37 +130,17 @@ async function handleVideoChange(videoData: {
 }
 
 function observeLdJsonChanges() {
-  const attachObserver = () => {
-    const scripts = findLdJsonScripts()
-    if (scripts.length === 0) {
-      return
-    }
-    scripts.forEach((script) => {
-      ldObserver.observe(script, {
-        characterData: true,
-        childList: true,
-        subtree: true
-      })
-    })
-  }
-
-  const ldObserver = new MutationObserver(() => {
+  const head = document.head ?? document.documentElement
+  const observer = new MutationObserver(() => {
     const videoData = extractVideoDataFromLdJson()
     if (videoData) {
       handleVideoChange(videoData)
     }
   })
-
-  const documentObserver = new MutationObserver(() => {
-    attachObserver()
-  })
-
-  documentObserver.observe(document.head ?? document.documentElement, {
+  observer.observe(head, {
     childList: true,
     subtree: true
   })
-
-  attachObserver()
 }
 
 function extractVideoDataFromLdJson():
