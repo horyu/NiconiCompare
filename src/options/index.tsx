@@ -7,8 +7,7 @@ export default function OptionsPage() {
   const [settings, setSettings] = useState<NcSettings>()
   const [meta, setMeta] = useState<NcMeta>()
   const [form, setForm] = useState({
-    recentWindowSize: "5",
-    overlayAutoCloseSeconds: "1.5"
+    recentWindowSize: "5"
   })
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string>()
@@ -25,8 +24,7 @@ export default function OptionsPage() {
       const next = response.data.settings as NcSettings
       setSettings(next)
       setForm({
-        recentWindowSize: String(next.recentWindowSize),
-        overlayAutoCloseSeconds: String(next.overlayAutoCloseMs / 1000)
+        recentWindowSize: String(next.recentWindowSize)
       })
       setMeta(response.data.meta as NcMeta)
     }
@@ -43,8 +41,7 @@ export default function OptionsPage() {
     setMessage(undefined)
     try {
       const payload = {
-        recentWindowSize: Number(form.recentWindowSize),
-        overlayAutoCloseMs: Number(form.overlayAutoCloseSeconds) * 1000
+        recentWindowSize: Number(form.recentWindowSize)
       }
       const response = await chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.updateSettings,
@@ -94,18 +91,6 @@ export default function OptionsPage() {
                 max={10}
                 value={form.recentWindowSize}
                 onChange={handleInputChange("recentWindowSize")}
-                style={inputStyle}
-              />
-            </label>
-            <label style={labelStyle}>
-              自動閉鎖 (秒)
-              <input
-                type="number"
-                min={0.5}
-                max={5}
-                step={0.5}
-                value={form.overlayAutoCloseSeconds}
-                onChange={handleInputChange("overlayAutoCloseSeconds")}
                 style={inputStyle}
               />
             </label>
