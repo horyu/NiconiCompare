@@ -108,7 +108,7 @@ comparisonGrid.style.gap = "4px 8px"
 comparisonGrid.style.alignItems = "center"
 
 const currentVideoLabel = document.createElement("div")
-currentVideoLabel.style.fontSize = "12px"
+currentVideoLabel.style.fontSize = "14px"
 currentVideoLabel.style.opacity = "0.9"
 currentVideoLabel.style.textAlign = "right"
 
@@ -121,6 +121,7 @@ verdictButtonElements.push(currentPreferredButton)
 const vsLabel = document.createElement("div")
 vsLabel.textContent = "vs"
 vsLabel.style.textAlign = "center"
+vsLabel.style.fontSize = "14px"
 vsLabel.style.fontWeight = "bold"
 vsLabel.style.opacity = "0.7"
 
