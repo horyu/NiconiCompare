@@ -44,6 +44,7 @@ let overlaySettings: NcSettings = DEFAULT_SETTINGS
 let autoCloseTimer: number | undefined
 let observerScheduled = false
 let videoSnapshots: Record<string, VideoSnapshot> = {}
+let overlayHovered = false
 
 if (chrome.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -99,6 +100,12 @@ select.style.textAlign = "right"
 select.addEventListener("change", () => {
   selectedLeftVideoId = select.value
   updateComparisonLabels()
+  scheduleAutoClose()
+})
+select.addEventListener("blur", () => {
+  if (!autoCloseTimer) {
+    scheduleAutoClose()
+  }
 })
 
 const comparisonGrid = document.createElement("div")
@@ -155,6 +162,7 @@ overlayRoot.addEventListener("mouseenter", () => {
   if (!overlaySettings.overlayEnabled) {
     return
   }
+  overlayHovered = true
   showControls()
   clearAutoClose()
 })
@@ -163,6 +171,7 @@ overlayRoot.addEventListener("mouseleave", () => {
   if (!overlaySettings.overlayEnabled) {
     return
   }
+  overlayHovered = false
   scheduleAutoClose()
 })
 
@@ -471,9 +480,17 @@ function hideControls() {
   controlsContainer.style.display = "none"
 }
 
-function scheduleAutoClose() {
+function scheduleAutoClose(delay?: number) {
   clearAutoClose()
-  hideControls()
+  const timeout = delay ?? overlaySettings.overlayAutoCloseMs ?? 2000
+  autoCloseTimer = window.setTimeout(() => {
+    if (overlayHovered) {
+      autoCloseTimer = undefined
+      return
+    }
+    hideControls()
+    autoCloseTimer = undefined
+  }, timeout)
 }
 
 function clearAutoClose() {

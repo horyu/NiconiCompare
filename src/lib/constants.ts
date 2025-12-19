@@ -13,7 +13,7 @@ export const STORAGE_KEYS = {
 export const DEFAULT_SETTINGS: NcSettings = {
   recentWindowSize: 5,
   overlayEnabled: true,
-  overlayAutoCloseMs: 1500,
+  overlayAutoCloseMs: 2000,
   glicko: {
     rating: 1500,
     rd: 350,
