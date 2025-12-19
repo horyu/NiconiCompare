@@ -403,7 +403,7 @@ function formatVideoLabel(videoId?: string) {
   }
   const snapshot = videoSnapshots[videoId]
   if (snapshot?.title) {
-    return `${snapshot.title} | ${videoId}`
+    return `${videoId} | ${snapshot.title}`
   }
   return videoId
 }
