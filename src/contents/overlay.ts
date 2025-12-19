@@ -32,7 +32,6 @@ overlayRoot.style.color = "#fff"
 overlayRoot.style.padding = "12px"
 overlayRoot.style.borderRadius = "8px"
 overlayRoot.style.boxShadow = "0 4px 30px rgba(0,0,0,0.3)"
-overlayRoot.style.minWidth = "260px"
 overlayRoot.style.maxWidth = "555px"
 overlayRoot.style.display = "flex"
 overlayRoot.style.flexDirection = "column"
@@ -72,11 +71,15 @@ if (chrome.storage?.onChanged) {
 
 const title = document.createElement("strong")
 title.textContent = "NiconiCompare"
+title.style.width = "100%"
+title.style.textAlign = "right"
 
 const statusText = document.createElement("span")
 statusText.style.fontSize = "12px"
 statusText.style.opacity = "0.8"
 statusText.style.display = "none"
+statusText.style.width = "100%"
+statusText.style.textAlign = "right"
 
 const controlsContainer = document.createElement("div")
 controlsContainer.style.display = "flex"
@@ -92,6 +95,7 @@ select.style.border = "1px solid rgba(255,255,255,0.3)"
 select.style.background = "#1f1f1f"
 select.style.color = "#fff"
 select.style.width = "100%"
+select.style.textAlign = "right"
 select.addEventListener("change", () => {
   selectedLeftVideoId = select.value
   updateComparisonLabels()
@@ -106,7 +110,7 @@ comparisonGrid.style.alignItems = "center"
 const currentVideoLabel = document.createElement("div")
 currentVideoLabel.style.fontSize = "12px"
 currentVideoLabel.style.opacity = "0.9"
-currentVideoLabel.style.textAlign = "left"
+currentVideoLabel.style.textAlign = "right"
 
 const currentPreferredButton = document.createElement("button")
 currentPreferredButton.textContent = "再生中の動画"
