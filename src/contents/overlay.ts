@@ -13,6 +13,16 @@ export const config: PlasmoCSConfig = {
   matches: ["https://www.nicovideo.jp/watch/*"]
 }
 
+const keepOverlayEnvValue = `${
+  process.env.PLASMO_PUBLIC_KEEP_OVERLAY_OPEN ?? ""
+}`
+const forceKeepOverlayOpen =
+  String(keepOverlayEnvValue).toLowerCase() === "true"
+console.info(
+  "NiconiCompare overlay ENV: PLASMO_PUBLIC_KEEP_OVERLAY_OPEN=",
+  keepOverlayEnvValue
+)
+
 type StateResponse = {
   settings: NcSettings
   state: NcState
@@ -526,10 +536,10 @@ function setStatusMessage(message?: string) {
   if (message) {
     statusText.textContent = message
     statusText.style.display = "block"
-  } else {
-    statusText.textContent = ""
-    statusText.style.display = "none"
+    return
   }
+  statusText.textContent = ""
+  statusText.style.display = "none"
 }
 
 async function submitVerdict(verdict: Verdict) {
@@ -595,10 +605,18 @@ function showControls() {
 }
 
 function hideControls() {
+  if (forceKeepOverlayOpen) {
+    controlsContainer.style.display = "flex"
+    return
+  }
   controlsContainer.style.display = "none"
 }
 
 function scheduleAutoClose(delay?: number) {
+  if (forceKeepOverlayOpen) {
+    showControls()
+    return
+  }
   clearAutoClose()
   const timeout = delay ?? overlaySettings.overlayAutoCloseMs ?? 2000
   autoCloseTimer = window.setTimeout(() => {

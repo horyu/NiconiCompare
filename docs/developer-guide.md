@@ -36,7 +36,13 @@ pnpm lint             # 型チェック + Prettier チェック
 
 > `pnpm approve-builds` は対話式で、依存の build script 実行を明示的に承認する必要がある。`esbuild`、`@parcel/watcher`、`@swc/core` などが選択対象として表示されるので、画面の指示に従って次工程へ進むこと。
 
-### 1.3 主要依存関係
+### 1.3 環境変数の管理
+
+- ルートの `.env.sample` を `.env` にコピーし、必要に応じて値を変更する。
+- `PLASMO_PUBLIC_KEEP_OVERLAY_OPEN=true` を設定すると、開発中にコンテンツオーバーレイが自動で閉じなくなり、動作確認が容易になる。デフォルト（false）のままでも通常利用は可能。
+- Plasmo/Parcel は `.env` の内容を `process.env` に注入するため、他の `_PUBLIC` 変数もこのファイルで管理する。
+
+### 1.4 主要依存関係
 
 - Plasmo 0.90+ (MV3 拡張ビルド)
 - TypeScript 5+, React 19+
