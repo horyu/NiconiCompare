@@ -1,6 +1,6 @@
 import styleText from "data-text:../style.css"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { DEFAULT_SETTINGS, MESSAGE_TYPES, STORAGE_KEYS } from "../lib/constants"
 import {
@@ -49,7 +49,6 @@ export default function Overlay() {
   const [lastEventId, setLastEventId] = useState<number>()
 
   const autoCloseTimerRef = useRef<number>()
-  const previousCurrentVideoIdRef = useRef<string>()
 
   // Chrome storage listener
   useEffect(() => {
@@ -73,10 +72,32 @@ export default function Overlay() {
     return () => chrome.storage.onChanged.removeListener(handleStorageChange)
   }, [])
 
-  // Load initial video snapshots
-  useEffect(() => {
-    loadVideoSnapshots()
-  }, [])
+  const loadVideoSnapshots = async () => {
+    if (!chrome.storage?.local) return
+    const result = await chrome.storage.local.get(STORAGE_KEYS.videos)
+    setVideoSnapshots(result?.[STORAGE_KEYS.videos] ?? {})
+  }
+
+  const handleVideoChange = useCallback(
+    async (videoData: { video: VideoSnapshot; author: AuthorProfile }) => {
+      if (currentVideoId === videoData.video.videoId) return
+
+      setCurrentVideoId(videoData.video.videoId)
+
+      await chrome.runtime.sendMessage({
+        type: MESSAGE_TYPES.registerSnapshot,
+        payload: { video: videoData.video, author: videoData.author }
+      })
+
+      await chrome.runtime.sendMessage({
+        type: MESSAGE_TYPES.updateCurrentVideo,
+        payload: { videoId: videoData.video.videoId }
+      })
+
+      await refreshState()
+    },
+    [currentVideoId]
+  )
 
   // JSON-LD observer
   useEffect(() => {
@@ -93,7 +114,7 @@ export default function Overlay() {
     }
 
     return cleanup
-  }, [])
+  }, [handleVideoChange])
 
   // Auto-close handler
   useEffect(() => {
@@ -126,70 +147,21 @@ export default function Overlay() {
   // Update UI when state changes
   useEffect(() => {
     const selectableWindow = recentWindow.filter((id) => id !== currentVideoId)
+
     if (selectableWindow.length === 0) {
-      if (opponentVideoId) {
-        setOpponentVideoId(undefined)
-      }
+      setOpponentVideoId(undefined)
       return
     }
 
-    if (!opponentVideoId || opponentVideoId === currentVideoId) {
+    if (!opponentVideoId || !selectableWindow.includes(opponentVideoId)) {
       setOpponentVideoId(selectableWindow[0])
     }
-  }, [recentWindow, currentVideoId])
-
-  useEffect(() => {
-    if (!currentVideoId) {
-      previousCurrentVideoIdRef.current = currentVideoId
-      return
-    }
-
-    if (previousCurrentVideoIdRef.current !== currentVideoId) {
-      const selectableWindow = recentWindow.filter(
-        (id) => id !== currentVideoId
-      )
-      setOpponentVideoId(selectableWindow[0])
-    }
-
-    previousCurrentVideoIdRef.current = currentVideoId
-  }, [currentVideoId, recentWindow])
+  }, [recentWindow, currentVideoId, opponentVideoId])
 
   useEffect(() => {
     setLastVerdict(undefined)
     setLastEventId(undefined)
-  }, [currentVideoId])
-
-  useEffect(() => {
-    setLastVerdict(undefined)
-    setLastEventId(undefined)
-  }, [opponentVideoId])
-
-  const loadVideoSnapshots = async () => {
-    if (!chrome.storage?.local) return
-    const result = await chrome.storage.local.get(STORAGE_KEYS.videos)
-    setVideoSnapshots(result?.[STORAGE_KEYS.videos] ?? {})
-  }
-
-  const handleVideoChange = async (videoData: {
-    video: VideoSnapshot
-    author: AuthorProfile
-  }) => {
-    if (currentVideoId === videoData.video.videoId) return
-
-    setCurrentVideoId(videoData.video.videoId)
-
-    await chrome.runtime.sendMessage({
-      type: MESSAGE_TYPES.registerSnapshot,
-      payload: { video: videoData.video, author: videoData.author }
-    })
-
-    await chrome.runtime.sendMessage({
-      type: MESSAGE_TYPES.updateCurrentVideo,
-      payload: { videoId: videoData.video.videoId }
-    })
-
-    await refreshState()
-  }
+  }, [currentVideoId, opponentVideoId])
 
   const refreshState = async () => {
     const response = await chrome.runtime.sendMessage({
