@@ -153,6 +153,11 @@ export default function Overlay() {
     setLastEventId(undefined)
   }, [currentVideoId])
 
+  useEffect(() => {
+    setLastVerdict(undefined)
+    setLastEventId(undefined)
+  }, [opponentVideoId])
+
   const loadVideoSnapshots = async () => {
     if (!chrome.storage?.local) return
     const result = await chrome.storage.local.get(STORAGE_KEYS.videos)
