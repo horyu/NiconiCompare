@@ -333,7 +333,7 @@ export default function Overlay() {
               ) : (
                 <div className="w-full aspect-video rounded-md bg-white/10" />
               )}
-              <div className="text-[14px] opacity-90 text-right break-words overflow-hidden w-full">
+              <div className="text-[14px] opacity-90 text-right break-all overflow-hidden w-full">
                 {currentVideoId
                   ? formatVideoLabel(currentVideoId)
                   : "再生中動画を検出できません"}
@@ -393,7 +393,7 @@ export default function Overlay() {
                     )}
                   </select>
                 </label>
-                <div className="text-[14px] opacity-90 self-stretch text-left break-words overflow-hidden">
+                <div className="text-[14px] opacity-90 self-stretch text-left break-all overflow-hidden">
                   {opponentVideoId
                     ? videoSnapshots[opponentVideoId]?.title ?? ""
                     : ""}
