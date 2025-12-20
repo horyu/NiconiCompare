@@ -42,7 +42,7 @@ overlayRoot.style.color = "#fff"
 overlayRoot.style.padding = "12px"
 overlayRoot.style.borderRadius = "8px"
 overlayRoot.style.boxShadow = "0 4px 30px rgba(0,0,0,0.3)"
-overlayRoot.style.maxWidth = "555px"
+overlayRoot.style.maxWidth = "320px"
 overlayRoot.style.display = "flex"
 overlayRoot.style.flexDirection = "column"
 overlayRoot.style.gap = "8px"
@@ -118,41 +118,40 @@ select.addEventListener("blur", () => {
   }
 })
 
-const comparisonGrid = document.createElement("div")
-comparisonGrid.style.display = "grid"
-comparisonGrid.style.gridTemplateColumns = "105px 105px 105px"
-comparisonGrid.style.gridTemplateRows = "auto auto auto"
-comparisonGrid.style.gap = "8px"
-comparisonGrid.style.alignItems = "center"
+const buttonRow = document.createElement("div")
+buttonRow.style.display = "grid"
+buttonRow.style.gridTemplateColumns = "105px 70px 105px"
+buttonRow.style.gap = "8px"
+buttonRow.style.alignItems = "center"
+
+const videoRow = document.createElement("div")
+videoRow.style.display = "grid"
+videoRow.style.gridTemplateColumns = "1fr auto 1fr"
+videoRow.style.gap = "8px"
+videoRow.style.alignItems = "start"
 
 const currentPreferredButton = document.createElement("button")
 currentPreferredButton.textContent = "再生中の動画"
 styleVerdictButton(currentPreferredButton)
-currentPreferredButton.style.gridColumn = "1"
-currentPreferredButton.style.gridRow = "1"
 currentPreferredButton.addEventListener("click", () => submitVerdict("better"))
 verdictButtonElements.push(currentPreferredButton)
+buttonRow.appendChild(currentPreferredButton)
 
 const drawButton = document.createElement("button")
 drawButton.textContent = "引き分け"
 styleVerdictButton(drawButton)
-drawButton.style.gridColumn = "2"
-drawButton.style.gridRow = "1"
 drawButton.addEventListener("click", () => submitVerdict("same"))
 verdictButtonElements.push(drawButton)
+buttonRow.appendChild(drawButton)
 
 const selectedPreferredButton = document.createElement("button")
 selectedPreferredButton.textContent = "選択中の動画"
 styleVerdictButton(selectedPreferredButton)
-selectedPreferredButton.style.gridColumn = "3"
-selectedPreferredButton.style.gridRow = "1"
-selectedPreferredButton.style.justifySelf = "end"
 selectedPreferredButton.addEventListener("click", () => submitVerdict("worse"))
 verdictButtonElements.push(selectedPreferredButton)
+buttonRow.appendChild(selectedPreferredButton)
 
 const currentThumbnail = document.createElement("img")
-currentThumbnail.style.gridColumn = "1"
-currentThumbnail.style.gridRow = "2"
 styleThumbnail(currentThumbnail)
 
 const vsLabel = document.createElement("div")
@@ -161,42 +160,36 @@ vsLabel.style.textAlign = "center"
 vsLabel.style.fontSize = "14px"
 vsLabel.style.fontWeight = "bold"
 vsLabel.style.opacity = "0.7"
-vsLabel.style.gridColumn = "2"
-vsLabel.style.gridRow = "2"
+vsLabel.style.width = "auto"
 
 const selectedThumbnail = document.createElement("img")
-selectedThumbnail.style.gridColumn = "3"
-selectedThumbnail.style.gridRow = "2"
-selectedThumbnail.style.justifySelf = "end"
 styleThumbnail(selectedThumbnail)
 
 const currentVideoLabel = document.createElement("div")
 currentVideoLabel.style.fontSize = "14px"
 currentVideoLabel.style.opacity = "0.9"
 currentVideoLabel.style.textAlign = "right"
-currentVideoLabel.style.gridColumn = "1"
-currentVideoLabel.style.gridRow = "3"
 currentVideoLabel.style.whiteSpace = "normal"
 currentVideoLabel.style.wordBreak = "break-word"
 currentVideoLabel.style.overflow = "hidden"
+currentVideoLabel.style.width = "100%"
 
 const selectContainer = document.createElement("div")
-selectContainer.style.gridColumn = "3"
-selectContainer.style.gridRow = "3"
 selectContainer.style.width = "100%"
 selectContainer.style.display = "flex"
 selectContainer.style.flexDirection = "column"
-selectContainer.style.alignItems = "flex-end"
+selectContainer.style.alignItems = "flex-start"
 selectContainer.style.boxSizing = "border-box"
-selectContainer.style.paddingTop = "2px"
-selectContainer.style.paddingBottom = "2px"
 const selectControl = document.createElement("label")
 selectControl.style.position = "relative"
 selectControl.style.width = "100%"
 selectControl.style.display = "flex"
 selectControl.style.alignItems = "center"
 const selectDisplay = document.createElement("span")
-selectDisplay.style.padding = "3px 6px"
+selectDisplay.style.paddingTop = "3px"
+selectDisplay.style.paddingBottom = "1px"
+selectDisplay.style.paddingLeft = "6px"
+selectDisplay.style.paddingRight = "6px"
 selectDisplay.style.borderRadius = "4px"
 selectDisplay.style.border = "1px solid rgba(255,255,255,0.3)"
 selectDisplay.style.background = "#1f1f1f"
@@ -207,11 +200,10 @@ selectDisplay.style.alignItems = "center"
 selectDisplay.style.pointerEvents = "none"
 selectDisplay.style.width = "100%"
 const selectTitle = document.createElement("div")
-selectTitle.style.fontSize = "13px"
+selectTitle.style.fontSize = "14px"
 selectTitle.style.opacity = "0.9"
-selectTitle.style.marginTop = "6px"
 selectTitle.style.alignSelf = "stretch"
-selectTitle.style.textAlign = "right"
+selectTitle.style.textAlign = "left"
 selectTitle.style.whiteSpace = "normal"
 selectTitle.style.wordBreak = "break-word"
 selectTitle.style.overflow = "hidden"
@@ -232,20 +224,32 @@ selectControl.appendChild(selectDisplay)
 selectControl.appendChild(select)
 selectContainer.append(selectControl, selectTitle)
 
-comparisonGrid.append(
-  currentPreferredButton,
-  drawButton,
-  selectedPreferredButton,
-  currentThumbnail,
-  vsLabel,
-  selectedThumbnail,
-  currentVideoLabel,
-  selectContainer
-)
+const leftColumn = document.createElement("div")
+leftColumn.style.display = "flex"
+leftColumn.style.flexDirection = "column"
+leftColumn.style.gap = "8px"
+leftColumn.append(currentThumbnail, currentVideoLabel)
+
+const centerColumn = document.createElement("div")
+centerColumn.style.display = "flex"
+centerColumn.style.alignItems = "center"
+centerColumn.style.justifyContent = "center"
+centerColumn.style.alignSelf = "center"
+centerColumn.appendChild(vsLabel)
+
+const rightColumn = document.createElement("div")
+rightColumn.style.display = "flex"
+rightColumn.style.flexDirection = "column"
+// Select 要素があるため、gap を少し狭くする
+rightColumn.style.gap = "5px"
+rightColumn.append(selectedThumbnail, selectContainer)
+
+videoRow.append(leftColumn, centerColumn, rightColumn)
 
 overlayRoot.appendChild(title)
 overlayRoot.appendChild(statusText)
-controlsContainer.appendChild(comparisonGrid)
+controlsContainer.appendChild(buttonRow)
+controlsContainer.appendChild(videoRow)
 overlayRoot.appendChild(controlsContainer)
 
 overlayRoot.addEventListener("mouseenter", () => {
@@ -575,12 +579,11 @@ function styleVerdictButton(button: HTMLButtonElement) {
   button.style.background = "rgba(255,255,255,0.2)"
   button.style.color = "#fff"
   button.style.whiteSpace = "nowrap"
-  button.style.width = "105px"
+  button.style.width = "100%"
 }
 
 function styleThumbnail(img: HTMLImageElement) {
   img.style.width = "100%"
-  img.style.maxWidth = "120px"
   img.style.aspectRatio = "16 / 9"
   img.style.objectFit = "cover"
   img.style.borderRadius = "6px"
