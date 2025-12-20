@@ -54,7 +54,10 @@ export default function Overlay() {
   useEffect(() => {
     if (!chrome.storage?.onChanged) return
 
-    const handleStorageChange = (changes: any, areaName: string) => {
+    const handleStorageChange = (
+      changes: { [key: string]: chrome.storage.StorageChange },
+      areaName: string
+    ) => {
       if (areaName !== "local") return
 
       if (changes[STORAGE_KEYS.settings]?.newValue) {
@@ -72,11 +75,49 @@ export default function Overlay() {
     return () => chrome.storage.onChanged.removeListener(handleStorageChange)
   }, [])
 
-  const loadVideoSnapshots = async () => {
+  const loadVideoSnapshots = useCallback(async () => {
     if (!chrome.storage?.local) return
     const result = await chrome.storage.local.get(STORAGE_KEYS.videos)
     setVideoSnapshots(result?.[STORAGE_KEYS.videos] ?? {})
-  }
+  }, [])
+
+  const clearAutoCloseTimer = useCallback(() => {
+    if (autoCloseTimerRef.current) {
+      window.clearTimeout(autoCloseTimerRef.current)
+      autoCloseTimerRef.current = undefined
+    }
+  }, [])
+
+  const scheduleAutoClose = useCallback(() => {
+    clearAutoCloseTimer()
+    const timeout = overlaySettings.overlayAutoCloseMs ?? 2000
+    autoCloseTimerRef.current = window.setTimeout(() => {
+      if (!isHovered) {
+        setShowControls(false)
+      }
+      autoCloseTimerRef.current = undefined
+    }, timeout)
+  }, [clearAutoCloseTimer, overlaySettings.overlayAutoCloseMs, isHovered])
+
+  const refreshState = useCallback(async () => {
+    const response = await chrome.runtime.sendMessage({
+      type: MESSAGE_TYPES.requestState
+    })
+
+    if (!response?.ok) return
+
+    const data = response.data as StateResponse
+    setOverlaySettings(data.settings)
+    setRecentWindow(data.state.recentWindow)
+    setCurrentVideoId(data.state.currentVideoId)
+    await loadVideoSnapshots()
+
+    if (data.state.currentVideoId) {
+      setStatusMessage(undefined)
+    } else {
+      setStatusMessage("再生中動画を検出できません")
+    }
+  }, [loadVideoSnapshots])
 
   const handleVideoChange = useCallback(
     async (videoData: { video: VideoSnapshot; author: AuthorProfile }) => {
@@ -96,7 +137,7 @@ export default function Overlay() {
 
       await refreshState()
     },
-    [currentVideoId]
+    [currentVideoId, refreshState]
   )
 
   // JSON-LD observer
@@ -141,7 +182,9 @@ export default function Overlay() {
   }, [
     isHovered,
     overlaySettings.overlayEnabled,
-    overlaySettings.overlayAutoCloseMs
+    overlaySettings.overlayAutoCloseMs,
+    clearAutoCloseTimer,
+    scheduleAutoClose
   ])
 
   // Update UI when state changes
@@ -162,26 +205,6 @@ export default function Overlay() {
     setLastVerdict(undefined)
     setLastEventId(undefined)
   }, [currentVideoId, opponentVideoId])
-
-  const refreshState = async () => {
-    const response = await chrome.runtime.sendMessage({
-      type: MESSAGE_TYPES.requestState
-    })
-
-    if (!response?.ok) return
-
-    const data = response.data as StateResponse
-    setOverlaySettings(data.settings)
-    setRecentWindow(data.state.recentWindow)
-    setCurrentVideoId(data.state.currentVideoId)
-    await loadVideoSnapshots()
-
-    if (data.state.currentVideoId) {
-      setStatusMessage(undefined)
-    } else {
-      setStatusMessage("再生中動画を検出できません")
-    }
-  }
 
   const submitVerdict = async (verdict: Verdict) => {
     if (lastVerdict === verdict) {
@@ -219,24 +242,6 @@ export default function Overlay() {
       setLastVerdict(verdict)
       setLastEventId(response.eventId)
       await refreshState()
-    }
-  }
-
-  const scheduleAutoClose = () => {
-    clearAutoCloseTimer()
-    const timeout = overlaySettings.overlayAutoCloseMs ?? 2000
-    autoCloseTimerRef.current = window.setTimeout(() => {
-      if (!isHovered) {
-        setShowControls(false)
-      }
-      autoCloseTimerRef.current = undefined
-    }, timeout)
-  }
-
-  const clearAutoCloseTimer = () => {
-    if (autoCloseTimerRef.current) {
-      window.clearTimeout(autoCloseTimerRef.current)
-      autoCloseTimerRef.current = undefined
     }
   }
 
