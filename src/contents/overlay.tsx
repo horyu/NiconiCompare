@@ -21,9 +21,8 @@ export const getStyle: PlasmoGetStyle = () => {
   return style
 }
 
-const keepOverlayEnvValue = `${process.env.PLASMO_PUBLIC_KEEP_OVERLAY_OPEN ?? ""}`
-const forceKeepOverlayOpen =
-  String(keepOverlayEnvValue).toLowerCase() === "true"
+const keepOverlayEnvValue = String(process.env.PLASMO_PUBLIC_KEEP_OVERLAY_OPEN)
+const forceKeepOverlayOpen = keepOverlayEnvValue.toLowerCase() === "true"
 
 type StateResponse = {
   settings: NcSettings
@@ -377,6 +376,9 @@ export default function Overlay() {
                     value={opponentVideoId ?? ""}
                     onChange={(e) => setOpponentVideoId(e.target.value)}
                     onBlur={() => {
+                      if (forceKeepOverlayOpen) {
+                        return
+                      }
                       if (!autoCloseTimerRef.current) {
                         scheduleAutoClose()
                       }
