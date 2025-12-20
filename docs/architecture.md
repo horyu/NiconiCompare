@@ -317,29 +317,20 @@ async function saveCompareEvent(event: CompareEvent) {
 
 ### 6.1 Content Overlay
 
-**実装**: Plasmo CSUI (Content Script UI)
+実装は Plasmo CSUI で DOM に直接マウントされる。UI レイアウトやアニメーションは頻繁に変わるため本書では「守るべき機能要件」のみを列挙し、詳細な構造は `src/contents/overlay.ts` と `docs/ui-overlay.md`（DOM/状態まとめ）を正とする。仕様レイヤー（docs/spec.md §9.1）との関係は以下。
 
-**配置**: 右上固定 (position: fixed; top: 10px; right: 10px;)
+**不変要件（仕様で固定）**
 
-**コンポーネント構成**:
+- watch ページ右上付近に常駐し、`overlayEnabled` が true の間は常に比較操作が可能。
+- `nc_state.recentWindow` の LRU 候補と `currentVideoId` を同一カード内で確認でき、任意のペアに対して verdict を一手で送信できる。
+- verdict 送信後は `MESSAGE_TYPES.recordEvent` → `MESSAGE_TYPES.requestState` の順で state を再取得し最新 UI に追従する。
+- JSON-LD が取得できない場合はステータスメッセージ表示と verdict ボタン無効化を行い、メタデータが復旧したら自動で再有効化する。
+- `overlayEnabled` / `overlayAutoCloseMs` は chrome.storage に保存された設定値を唯一の情報源として参照し、マウスの hover/out に応じて自動開閉できる。
 
-```tsx
-<CompareOverlay>
-  <IconButton onHover={openCard} />
-  {isCardOpen && (
-    <CompareCard autoClose={1000}>
-      <VideoSelect candidates={recentWindow} />
-      <VerdictButtons onSelect={handleVerdict} />
-    </CompareCard>
-  )}
-</CompareOverlay>
-```
+**実装依存の要素（コード参照）**
 
-**アクセシビリティ**:
-
-- `role="button"`, `aria-label="動画比較カードを開く"`
-- Tab/Enter/Space キー対応
-- フォーカストラップ（カード内で Tab キー循環）
+- 表示位置の微調整・カードレイアウト・アクセシビリティ属性・hover での展開方法など、UI の細部は `src/contents/overlay.ts` を参照する。変更時はコードと合わせてスクリーンショット資料を更新し、仕様書では改めて定義しない。
+- Select のラベル表記、ステータス文言、auto-close アニメーションなども実装ベースで運用し、アーキテクチャ文書では管理対象外とする。
 
 ### 6.2 Popup
 
