@@ -409,7 +409,6 @@ function extractVideoDataFromLdJson():
         videoId,
         title: videoObject.name || document.title || videoId,
         authorUrl: author.authorUrl,
-        authorName: author.name,
         thumbnailUrls: Array.isArray(videoObject.thumbnailUrl)
           ? videoObject.thumbnailUrl
           : videoObject.thumbnailUrl

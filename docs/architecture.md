@@ -55,12 +55,12 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 
 ### 1.2 コンポーネント責務
 
-| コンポーネント     | 責務                                           | 技術スタック                      |
-| ------------------ | ---------------------------------------------- | --------------------------------- |
-| **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得        | React 19, TypeScript, Plasmo CSUI |
-| **Service Worker** | イベントソーシング、Glicko-2 計算、Storage I/O | TypeScript, chrome.storage API    |
-| **Popup**          | レーティング表示、直近イベント管理             | React 19, TypeScript              |
-| **Options**        | 詳細設定、データ操作、エクスポート/インポート  | React 19, TypeScript              |
+| コンポーネント     | 責務                                           | 技術スタック                        |
+| ------------------ | ---------------------------------------------- | ----------------------------------- |
+| **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得        | React 18.2.0, TypeScript, Plasmo CSUI |
+| **Service Worker** | イベントソーシング、Glicko-2 計算、Storage I/O | TypeScript, chrome.storage API      |
+| **Popup**          | レーティング表示、直近イベント管理             | React 18.2.0, TypeScript            |
+| **Options**        | 詳細設定、データ操作、エクスポート/インポート  | React 18.2.0, TypeScript            |
 | **Storage**        | 永続化層                                       | chrome.storage.local (Key-Value)  |
 
 ---
@@ -208,7 +208,7 @@ Glicko-2 は、Glicko 評価システムの改良版で、以下の 3 つのパ�
 
 ### 4.2 実装詳細
 
-**ライブラリ**: `glicko2` npm パッケージまたは独自実装
+**ライブラリ**: `glicko2-lite` npm パッケージ
 
 **計算フロー**:
 
@@ -271,7 +271,52 @@ Chrome Storage Local は、Key-Value 型のストレージ（JSON シリアラ�
 | `nc_ratings`  | Map<string, RatingSnapshot>             | 100 B/件   |
 | `nc_meta`     | Object                                  | ~10 KB     |
 
-### 5.2 ストレージクォータ管理
+### 5.2 データ更新の不変性管理
+
+**ライブラリ**: `immer` を使用して Immutable な state 更新を実現
+
+```typescript
+import { produce } from "immer"
+
+// 例: イベント追加時の不変更新
+const updatedEvents = produce(events, (draft) => {
+  draft.items.push(newEvent)
+  draft.nextId += 1
+})
+```
+
+**メリット**:
+- 複雑なネストしたオブジェクトの更新が直感的
+- 意図しない副作用を防止
+- リプレイやロールバックが容易
+
+### 5.3 設定値の正規化
+
+`normalizeSettings` 関数により、不正な設定値を自動修正:
+
+```typescript
+function normalizeSettings(settings: NcSettings): NcSettings {
+  return {
+    ...settings,
+    recentWindowSize: Math.min(
+      10,
+      Math.max(1, Math.floor(settings.recentWindowSize || 5))
+    ),
+    overlayAutoCloseMs: Math.min(
+      5000,
+      Math.max(500, settings.overlayAutoCloseMs || 2000)
+    ),
+    glicko: settings.glicko || DEFAULT_SETTINGS.glicko
+  }
+}
+```
+
+**バリデーション範囲**:
+- `recentWindowSize`: 1〜10 の整数
+- `overlayAutoCloseMs`: 500〜5000ms（デフォルト: 2000ms）
+- `glicko`: 初期値の妥当性チェック
+
+### 5.4 ストレージクォータ管理
 
 **Chrome 制限**: `chrome.storage.local` は約 10 MB
 
@@ -286,9 +331,9 @@ Chrome Storage Local は、Key-Value 型のストレージ（JSON シリアラ�
 
 1. UI に警告バナー表示
 2. 古いイベントの削除を促す
-3. `chrome.storage.local.getBytesInUse()` で使用量監視
+3. `chrome.storage.local.getBytesInUse()` で使用量監視（※現状未実装）
 
-### 5.3 書き込みパフォーマンス最適化
+### 5.5 書き込みパフォーマンス最適化
 
 **課題**: 頻繁な小規模書き込みは遅い
 
@@ -334,7 +379,7 @@ async function saveCompareEvent(event: CompareEvent) {
 
 ### 6.2 Popup
 
-**サイズ**: 幅 400px、高さ 600px
+**サイズ**: 幅 320px、高さ可変
 
 **レイアウト**:
 

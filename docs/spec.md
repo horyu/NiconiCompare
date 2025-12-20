@@ -119,6 +119,8 @@ type RatingSnapshot = {
 ### 7.4 動画メタ取得 (JSON-LD)
 
 - watch ページの `<script type="application/ld+json">` に含まれる `VideoObject` から `thumbnailUrl[]` と `author.url/name` を取得。
+  - `author.url` は VideoSnapshot の `authorUrl` フィールドおよび AuthorProfile のキーとして使用。
+  - `author.name` は AuthorProfile の `name` フィールドに保存し、オーバーレイ UI で投稿者名を表示する際は `nc_authors[videoSnapshot.authorUrl].name` から取得する。
 - 再訪時にも同 JSON-LD から最新スナップショットを取得・上書き。
 - JSON-LD が取得できない場合は DOM 属性や別 API にフォールバックせず、オーバーレイにエラーメッセージを表示して比較入力を抑制する（ログにも記録）。
 

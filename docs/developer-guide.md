@@ -39,14 +39,19 @@ pnpm lint             # 型チェック + Prettier チェック
 ### 1.3 環境変数の管理
 
 - ルートの `.env.sample` を `.env` にコピーし、必要に応じて値を変更する。
-- `PLASMO_PUBLIC_KEEP_OVERLAY_OPEN=true` を設定すると、開発中にコンテンツオーバーレイが自動で閉じなくなり、動作確認が容易になる。デフォルト（false）のままでも通常利用は可能。
-- Plasmo/Parcel は `.env` の内容を `process.env` に注入するため、他の `_PUBLIC` 変数もこのファイルで管理する。
+- **`PLASMO_PUBLIC_KEEP_OVERLAY_OPEN`**: 開発用環境変数
+  - `true` に設定すると、コンテンツオーバーレイが自動で閉じなくなり、動作確認が容易になる
+  - デフォルトは `false`（通常の自動クローズ動作）
+  - オーバーレイの `handleMouseLeave` イベントで参照され、開発中のデバッグに使用
+- Plasmo/Parcel は `.env` の内容を `process.env` に注入するため、他の `PLASMO_PUBLIC_` プレフィックス変数もこのファイルで管理する。
 
 ### 1.4 主要依存関係
 
 - Plasmo 0.90+ (MV3 拡張ビルド)
-- TypeScript 5+, React 19+
-- Vitest, Playwright (テスト)
+- TypeScript 5+, React 18.2.0
+- glicko2-lite (Glicko-2 レーティング計算)
+- immer (Immutable state 更新)
+- **テストフレームワーク**: 現状未セットアップ（Vitest, Playwright の導入は将来予定）
 
 ---
 
@@ -81,11 +86,13 @@ TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関�
 ## 3. テスト
 
 ```bash
-pnpm test        # 単体テスト
-pnpm test:e2e    # E2Eテスト (Playwright)
+pnpm test        # 単体テスト (※未セットアップ)
+pnpm test:e2e    # E2Eテスト (Playwright, ※未セットアップ)
 ```
 
-カバレッジ目標: 80%以上
+**現状**: テストフレームワーク（Vitest, Playwright）は未導入。将来的な実装予定。
+
+カバレッジ目標: 80%以上（テストセットアップ後）
 
 ---
 
