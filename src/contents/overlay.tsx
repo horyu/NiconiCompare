@@ -42,6 +42,7 @@ export default function Overlay() {
   const [statusMessage, setStatusMessage] = useState<string>()
   const [isHovered, setIsHovered] = useState(false)
   const [showControls, setShowControls] = useState(true)
+  const [lastVerdict, setLastVerdict] = useState<Verdict>()
 
   const autoCloseTimerRef = useRef<number>()
   const observerScheduledRef = useRef(false)
@@ -130,6 +131,10 @@ export default function Overlay() {
     }
   }, [recentWindow, currentVideoId])
 
+  useEffect(() => {
+    setLastVerdict(undefined)
+  }, [currentVideoId])
+
   const loadVideoSnapshots = async () => {
     if (!chrome.storage?.local) return
     const result = await chrome.storage.local.get(STORAGE_KEYS.videos)
@@ -211,6 +216,7 @@ export default function Overlay() {
 
   const submitVerdict = async (verdict: Verdict) => {
     if (!selectedLeftVideoId || !currentVideoId) return
+    setLastVerdict(verdict)
 
     const response = await chrome.runtime.sendMessage({
       type: MESSAGE_TYPES.recordEvent,
@@ -258,6 +264,14 @@ export default function Overlay() {
     return videoSnapshots[videoId]?.thumbnailUrls?.[0]
   }
 
+  const getVerdictButtonClass = (verdict: Verdict) =>
+    [
+      "px-3 py-1.5 rounded disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap w-full",
+      lastVerdict === verdict
+        ? "bg-white text-black shadow-inner ring-2 ring-white/80"
+        : "bg-white/20 hover:bg-white/30"
+    ].join(" ")
+
   if (!overlaySettings.overlayEnabled) {
     return null
   }
@@ -285,20 +299,23 @@ export default function Overlay() {
           <div className="grid grid-cols-[105px_70px_105px] gap-2 items-center">
             <button
               onClick={() => submitVerdict("better")}
+              aria-pressed={lastVerdict === "better"}
               disabled={!canSubmit}
-              className="px-3 py-1.5 rounded bg-white/20 hover:bg-white/30 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap w-full">
+              className={getVerdictButtonClass("better")}>
               再生中の動画
             </button>
             <button
               onClick={() => submitVerdict("same")}
+              aria-pressed={lastVerdict === "same"}
               disabled={!canSubmit}
-              className="px-3 py-1.5 rounded bg-white/20 hover:bg-white/30 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap w-full">
+              className={getVerdictButtonClass("same")}>
               引き分け
             </button>
             <button
               onClick={() => submitVerdict("worse")}
+              aria-pressed={lastVerdict === "worse"}
               disabled={!canSubmit}
-              className="px-3 py-1.5 rounded bg-white/20 hover:bg-white/30 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap w-full">
+              className={getVerdictButtonClass("worse")}>
               選択中の動画
             </button>
           </div>
