@@ -189,16 +189,26 @@ const selectDisplay = document.createElement("span")
 selectDisplay.style.paddingTop = "3px"
 selectDisplay.style.paddingBottom = "1px"
 selectDisplay.style.paddingLeft = "6px"
-selectDisplay.style.paddingRight = "6px"
+selectDisplay.style.paddingRight = "24px"
 selectDisplay.style.borderRadius = "4px"
 selectDisplay.style.border = "1px solid rgba(255,255,255,0.3)"
 selectDisplay.style.background = "#1f1f1f"
 selectDisplay.style.color = "#fff"
 selectDisplay.style.fontSize = "12px"
-selectDisplay.style.display = "flex"
-selectDisplay.style.alignItems = "center"
+selectDisplay.style.overflow = "hidden"
+selectDisplay.style.textOverflow = "ellipsis"
+selectDisplay.style.whiteSpace = "nowrap"
 selectDisplay.style.pointerEvents = "none"
 selectDisplay.style.width = "100%"
+const selectDisplayArrow = document.createElement("span")
+selectDisplayArrow.textContent = "▼"
+selectDisplayArrow.style.position = "absolute"
+selectDisplayArrow.style.right = "8px"
+selectDisplayArrow.style.top = "50%"
+selectDisplayArrow.style.transform = "translateY(-50%)"
+selectDisplayArrow.style.fontSize = "10px"
+selectDisplayArrow.style.opacity = "0.7"
+selectDisplayArrow.style.pointerEvents = "none"
 const selectTitle = document.createElement("div")
 selectTitle.style.fontSize = "14px"
 selectTitle.style.opacity = "0.9"
@@ -221,6 +231,7 @@ const selectId = "nc-select"
 select.id = selectId
 selectControl.htmlFor = selectId
 selectControl.appendChild(selectDisplay)
+selectControl.appendChild(selectDisplayArrow)
 selectControl.appendChild(select)
 selectContainer.append(selectControl, selectTitle)
 
@@ -240,7 +251,7 @@ centerColumn.appendChild(vsLabel)
 const rightColumn = document.createElement("div")
 rightColumn.style.display = "flex"
 rightColumn.style.flexDirection = "column"
-// Select 要素があるため、gap を少し狭くする
+// Select 要素のテキストを再生中動画のID・タイトルと揃えるために少し狭める
 rightColumn.style.gap = "5px"
 rightColumn.append(selectedThumbnail, selectContainer)
 
