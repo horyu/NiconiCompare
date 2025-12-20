@@ -37,6 +37,7 @@
 ## 5. ドメイン要件
 
 - 比較イベント（CompareEvent）を操作することで状態を決定する。純粋なイベントソーシングには固執せず、「最新の CompareEvent ログが残っていればレーティングを再計算できる」レベルを目指す（過去イベントの編集や置換を許容）。
+  - 直近イベントと同じ組み合わせ（左右スワップ含む）の場合は、新規イベントを作成せず、直近イベントの verdict と timestamp を更新する。
 - マイリスト等との同期は行わず、比較時点の 2 動画と verdict を永続化する。
 - 動画メタ／投稿者情報は watch ページの JSON-LD (`author.url`, `thumbnailUrl`) から取得し、`authorUrl` をキーに AuthorProfile を保持。再訪時は最新メタで VideoSnapshot/AuthorProfile を上書きする。
   - **JSON-LD 取得失敗時の挙動**:

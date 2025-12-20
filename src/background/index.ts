@@ -252,6 +252,47 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
   const ratings = (result[STORAGE_KEYS.ratings] as NcRatings) ?? {}
 
+  const latestEvent = [...events.items]
+    .reverse()
+    .find((event) => !event.deleted)
+  const isLatestSamePair =
+    latestEvent &&
+    ((latestEvent.leftVideoId === payload.leftVideoId &&
+      latestEvent.rightVideoId === payload.rightVideoId) ||
+      (latestEvent.leftVideoId === payload.rightVideoId &&
+        latestEvent.rightVideoId === payload.leftVideoId))
+
+  if (latestEvent && isLatestSamePair) {
+    const updatedEvents = produce(events, (draft) => {
+      const index = draft.items.findIndex(
+        (event) => event.id === latestEvent.id
+      )
+      if (index !== -1) {
+        draft.items[index] = {
+          ...draft.items[index],
+          verdict: payload.verdict,
+          timestamp: Date.now()
+        }
+      }
+    })
+
+    const nextRatings = rebuildRatingsFromEvents(updatedEvents.items, settings)
+
+    try {
+      await chrome.storage.local.set({
+        [STORAGE_KEYS.events]: updatedEvents,
+        [STORAGE_KEYS.ratings]: nextRatings
+      })
+      await markEventPersistent(latestEvent.id)
+      await removeRetryEntry(latestEvent.id)
+      return latestEvent.id
+    } catch (error) {
+      console.error("Failed to persist event", error)
+      await queueEventRetry(latestEvent.id)
+      throw error
+    }
+  }
+
   const eventId = events.nextId
 
   const newEvent: CompareEvent = {
@@ -456,6 +497,40 @@ function getOrCreateRatingSnapshot(
     volatility: settings.glicko.volatility,
     updatedFromEventId: 0
   }
+}
+
+function rebuildRatingsFromEvents(
+  events: CompareEvent[],
+  settings: NcSettings
+): NcRatings {
+  const nextRatings: NcRatings = {}
+  const orderedEvents = events
+    .filter((event) => !event.deleted)
+    .sort((a, b) => a.id - b.id)
+
+  for (const event of orderedEvents) {
+    const leftRating = getOrCreateRatingSnapshot(
+      nextRatings,
+      event.leftVideoId,
+      settings
+    )
+    const rightRating = getOrCreateRatingSnapshot(
+      nextRatings,
+      event.rightVideoId,
+      settings
+    )
+    const { left, right } = updatePairRatings({
+      settings,
+      left: leftRating,
+      right: rightRating,
+      verdict: event.verdict,
+      eventId: event.id
+    })
+    nextRatings[left.videoId] = left
+    nextRatings[right.videoId] = right
+  }
+
+  return nextRatings
 }
 
 function buildRecentWindow(
