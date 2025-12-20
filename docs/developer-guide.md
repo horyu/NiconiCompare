@@ -49,6 +49,9 @@ pnpm lint             # 型チェック + Prettier チェック
 
 - Plasmo 0.90+ (MV3 拡張ビルド)
 - TypeScript 5+, React 18.2.0
+- Tailwind CSS v4 (@tailwindcss/postcss 4.1.18)
+  - **設定**: postcss.config.js のみ（tailwind.config.js 不要）
+  - **Plasmo互換性**: scripts/patch.js により自動パッチ適用
 - glicko2-lite (Glicko-2 レーティング計算)
 - immer (Immutable state 更新)
 - **テストフレームワーク**: 現状未セットアップ（Vitest, Playwright の導入は将来予定）

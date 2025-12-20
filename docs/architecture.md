@@ -57,7 +57,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 
 | コンポーネント     | 責務                                           | 技術スタック                        |
 | ------------------ | ---------------------------------------------- | ----------------------------------- |
-| **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得        | React 18.2.0, TypeScript, Plasmo CSUI |
+| **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得        | React 18.2.0, TypeScript, Tailwind CSS v4, Plasmo CSUI |
 | **Service Worker** | イベントソーシング、Glicko-2 計算、Storage I/O | TypeScript, chrome.storage API      |
 | **Popup**          | レーティング表示、直近イベント管理             | React 18.2.0, TypeScript            |
 | **Options**        | 詳細設定、データ操作、エクスポート/インポート  | React 18.2.0, TypeScript            |
