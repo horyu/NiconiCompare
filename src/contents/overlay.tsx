@@ -45,6 +45,7 @@ export default function Overlay() {
 
   const autoCloseTimerRef = useRef<number>()
   const observerScheduledRef = useRef(false)
+  const previousCurrentVideoIdRef = useRef<string>()
 
   // Chrome storage listener
   useEffect(() => {
@@ -129,6 +130,22 @@ export default function Overlay() {
       setOpponentVideoId(selectableWindow[0])
     }
   }, [recentWindow, currentVideoId])
+
+  useEffect(() => {
+    if (!currentVideoId) {
+      previousCurrentVideoIdRef.current = currentVideoId
+      return
+    }
+
+    if (previousCurrentVideoIdRef.current !== currentVideoId) {
+      const selectableWindow = recentWindow.filter(
+        (id) => id !== currentVideoId
+      )
+      setOpponentVideoId(selectableWindow[0])
+    }
+
+    previousCurrentVideoIdRef.current = currentVideoId
+  }, [currentVideoId, recentWindow])
 
   useEffect(() => {
     setLastVerdict(undefined)
