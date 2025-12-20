@@ -49,6 +49,7 @@ export default function Overlay() {
   const [lastEventId, setLastEventId] = useState<number>()
 
   const autoCloseTimerRef = useRef<number>()
+  const previousCurrentVideoIdRef = useRef<string>()
 
   // Chrome storage listener
   useEffect(() => {
@@ -190,15 +191,30 @@ export default function Overlay() {
   // Update UI when state changes
   useEffect(() => {
     const selectableWindow = recentWindow.filter((id) => id !== currentVideoId)
+    const currentChanged = previousCurrentVideoIdRef.current !== currentVideoId
 
     if (selectableWindow.length === 0) {
       setOpponentVideoId(undefined)
+      previousCurrentVideoIdRef.current = currentVideoId
       return
     }
 
-    if (!opponentVideoId || !selectableWindow.includes(opponentVideoId)) {
-      setOpponentVideoId(selectableWindow[0])
+    const previousSelectable =
+      currentChanged &&
+      previousCurrentVideoIdRef.current &&
+      selectableWindow.includes(previousCurrentVideoIdRef.current)
+        ? previousCurrentVideoIdRef.current
+        : undefined
+
+    if (
+      currentChanged ||
+      !opponentVideoId ||
+      !selectableWindow.includes(opponentVideoId)
+    ) {
+      setOpponentVideoId(previousSelectable ?? selectableWindow[0])
     }
+
+    previousCurrentVideoIdRef.current = currentVideoId
   }, [recentWindow, currentVideoId, opponentVideoId])
 
   useEffect(() => {
