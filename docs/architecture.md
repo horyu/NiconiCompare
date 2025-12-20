@@ -106,7 +106,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
      ├─ [3.1] VideoSnapshot/AuthorProfile取得 (nc_videos/nc_authors)
      │   ├─ 存在 → Glicko-2計算へ
      │   └─ 不在 → エラーログ記録 & スキップ
-     ├─ [3.2] Glicko-2計算実行 (leftVideo vs rightVideo)
+    ├─ [3.2] Glicko-2計算実行 (currentVideo vs opponentVideo)
      └─ [3.3] 計算結果をnc_ratingsに書き込み
      ↓
 [4] nc_meta.lastReplayEventIdを最終イベントIDに更新
@@ -152,9 +152,9 @@ NiconiCompare は「純粋なイベントソーシング」ではなく、**実�
 type CompareEvent = {
   id: number; // グローバル一意ID (nextIdから採番)
   timestamp: number; // UnixタイムスタンプHIRO
-  leftVideoId: string; // 比較対象 (過去動画)
-  rightVideoId: string; // 比較対象 (現在動画)
-  verdict: "better" | "same" | "worse"; // rightVideo視点の評価
+  currentVideoId: string; // 比較対象 (現在動画)
+  opponentVideoId: string; // 比較対象 (選択動画)
+  verdict: "better" | "same" | "worse"; // currentVideo視点の評価
   deleted: boolean; // 論理削除フラグ
   persistent?: boolean; // Storage書き込み完了フラグ
 };
@@ -220,14 +220,18 @@ type GlickoPlayer = {
 };
 
 function updateRatings(
-  leftVideo: GlickoPlayer,
-  rightVideo: GlickoPlayer,
+  currentVideo: GlickoPlayer,
+  opponentVideo: GlickoPlayer,
   verdict: "better" | "same" | "worse"
 ): { left: GlickoPlayer; right: GlickoPlayer } {
   const outcome = verdict === "better" ? 1 : verdict === "worse" ? 0 : 0.5;
 
   // Glicko-2アルゴリズム適用
-  const [newLeft, newRight] = glicko2.calculate(leftVideo, rightVideo, outcome);
+  const [newCurrent, newOpponent] = glicko2.calculate(
+    currentVideo,
+    opponentVideo,
+    outcome
+  );
 
   return { left: newLeft, right: newRight };
 }
@@ -350,7 +354,7 @@ async function saveCompareEvent(event: CompareEvent) {
   // 複数キーを1回のsetでまとめて書き込み
   await chrome.storage.local.set({
     nc_events: { items: [...nc_events.items, event], nextId: nc_events.nextId + 1 },
-    nc_videos: { ...nc_videos, [event.rightVideoId]: newSnapshot },
+    nc_videos: { ...nc_videos, [event.currentVideoId]: newSnapshot },
     nc_authors: { ...nc_authors, [newSnapshot.authorUrl]: newProfile },
   });
 }

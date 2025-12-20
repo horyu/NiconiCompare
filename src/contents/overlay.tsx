@@ -33,7 +33,7 @@ type StateResponse = {
 export default function Overlay() {
   const [currentVideoId, setCurrentVideoId] = useState<string>()
   const [recentWindow, setRecentWindow] = useState<string[]>([])
-  const [selectedLeftVideoId, setSelectedLeftVideoId] = useState<string>()
+  const [opponentVideoId, setOpponentVideoId] = useState<string>()
   const [overlaySettings, setOverlaySettings] =
     useState<NcSettings>(DEFAULT_SETTINGS)
   const [videoSnapshots, setVideoSnapshots] = useState<
@@ -120,14 +120,14 @@ export default function Overlay() {
   useEffect(() => {
     const selectableWindow = recentWindow.filter((id) => id !== currentVideoId)
     if (selectableWindow.length === 0) {
-      if (selectedLeftVideoId) {
-        setSelectedLeftVideoId(undefined)
+      if (opponentVideoId) {
+        setOpponentVideoId(undefined)
       }
       return
     }
 
-    if (!selectedLeftVideoId || selectedLeftVideoId === currentVideoId) {
-      setSelectedLeftVideoId(selectableWindow[0])
+    if (!opponentVideoId || opponentVideoId === currentVideoId) {
+      setOpponentVideoId(selectableWindow[0])
     }
   }, [recentWindow, currentVideoId])
 
@@ -215,14 +215,14 @@ export default function Overlay() {
   }
 
   const submitVerdict = async (verdict: Verdict) => {
-    if (!selectedLeftVideoId || !currentVideoId) return
+    if (!opponentVideoId || !currentVideoId) return
     setLastVerdict(verdict)
 
     const response = await chrome.runtime.sendMessage({
       type: MESSAGE_TYPES.recordEvent,
       payload: {
-        leftVideoId: selectedLeftVideoId,
-        rightVideoId: currentVideoId,
+        currentVideoId,
+        opponentVideoId,
         verdict
       }
     })
@@ -278,7 +278,7 @@ export default function Overlay() {
 
   const selectableWindow = recentWindow.filter((id) => id !== currentVideoId)
   const hasVideos = selectableWindow.length > 0
-  const canSubmit = hasVideos && currentVideoId && selectedLeftVideoId
+  const canSubmit = hasVideos && currentVideoId && opponentVideoId
 
   return (
     <div
@@ -349,9 +349,9 @@ export default function Overlay() {
 
             {/* Selected video */}
             <div className="flex flex-col gap-[5px]">
-              {getThumbnailUrl(selectedLeftVideoId) ? (
+              {getThumbnailUrl(opponentVideoId) ? (
                 <img
-                  src={getThumbnailUrl(selectedLeftVideoId)}
+                  src={getThumbnailUrl(opponentVideoId)}
                   alt="選択中の動画"
                   className="w-full aspect-video object-cover rounded-md bg-white/10"
                 />
@@ -366,7 +366,7 @@ export default function Overlay() {
                   className="relative w-full flex items-center">
                   <span className="pt-[3px] pb-[1px] px-1.5 pr-6 rounded border border-white/30 bg-[#1f1f1f] text-[12px] overflow-hidden text-ellipsis whitespace-nowrap pointer-events-none w-full">
                     {hasVideos
-                      ? selectedLeftVideoId ?? "比較候補を選択してください"
+                      ? opponentVideoId ?? "比較候補を選択してください"
                       : "比較対象がありません"}
                   </span>
                   <span className="absolute right-2 text-[10px] opacity-70 pointer-events-none">
@@ -374,8 +374,8 @@ export default function Overlay() {
                   </span>
                   <select
                     id="nc-select"
-                    value={selectedLeftVideoId ?? ""}
-                    onChange={(e) => setSelectedLeftVideoId(e.target.value)}
+                    value={opponentVideoId ?? ""}
+                    onChange={(e) => setOpponentVideoId(e.target.value)}
                     onBlur={() => {
                       if (!autoCloseTimerRef.current) {
                         scheduleAutoClose()
@@ -394,8 +394,8 @@ export default function Overlay() {
                   </select>
                 </label>
                 <div className="text-[14px] opacity-90 self-stretch text-left break-words overflow-hidden">
-                  {selectedLeftVideoId
-                    ? videoSnapshots[selectedLeftVideoId]?.title ?? ""
+                  {opponentVideoId
+                    ? videoSnapshots[opponentVideoId]?.title ?? ""
                     : ""}
                 </div>
               </div>

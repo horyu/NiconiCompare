@@ -54,8 +54,8 @@ type UpdateCurrentVideoMessage = {
 type RecordEventMessage = {
   type: typeof MESSAGE_TYPES.recordEvent
   payload: {
-    leftVideoId: string
-    rightVideoId: string
+    currentVideoId: string
+    opponentVideoId: string
     verdict: Verdict
   }
 }
@@ -257,10 +257,10 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     .find((event) => !event.deleted)
   const isLatestSamePair =
     latestEvent &&
-    ((latestEvent.leftVideoId === payload.leftVideoId &&
-      latestEvent.rightVideoId === payload.rightVideoId) ||
-      (latestEvent.leftVideoId === payload.rightVideoId &&
-        latestEvent.rightVideoId === payload.leftVideoId))
+    ((latestEvent.currentVideoId === payload.currentVideoId &&
+      latestEvent.opponentVideoId === payload.opponentVideoId) ||
+      (latestEvent.currentVideoId === payload.opponentVideoId &&
+        latestEvent.opponentVideoId === payload.currentVideoId))
 
   if (latestEvent && isLatestSamePair) {
     const updatedEvents = produce(events, (draft) => {
@@ -298,8 +298,8 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
   const newEvent: CompareEvent = {
     id: eventId,
     timestamp: Date.now(),
-    leftVideoId: payload.leftVideoId,
-    rightVideoId: payload.rightVideoId,
+    currentVideoId: payload.currentVideoId,
+    opponentVideoId: payload.opponentVideoId,
     verdict: payload.verdict,
     deleted: false,
     persistent: false
@@ -312,12 +312,12 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
 
   const leftRating = getOrCreateRatingSnapshot(
     ratings,
-    payload.leftVideoId,
+    payload.currentVideoId,
     settings
   )
   const rightRating = getOrCreateRatingSnapshot(
     ratings,
-    payload.rightVideoId,
+    payload.opponentVideoId,
     settings
   )
 
@@ -337,8 +337,8 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     draft.recentWindow = buildRecentWindow(
       draft.recentWindow,
       settings.recentWindowSize,
-      payload.leftVideoId,
-      payload.rightVideoId
+      payload.currentVideoId,
+      payload.opponentVideoId
     )
   })
 
@@ -511,12 +511,12 @@ function rebuildRatingsFromEvents(
   for (const event of orderedEvents) {
     const leftRating = getOrCreateRatingSnapshot(
       nextRatings,
-      event.leftVideoId,
+      event.currentVideoId,
       settings
     )
     const rightRating = getOrCreateRatingSnapshot(
       nextRatings,
-      event.rightVideoId,
+      event.opponentVideoId,
       settings
     )
     const { left, right } = updatePairRatings({
@@ -536,13 +536,13 @@ function rebuildRatingsFromEvents(
 function buildRecentWindow(
   current: string[],
   size: number,
-  leftVideoId: string,
-  rightVideoId: string
+  currentVideoId: string,
+  opponentVideoId: string
 ) {
   const deduped = current.filter(
-    (id) => id !== leftVideoId && id !== rightVideoId && !!id
+    (id) => id !== currentVideoId && id !== opponentVideoId && !!id
   )
-  const next = [leftVideoId, rightVideoId, ...deduped].filter(Boolean)
+  const next = [currentVideoId, opponentVideoId, ...deduped].filter(Boolean)
   return next.slice(0, Math.max(1, size))
 }
 
@@ -700,11 +700,11 @@ async function performCleanup() {
   events.items
     .filter((event) => !event.deleted)
     .forEach((event) => {
-      if (event.leftVideoId) {
-        referencedVideos.add(event.leftVideoId)
+      if (event.currentVideoId) {
+        referencedVideos.add(event.currentVideoId)
       }
-      if (event.rightVideoId) {
-        referencedVideos.add(event.rightVideoId)
+      if (event.opponentVideoId) {
+        referencedVideos.add(event.opponentVideoId)
       }
     })
 
@@ -753,7 +753,7 @@ function rebuildRecentWindowFromEvents(events: CompareEvent[], size: number) {
     if (event.deleted) {
       continue
     }
-    const candidates = [event.leftVideoId, event.rightVideoId]
+    const candidates = [event.currentVideoId, event.opponentVideoId]
     for (const candidate of candidates) {
       if (!candidate) {
         continue

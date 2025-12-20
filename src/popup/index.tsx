@@ -105,8 +105,8 @@ export default function Popup() {
           <ul style={listStyle}>
             {lastEvents.map((event) => (
               <li key={event.id}>
-                <strong>#{event.id}</strong> {event.leftVideoId} vs{" "}
-                {event.rightVideoId}{" "}
+                <strong>#{event.id}</strong> {event.currentVideoId} vs{" "}
+                {event.opponentVideoId}{" "}
                 <span style={verdictStyle(event.verdict)}>
                   {labelVerdict(event.verdict)}
                 </span>

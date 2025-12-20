@@ -45,8 +45,8 @@
     - VideoSnapshot が存在しない場合：オーバーレイにエラーメッセージを表示し、比較入力を完全に抑制
     - いずれの場合もエラーログに記録し、ユーザーはページリロードで再取得を試行できる
     - JSON-LD の構造変更やフィールド欠損（`author.url` 不在など）も同様に扱う
-- `nc_state.recentWindow` として leftVideo 候補 (選択肢) の LRU を設定値の件数だけ保持する。LRU 更新は「比較イベントの storage 書き込み成功後」および「`currentVideoId` が新しい動画へ切り替わった際」に行い、比較に登場した leftVideo/rightVideo や直前まで視聴していた動画を最新順に並べる（書き込み失敗時は LRU を更新しない）。rightVideo（現在再生中の動画）は別途 `nc_state.currentVideoId` で管理する。
-  - **設定値変更時の LRU 再構築**: 「直近 100 件までの CompareEvent（deleted = true を除外）を時系列逆順に走査し、登場した leftVideo を重複除去しながら新しい設定値ぶん埋める」アルゴリズムで LRU を再構築する。100 件の根拠は「最大設定値 10 × 10 倍のバッファ」として十分なイベント履歴を確保するため。`currentVideoId` は LRU に含めず、別途保持し続ける。
+- `nc_state.recentWindow` として opponentVideo 候補 (選択肢) の LRU を設定値の件数だけ保持する。LRU 更新は「比較イベントの storage 書き込み成功後」および「`currentVideoId` が新しい動画へ切り替わった際」に行い、比較に登場した currentVideo/opponentVideo や直前まで視聴していた動画を最新順に並べる（書き込み失敗時は LRU を更新しない）。currentVideo（現在再生中の動画）は別途 `nc_state.currentVideoId` で管理する。
+  - **設定値変更時の LRU 再構築**: 「直近 100 件までの CompareEvent（deleted = true を除外）を時系列逆順に走査し、登場した opponentVideo を重複除去しながら新しい設定値ぶん埋める」アルゴリズムで LRU を再構築する。100 件の根拠は「最大設定値 10 × 10 倍のバッファ」として十分なイベント履歴を確保するため。`currentVideoId` は LRU に含めず、別途保持し続ける。
 - 削除はまず CompareEvent に `deleted = true` をセットする論理削除とし、Options から「完全削除」操作を行うまでは `nc_events.items` から除去しない。
 
 ## 6. アーキテクチャ
@@ -99,9 +99,9 @@ type AuthorProfile = {
 type CompareEvent = {
   id: number;
   timestamp: number;
-  leftVideoId: string;
-  rightVideoId: string;
-  verdict: "better" | "same" | "worse"; // rightVideo（視聴中）視点。invalid 値は UI でバリデーション
+  currentVideoId: string;
+  opponentVideoId: string;
+  verdict: "better" | "same" | "worse"; // currentVideo（視聴中）視点。invalid 値は UI でバリデーション
   deleted: boolean; // Popup操作で論理削除し、Optionsから完全削除可能
   persistent?: boolean; // storage 書き込み完了フラグ（生成時 undefined、書き込み成功後に true、リトライ中は false）
 };
@@ -128,7 +128,7 @@ type RatingSnapshot = {
 ## 8. レーティングとリプレイ
 
 - **アルゴリズム**: Glicko-2（初期 rating 1500 / RD 350 / volatility 0.06。Options で変更可）。各 CompareEvent を 1 rating period として扱い、逐次的に計算する。
-- **verdict 解釈**: `"better"` = rightVideo 勝利、`"worse"` = leftVideo 勝利、`"same"` = 引き分け。
+- **verdict 解釈**: `"better"` = currentVideo 勝利、`"worse"` = opponentVideo 勝利、`"same"` = 引き分け。
 - **計算タイミング**: 比較イベントが追加されるたびに即時で Glicko-2 を再計算し `nc_ratings` を更新する。Options でパラメータ変更や再計算を行う場合は全イベントをリプレイする。大規模データセット（100+ イベント）の場合は Web Worker を使用して UI ブロックを回避する。
 - **リプレイ手順**:
   1. `nc_events.items` から `deleted = false` の CompareEvent を抽出し、ID 昇順で走査

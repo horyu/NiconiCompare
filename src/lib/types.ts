@@ -18,8 +18,8 @@ export type AuthorProfile = {
 export type CompareEvent = {
   id: number
   timestamp: number
-  leftVideoId: string
-  rightVideoId: string
+  currentVideoId: string
+  opponentVideoId: string
   verdict: Verdict
   deleted: boolean
   persistent?: boolean

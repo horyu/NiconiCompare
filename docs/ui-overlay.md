@@ -39,12 +39,12 @@
 - verdict ボタンは 3 つ（再生中/引き分け/選択中）で、`submitVerdict` を通じて background へ送信
 - verdict ボタンは最後に押したものが選択状態になり、`currentVideoId` の切替時に解除される
 - Select は `opacity-0` で透明化し、`label` 内の `span` と重ねる構造。候補ラベルは `{index}. videoId | title`
-- 状態: `useState` で currentVideoId, recentWindow, selectedLeftVideoId, videoSnapshots, lastVerdict を管理
+- 状態: `useState` で currentVideoId, recentWindow, opponentVideoId, videoSnapshots, lastVerdict を管理
 
 ## 状態管理と通信
 
 - **状態**: React hooks (`useState`, `useRef`) で管理
-  - currentVideoId, recentWindow, selectedLeftVideoId, overlaySettings, videoSnapshots
+  - currentVideoId, recentWindow, opponentVideoId, overlaySettings, videoSnapshots
   - autoCloseTimerRef, observerScheduledRef による参照保持
 - **Storage監視**: `useEffect` + `chrome.storage.onChanged` で settings/videoSnapshots の変化に追従
 - **JSON-LD監視**: `MutationObserver` + `requestIdleCallback` で watch page の metadata 変更を検知
