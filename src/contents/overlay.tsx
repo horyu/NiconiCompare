@@ -3,6 +3,10 @@ import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useRef, useState } from "react"
 
 import { DEFAULT_SETTINGS, MESSAGE_TYPES, STORAGE_KEYS } from "../lib/constants"
+import {
+  extractVideoDataFromLdJson,
+  observeLdJsonChanges
+} from "../lib/dom-observer"
 import type {
   AuthorProfile,
   NcSettings,
@@ -45,7 +49,6 @@ export default function Overlay() {
   const [lastEventId, setLastEventId] = useState<number>()
 
   const autoCloseTimerRef = useRef<number>()
-  const observerScheduledRef = useRef(false)
   const previousCurrentVideoIdRef = useRef<string>()
 
   // Chrome storage listener
@@ -77,7 +80,10 @@ export default function Overlay() {
 
   // JSON-LD observer
   useEffect(() => {
-    const observer = observeLdJsonChanges()
+    const cleanup = observeLdJsonChanges({
+      onVideoDataChange: handleVideoChange,
+      onError: setStatusMessage
+    })
 
     const videoData = extractVideoDataFromLdJson()
     if (videoData) {
@@ -86,7 +92,7 @@ export default function Overlay() {
       setStatusMessage("動画情報を取得中...")
     }
 
-    return () => observer?.disconnect()
+    return cleanup
   }, [])
 
   // Auto-close handler
@@ -162,38 +168,6 @@ export default function Overlay() {
     if (!chrome.storage?.local) return
     const result = await chrome.storage.local.get(STORAGE_KEYS.videos)
     setVideoSnapshots(result?.[STORAGE_KEYS.videos] ?? {})
-  }
-
-  const observeLdJsonChanges = () => {
-    const head = document.head
-    if (!head) {
-      console.error("document.head is missing; ld+json observer disabled.")
-      setStatusMessage("動画情報を取得できません")
-      return undefined
-    }
-
-    const observer = new MutationObserver(() => scheduleLdJsonProcessing())
-    observer.observe(head, { childList: true, subtree: true })
-    return observer
-  }
-
-  const scheduleLdJsonProcessing = () => {
-    if (observerScheduledRef.current) return
-    observerScheduledRef.current = true
-
-    const runner = () => {
-      observerScheduledRef.current = false
-      const videoData = extractVideoDataFromLdJson()
-      if (videoData) {
-        handleVideoChange(videoData)
-      }
-    }
-
-    if ("requestIdleCallback" in window) {
-      ;(window.requestIdleCallback as (cb: () => void) => number)(runner)
-    } else {
-      setTimeout(runner, 0)
-    }
   }
 
   const handleVideoChange = async (videoData: {
@@ -452,86 +426,4 @@ export default function Overlay() {
       )}
     </div>
   )
-}
-
-// Utility functions (extracted from original code)
-function extractVideoDataFromLdJson():
-  | {
-      video: VideoSnapshot
-      author: AuthorProfile
-    }
-  | undefined {
-  const scripts = findLdJsonScripts()
-  if (scripts.length === 0) return undefined
-
-  for (const script of scripts) {
-    if (!script.textContent) continue
-
-    try {
-      const parsed = JSON.parse(script.textContent)
-      const videoObject = Array.isArray(parsed)
-        ? parsed.find((item) => item?.["@type"] === "VideoObject")
-        : parsed
-
-      if (!videoObject) continue
-
-      const authorData = Array.isArray(videoObject.author)
-        ? videoObject.author[0]
-        : videoObject.author
-
-      const videoId =
-        videoObject.identifier ||
-        videoObject.videoId ||
-        extractVideoIdFromUrl(videoObject.url) ||
-        extractVideoIdFromUrl(window.location.pathname)
-
-      if (!videoId) continue
-
-      const author: AuthorProfile = {
-        authorUrl:
-          authorData?.url ||
-          authorData?.["@id"] ||
-          document.querySelector<HTMLAnchorElement>('[rel="author"]')?.href ||
-          window.location.origin,
-        name:
-          authorData?.name ||
-          document.querySelector('[rel="author"]')?.textContent ||
-          "unknown",
-        capturedAt: Date.now()
-      }
-
-      const video: VideoSnapshot = {
-        videoId,
-        title: videoObject.name || document.title || videoId,
-        authorUrl: author.authorUrl,
-        thumbnailUrls: Array.isArray(videoObject.thumbnailUrl)
-          ? videoObject.thumbnailUrl
-          : videoObject.thumbnailUrl
-            ? [videoObject.thumbnailUrl]
-            : [],
-        lengthSeconds: Number(videoObject.duration ?? 0),
-        capturedAt: Date.now()
-      }
-
-      return { video, author }
-    } catch (error) {
-      console.error("Failed to parse ld+json", error)
-    }
-  }
-  return undefined
-}
-
-function findLdJsonScripts() {
-  return Array.from(
-    document.querySelectorAll('script[type="application/ld+json"]')
-  )
-}
-
-function extractVideoIdFromUrl(target?: string) {
-  if (!target) return undefined
-  const url = target.startsWith("http")
-    ? new URL(target)
-    : new URL(target, window.location.origin)
-  const segments = url.pathname.split("/")
-  return segments.pop() || segments.pop()
 }
