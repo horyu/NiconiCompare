@@ -19,6 +19,18 @@
 - **[アーキテクチャ設計書](./docs/architecture.md)**: 技術設計とデータフロー
 - **[UI実装スナップショット](./docs/ui-overlay.md)**: オーバーレイUI実装の現状（React + Tailwind v4）
 
+## 🔧 開発
+
+```bash
+pnpm install          # 依存関係のインストール
+pnpm dev              # 開発サーバー起動
+pnpm fix              # コード自動修正（ESLint + Prettier）
+pnpm lint             # コード品質チェック（型・ESLint・Prettier）
+pnpm build            # 本番ビルド
+```
+
+**⚠️ コミット前に必ず実行**: `pnpm fix` → `pnpm lint` で全チェック合格を確認すること
+
 ## ⚠️ 免責事項
 
 **本プロジェクトはLLM Coding Agent（AI開発支援ツール）を活用して開発されています。**

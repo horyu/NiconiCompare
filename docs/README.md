@@ -32,6 +32,7 @@ docs/
 | UI/UX 変更           | spec.md                                    |
 | パフォーマンス最適化 | architecture.md, developer-guide.md        |
 | ビルド手順の変更     | developer-guide.md                         |
+| 開発ツール・lint設定の変更 | developer-guide.md                   |
 
 ### 更新時の注意事項
 

@@ -31,10 +31,15 @@ mise install
 ```bash
 pnpm install
 pnpm approve-builds   # 初回のみ、esbuild/@parcel/watcher 等の build script を許可
-pnpm lint             # 型チェック + Prettier チェック
+pnpm lint             # 型チェック + ESLint + Prettier チェック（並列実行）
+pnpm fix              # ESLint + Prettier 自動修正（並列実行）
 ```
 
 > `pnpm approve-builds` は対話式で、依存の build script 実行を明示的に承認する必要がある。`esbuild`、`@parcel/watcher`、`@swc/core` などが選択対象として表示されるので、画面の指示に従って次工程へ進むこと。
+
+**⚠️ コミット前の必須事項**:
+- **`pnpm fix`**: コード自動修正を実行
+- **`pnpm lint`**: 全チェック（型・ESLint・Prettier）に合格すること
 
 ### 1.3 環境変数の管理
 
@@ -54,6 +59,10 @@ pnpm lint             # 型チェック + Prettier チェック
   - **Plasmo互換性**: scripts/patch.js により自動パッチ適用
 - glicko2-lite (Glicko-2 レーティング計算)
 - immer (Immutable state 更新)
+- **コード品質ツール**:
+  - ESLint 9.39+ (TypeScript/React/React Hooks plugins)
+  - Prettier 3.2+ (コードフォーマッター)
+  - npm-run-all (並列スクリプト実行)
 - **テストフレームワーク**: 現状未セットアップ（Vitest, Playwright の導入は将来予定）
 
 ---
@@ -83,6 +92,38 @@ src/
 ### 2.3 コーディング規約
 
 TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関数/変数), snake_case (storage キー)
+
+### 2.4 コード品質チェック
+
+**ESLint**: 静的解析によりコード品質を保証
+- **設定ファイル**: `eslint.config.mjs` (ESLint 9 flat config)
+- **有効なルール**:
+  - TypeScript 推奨ルール (@typescript-eslint/recommended)
+  - React 推奨ルール (react/recommended)
+  - React Hooks ルール (react-hooks/rules-of-hooks, exhaustive-deps)
+- **カスタムルール**:
+  - `react/react-in-jsx-scope`: off (React 17+ では不要)
+  - `@typescript-eslint/no-explicit-any`: warn
+  - `react-hooks/exhaustive-deps`: warn
+
+**Prettier**: コードフォーマッター (ESLint と競合しないよう eslint-config-prettier で調整済み)
+
+**実行コマンド**:
+```bash
+pnpm lint              # 型チェック + ESLint + Prettier を並列実行
+pnpm fix               # ESLint + Prettier を自動修正モードで並列実行
+pnpm eslint            # ESLint のみ（自動修正あり）
+pnpm eslint:check      # ESLint のみ（チェックのみ）
+pnpm types:check       # TypeScript 型チェックのみ
+pnpm format            # Prettier のみ（自動修正あり）
+pnpm format:check      # Prettier のみ（チェックのみ）
+```
+
+**開発フロー**:
+1. コード編集
+2. `pnpm fix` でコード自動修正
+3. `pnpm lint` で全チェック合格を確認
+4. コミット
 
 ---
 
