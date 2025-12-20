@@ -60,6 +60,13 @@ type RecordEventMessage = {
   }
 }
 
+type DeleteEventMessage = {
+  type: typeof MESSAGE_TYPES.deleteEvent
+  payload: {
+    eventId: number
+  }
+}
+
 type ToggleOverlayMessage = {
   type: typeof MESSAGE_TYPES.toggleOverlay
   payload: { enabled: boolean }
@@ -86,6 +93,7 @@ type Message =
   | RegisterSnapshotMessage
   | UpdateCurrentVideoMessage
   | RecordEventMessage
+  | DeleteEventMessage
   | ToggleOverlayMessage
   | UpdateSettingsMessage
   | MetaActionMessage
@@ -117,6 +125,11 @@ chrome.runtime.onMessage.addListener(
           case MESSAGE_TYPES.recordEvent: {
             const eventId = await handleRecordEvent(message.payload)
             sendResponse({ ok: true, eventId })
+            break
+          }
+          case MESSAGE_TYPES.deleteEvent: {
+            const deleted = await handleDeleteEvent(message.payload.eventId)
+            sendResponse({ ok: true, deleted })
             break
           }
           case MESSAGE_TYPES.toggleOverlay:
@@ -356,6 +369,48 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     await queueEventRetry(eventId)
     throw error
   }
+}
+
+async function handleDeleteEvent(eventId: number) {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    console.warn("chrome.storage.local is unavailable.")
+    return false
+  }
+
+  const result = await storage.get([
+    STORAGE_KEYS.events,
+    STORAGE_KEYS.settings,
+    STORAGE_KEYS.ratings,
+    STORAGE_KEYS.meta
+  ])
+  const events =
+    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
+  const settings =
+    (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
+  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+
+  const index = events.items.findIndex((event) => event.id === eventId)
+  if (index === -1) {
+    return false
+  }
+
+  if (events.items[index].deleted) {
+    return true
+  }
+
+  const updatedEvents = produce(events, (draft) => {
+    draft.items[index] = { ...draft.items[index], deleted: true }
+  })
+  const nextRatings = rebuildRatingsFromEvents(updatedEvents.items, settings)
+
+  await storage.set({
+    [STORAGE_KEYS.events]: updatedEvents,
+    [STORAGE_KEYS.ratings]: nextRatings,
+    [STORAGE_KEYS.meta]: { ...meta, needsCleanup: true }
+  })
+
+  return true
 }
 
 async function handleToggleOverlay(enabled: boolean) {

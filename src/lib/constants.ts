@@ -43,6 +43,7 @@ export const MESSAGE_TYPES = {
   registerSnapshot: "nc/registerSnapshot",
   updateCurrentVideo: "nc/updateCurrentVideo",
   recordEvent: "nc/recordEvent",
+  deleteEvent: "nc/deleteEvent",
   toggleOverlay: "nc/toggleOverlay",
   requestState: "nc/requestState",
   updateSettings: "nc/updateSettings",

@@ -42,6 +42,7 @@ export default function Overlay() {
   const [isHovered, setIsHovered] = useState(false)
   const [showControls, setShowControls] = useState(true)
   const [lastVerdict, setLastVerdict] = useState<Verdict>()
+  const [lastEventId, setLastEventId] = useState<number>()
 
   const autoCloseTimerRef = useRef<number>()
   const observerScheduledRef = useRef(false)
@@ -149,6 +150,7 @@ export default function Overlay() {
 
   useEffect(() => {
     setLastVerdict(undefined)
+    setLastEventId(undefined)
   }, [currentVideoId])
 
   const loadVideoSnapshots = async () => {
@@ -231,8 +233,27 @@ export default function Overlay() {
   }
 
   const submitVerdict = async (verdict: Verdict) => {
+    if (lastVerdict === verdict) {
+      if (!lastEventId) {
+        setLastVerdict(undefined)
+        return
+      }
+
+      const response = await chrome.runtime.sendMessage({
+        type: MESSAGE_TYPES.deleteEvent,
+        payload: { eventId: lastEventId }
+      })
+
+      setLastVerdict(undefined)
+      setLastEventId(undefined)
+
+      if (response?.ok) {
+        await refreshState()
+      }
+      return
+    }
+
     if (!opponentVideoId || !currentVideoId) return
-    setLastVerdict(verdict)
 
     const response = await chrome.runtime.sendMessage({
       type: MESSAGE_TYPES.recordEvent,
@@ -244,6 +265,8 @@ export default function Overlay() {
     })
 
     if (response?.ok) {
+      setLastVerdict(verdict)
+      setLastEventId(response.eventId)
       await refreshState()
     }
   }
