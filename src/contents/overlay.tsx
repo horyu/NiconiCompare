@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react"
+import styleText from "data-text:../style.css"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
+import { useEffect, useRef, useState } from "react"
 
 import { DEFAULT_SETTINGS, MESSAGE_TYPES, STORAGE_KEYS } from "../lib/constants"
 import type {
@@ -9,8 +10,6 @@ import type {
   Verdict,
   VideoSnapshot
 } from "../lib/types"
-
-import styleText from "data-text:../style.css"
 
 export const config: PlasmoCSConfig = {
   matches: ["https://www.nicovideo.jp/watch/*"]
@@ -23,7 +22,8 @@ export const getStyle: PlasmoGetStyle = () => {
 }
 
 const keepOverlayEnvValue = `${process.env.PLASMO_PUBLIC_KEEP_OVERLAY_OPEN ?? ""}`
-const forceKeepOverlayOpen = String(keepOverlayEnvValue).toLowerCase() === "true"
+const forceKeepOverlayOpen =
+  String(keepOverlayEnvValue).toLowerCase() === "true"
 
 type StateResponse = {
   settings: NcSettings
@@ -34,12 +34,15 @@ export default function Overlay() {
   const [currentVideoId, setCurrentVideoId] = useState<string>()
   const [recentWindow, setRecentWindow] = useState<string[]>([])
   const [selectedLeftVideoId, setSelectedLeftVideoId] = useState<string>()
-  const [overlaySettings, setOverlaySettings] = useState<NcSettings>(DEFAULT_SETTINGS)
-  const [videoSnapshots, setVideoSnapshots] = useState<Record<string, VideoSnapshot>>({})
+  const [overlaySettings, setOverlaySettings] =
+    useState<NcSettings>(DEFAULT_SETTINGS)
+  const [videoSnapshots, setVideoSnapshots] = useState<
+    Record<string, VideoSnapshot>
+  >({})
   const [statusMessage, setStatusMessage] = useState<string>()
   const [isHovered, setIsHovered] = useState(false)
   const [showControls, setShowControls] = useState(true)
-  
+
   const autoCloseTimerRef = useRef<number>()
   const observerScheduledRef = useRef(false)
 
@@ -51,7 +54,9 @@ export default function Overlay() {
       if (areaName !== "local") return
 
       if (changes[STORAGE_KEYS.settings]?.newValue) {
-        setOverlaySettings(changes[STORAGE_KEYS.settings].newValue ?? DEFAULT_SETTINGS)
+        setOverlaySettings(
+          changes[STORAGE_KEYS.settings].newValue ?? DEFAULT_SETTINGS
+        )
       }
 
       if (changes[STORAGE_KEYS.videos]?.newValue) {
@@ -104,14 +109,26 @@ export default function Overlay() {
 
     setShowControls(true)
     scheduleAutoClose()
-  }, [isHovered, overlaySettings.overlayEnabled, overlaySettings.overlayAutoCloseMs])
+  }, [
+    isHovered,
+    overlaySettings.overlayEnabled,
+    overlaySettings.overlayAutoCloseMs
+  ])
 
   // Update UI when state changes
   useEffect(() => {
-    if (recentWindow.length > 0 && !selectedLeftVideoId) {
-      setSelectedLeftVideoId(recentWindow[0])
+    const selectableWindow = recentWindow.filter((id) => id !== currentVideoId)
+    if (selectableWindow.length === 0) {
+      if (selectedLeftVideoId) {
+        setSelectedLeftVideoId(undefined)
+      }
+      return
     }
-  }, [recentWindow])
+
+    if (!selectedLeftVideoId || selectedLeftVideoId === currentVideoId) {
+      setSelectedLeftVideoId(selectableWindow[0])
+    }
+  }, [recentWindow, currentVideoId])
 
   const loadVideoSnapshots = async () => {
     if (!chrome.storage?.local) return
@@ -184,7 +201,7 @@ export default function Overlay() {
     setRecentWindow(data.state.recentWindow)
     setCurrentVideoId(data.state.currentVideoId)
     await loadVideoSnapshots()
-    
+
     if (data.state.currentVideoId) {
       setStatusMessage(undefined)
     } else {
@@ -245,7 +262,8 @@ export default function Overlay() {
     return null
   }
 
-  const hasVideos = recentWindow.length > 0
+  const selectableWindow = recentWindow.filter((id) => id !== currentVideoId)
+  const hasVideos = selectableWindow.length > 0
   const canSubmit = hasVideos && currentVideoId && selectedLeftVideoId
 
   return (
@@ -256,7 +274,9 @@ export default function Overlay() {
       <strong className="text-right w-full">NiconiCompare</strong>
 
       {statusMessage && (
-        <span className="text-xs opacity-80 text-right w-full">{statusMessage}</span>
+        <span className="text-xs opacity-80 text-right w-full">
+          {statusMessage}
+        </span>
       )}
 
       {showControls && (
@@ -297,13 +317,17 @@ export default function Overlay() {
                 <div className="w-full aspect-video rounded-md bg-white/10" />
               )}
               <div className="text-[14px] opacity-90 text-right break-words overflow-hidden w-full">
-                {currentVideoId ? formatVideoLabel(currentVideoId) : "再生中動画を検出できません"}
+                {currentVideoId
+                  ? formatVideoLabel(currentVideoId)
+                  : "再生中動画を検出できません"}
               </div>
             </div>
 
             {/* VS label */}
             <div className="flex items-center justify-center self-center">
-              <div className="text-center text-[14px] font-bold opacity-70">vs</div>
+              <div className="text-center text-[14px] font-bold opacity-70">
+                vs
+              </div>
             </div>
 
             {/* Selected video */}
@@ -317,12 +341,16 @@ export default function Overlay() {
               ) : (
                 <div className="w-full aspect-video rounded-md bg-white/10" />
               )}
-              
+
               {/* Custom select */}
               <div className="w-full flex flex-col items-start">
-                <label htmlFor="nc-select" className="relative w-full flex items-center">
+                <label
+                  htmlFor="nc-select"
+                  className="relative w-full flex items-center">
                   <span className="pt-[3px] pb-[1px] px-1.5 pr-6 rounded border border-white/30 bg-[#1f1f1f] text-[12px] overflow-hidden text-ellipsis whitespace-nowrap pointer-events-none w-full">
-                    {selectedLeftVideoId ?? "比較候補を選択してください"}
+                    {hasVideos
+                      ? selectedLeftVideoId ?? "比較候補を選択してください"
+                      : "比較対象がありません"}
                   </span>
                   <span className="absolute right-2 text-[10px] opacity-70 pointer-events-none">
                     ▼
@@ -340,7 +368,7 @@ export default function Overlay() {
                     {!hasVideos ? (
                       <option value="">比較候補なし</option>
                     ) : (
-                      recentWindow.map((id, index) => (
+                      selectableWindow.map((id, index) => (
                         <option key={id} value={id}>
                           {index + 1}. {formatVideoLabel(id)}
                         </option>
@@ -349,7 +377,9 @@ export default function Overlay() {
                   </select>
                 </label>
                 <div className="text-[14px] opacity-90 self-stretch text-left break-words overflow-hidden">
-                  {selectedLeftVideoId ? videoSnapshots[selectedLeftVideoId]?.title ?? "" : ""}
+                  {selectedLeftVideoId
+                    ? videoSnapshots[selectedLeftVideoId]?.title ?? ""
+                    : ""}
                 </div>
               </div>
             </div>
@@ -428,7 +458,9 @@ function extractVideoDataFromLdJson():
 }
 
 function findLdJsonScripts() {
-  return Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
+  return Array.from(
+    document.querySelectorAll('script[type="application/ld+json"]')
+  )
 }
 
 function extractVideoIdFromUrl(target?: string) {
