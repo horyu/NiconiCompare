@@ -250,7 +250,8 @@ export default function Overlay() {
       payload: {
         currentVideoId,
         opponentVideoId,
-        verdict
+        verdict,
+        eventId: lastEventId
       }
     })
 

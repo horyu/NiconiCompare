@@ -57,6 +57,7 @@ type RecordEventMessage = {
     currentVideoId: string
     opponentVideoId: string
     verdict: Verdict
+    eventId?: number
   }
 }
 
@@ -265,20 +266,22 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
   const ratings = (result[STORAGE_KEYS.ratings] as NcRatings) ?? {}
 
-  const latestEvent = [...events.items]
-    .reverse()
-    .find((event) => !event.deleted)
-  const isLatestSamePair =
-    latestEvent &&
-    ((latestEvent.currentVideoId === payload.currentVideoId &&
-      latestEvent.opponentVideoId === payload.opponentVideoId) ||
-      (latestEvent.currentVideoId === payload.opponentVideoId &&
-        latestEvent.opponentVideoId === payload.currentVideoId))
+  const targetEvent = payload.eventId
+    ? events.items.find(
+        (event) => event.id === payload.eventId && !event.deleted
+      )
+    : undefined
+  const isTargetSamePair =
+    targetEvent &&
+    ((targetEvent.currentVideoId === payload.currentVideoId &&
+      targetEvent.opponentVideoId === payload.opponentVideoId) ||
+      (targetEvent.currentVideoId === payload.opponentVideoId &&
+        targetEvent.opponentVideoId === payload.currentVideoId))
 
-  if (latestEvent && isLatestSamePair) {
+  if (targetEvent && isTargetSamePair) {
     const updatedEvents = produce(events, (draft) => {
       const index = draft.items.findIndex(
-        (event) => event.id === latestEvent.id
+        (event) => event.id === targetEvent.id
       )
       if (index !== -1) {
         draft.items[index] = {
@@ -296,12 +299,12 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
         [STORAGE_KEYS.events]: updatedEvents,
         [STORAGE_KEYS.ratings]: nextRatings
       })
-      await markEventPersistent(latestEvent.id)
-      await removeRetryEntry(latestEvent.id)
-      return latestEvent.id
+      await markEventPersistent(targetEvent.id)
+      await removeRetryEntry(targetEvent.id)
+      return targetEvent.id
     } catch (error) {
       console.error("Failed to persist event", error)
-      await queueEventRetry(latestEvent.id)
+      await queueEventRetry(targetEvent.id)
       throw error
     }
   }
