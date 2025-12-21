@@ -68,6 +68,10 @@ type DeleteEventMessage = {
   }
 }
 
+type DeleteAllDataMessage = {
+  type: typeof MESSAGE_TYPES.deleteAllData
+}
+
 type ToggleOverlayMessage = {
   type: typeof MESSAGE_TYPES.toggleOverlay
   payload: { enabled: boolean }
@@ -95,6 +99,7 @@ type Message =
   | UpdateCurrentVideoMessage
   | RecordEventMessage
   | DeleteEventMessage
+  | DeleteAllDataMessage
   | ToggleOverlayMessage
   | UpdateSettingsMessage
   | MetaActionMessage
@@ -133,6 +138,10 @@ chrome.runtime.onMessage.addListener(
             sendResponse({ ok: true, deleted })
             break
           }
+          case MESSAGE_TYPES.deleteAllData:
+            await handleDeleteAllData()
+            sendResponse({ ok: true })
+            break
           case MESSAGE_TYPES.toggleOverlay:
             await handleToggleOverlay(message.payload.enabled)
             sendResponse({ ok: true })
@@ -194,6 +203,23 @@ async function ensureDefaults() {
   if (Object.keys(updates).length > 0) {
     await chrome.storage.local.set(updates)
   }
+}
+
+async function handleDeleteAllData() {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    console.warn("chrome.storage.local is unavailable.")
+    return
+  }
+  await storage.set({
+    [STORAGE_KEYS.settings]: DEFAULT_SETTINGS,
+    [STORAGE_KEYS.state]: DEFAULT_STATE,
+    [STORAGE_KEYS.events]: DEFAULT_EVENTS_BUCKET,
+    [STORAGE_KEYS.meta]: DEFAULT_META,
+    [STORAGE_KEYS.videos]: {},
+    [STORAGE_KEYS.authors]: {},
+    [STORAGE_KEYS.ratings]: {}
+  })
 }
 
 async function handleRegisterSnapshot(payload: {

@@ -10,6 +10,7 @@ export default function OptionsPage() {
     recentWindowSize: "5"
   })
   const [saving, setSaving] = useState(false)
+  const [deletingAll, setDeletingAll] = useState(false)
   const [message, setMessage] = useState<string>()
 
   useEffect(() => {
@@ -82,6 +83,32 @@ export default function OptionsPage() {
       payload: { action: "cleanup" }
     })
     await refreshState()
+  }
+
+  const handleDeleteAllData = async () => {
+    const confirmed = confirm(
+      "全データを削除します。設定・履歴・レーティングも初期化されます。続行しますか？"
+    )
+    if (!confirmed) {
+      return
+    }
+    setDeletingAll(true)
+    setMessage(undefined)
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: MESSAGE_TYPES.deleteAllData
+      })
+      if (!response?.ok) {
+        throw new Error(response?.error ?? "delete all failed")
+      }
+      await refreshState()
+      setMessage("全データを削除しました。")
+    } catch (error) {
+      console.error(error)
+      setMessage("全データの削除に失敗しました。")
+    } finally {
+      setDeletingAll(false)
+    }
   }
 
   return (
@@ -158,6 +185,17 @@ export default function OptionsPage() {
                 </button>
               )}
             </div>
+            <div>
+              <div style={metaLabelStyle}>データ削除</div>
+              <div>設定・履歴・レーティングを初期化</div>
+              <button
+                type="button"
+                style={dangerButtonStyle}
+                onClick={handleDeleteAllData}
+                disabled={deletingAll}>
+                {deletingAll ? "削除中..." : "全データ削除"}
+              </button>
+            </div>
           </div>
         ) : (
           <p>読込中...</p>
@@ -230,5 +268,15 @@ const secondaryButtonStyle: React.CSSProperties = {
   borderRadius: 4,
   border: "1px solid #94a3b8",
   background: "transparent",
+  cursor: "pointer"
+}
+
+const dangerButtonStyle: React.CSSProperties = {
+  marginTop: 8,
+  padding: "6px 10px",
+  borderRadius: 4,
+  border: "1px solid #dc2626",
+  background: "transparent",
+  color: "#dc2626",
   cursor: "pointer"
 }
