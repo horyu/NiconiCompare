@@ -159,8 +159,13 @@ function renderVideoCard(
   videoId: string
 ) {
   const thumbnailUrl = video?.thumbnailUrls?.[0]
+  const watchUrl = `https://www.nicovideo.jp/watch/${videoId}`
   return (
-    <div className="flex flex-col items-center gap-1 w-24">
+    <a
+      href={watchUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="flex flex-col items-center gap-1 w-24">
       {thumbnailUrl ? (
         <img
           src={thumbnailUrl}
@@ -170,6 +175,6 @@ function renderVideoCard(
       ) : (
         <div className="w-24 h-[54px] rounded-md bg-slate-800" />
       )}
-    </div>
+    </a>
   )
 }
