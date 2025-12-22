@@ -291,6 +291,9 @@ export default function Overlay() {
   const selectableWindow = recentWindow.filter((id) => id !== currentVideoId)
   const hasVideos = selectableWindow.length > 0
   const canSubmit = hasVideos && currentVideoId && opponentVideoId
+  const opponentWatchUrl = opponentVideoId
+    ? `https://www.nicovideo.jp/watch/${opponentVideoId}`
+    : undefined
 
   return (
     <div
@@ -361,7 +364,19 @@ export default function Overlay() {
 
             {/* Selected video */}
             <div className="flex flex-col gap-[5px]">
-              {getThumbnailUrl(opponentVideoId) ? (
+              {opponentWatchUrl ? (
+                <a href={opponentWatchUrl} target="_blank" rel="noreferrer">
+                  {getThumbnailUrl(opponentVideoId) ? (
+                    <img
+                      src={getThumbnailUrl(opponentVideoId)}
+                      alt="選択中の動画"
+                      className="w-full aspect-video object-cover rounded-md bg-white/10"
+                    />
+                  ) : (
+                    <div className="w-full aspect-video rounded-md bg-white/10" />
+                  )}
+                </a>
+              ) : getThumbnailUrl(opponentVideoId) ? (
                 <img
                   src={getThumbnailUrl(opponentVideoId)}
                   alt="選択中の動画"
