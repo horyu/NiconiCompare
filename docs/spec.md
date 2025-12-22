@@ -55,7 +55,7 @@
 - **Background (service worker)**: chrome.storage I/O、event sourcing、Glicko-2 計算、`nc_meta.needsCleanup` 管理。
 - **Content overlay**: watch ページ DOM 監視、比較カード UI、ショートカット無しのマウス操作。
 - **Popup**: 直近イベント表示。設定変更は不可。
-- **Options / 拡張ページ**: 詳細設定（LRU、カード挙動、Glicko-2 初期値）、イベント履歴、エクスポート/インポート、クリーンアップ等のメンテナンス。
+- **Options / 拡張ページ**: 詳細設定（比較候補数、オーバーレイ自動閉鎖、Glicko-2 初期値、イベント一覧の表示設定）、イベント履歴、エクスポート/インポート、クリーンアップ等のメンテナンス。
 
 ## 7. データと永続化
 
@@ -69,7 +69,7 @@
 
 | Key           | 型                                 | 内容                                                                                                                                                                                                      | 想定最大サイズ                 |
 | ------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| `nc_settings` | object                             | ユーザー設定（比較対象 N、カード挙動、Glicko-2 初期値等）                                                                                                                                                 | ~2 KB                          |
+| `nc_settings` | object                             | ユーザー設定（比較候補数、オーバーレイ自動閉鎖、イベント一覧サムネ表示、Glicko-2 初期値等）                                                                                                                  | ~2 KB                          |
 | `nc_state`    | object                             | 再生状態（直近 LRU、現在の videoId など）                                                                                                                                                                 | ~5 KB                          |
 | `nc_videos`   | record\<videoId, VideoSnapshot\>   | 動画スナップショット                                                                                                                                                                                      | 1 件 ~500 B、1000 件で ~500 KB |
 | `nc_authors`  | record\<authorUrl, AuthorProfile\> | 投稿者情報                                                                                                                                                                                                | 1 件 ~200 B、500 件で ~100 KB  |
@@ -77,7 +77,6 @@
 | `nc_ratings`  | record\<videoId, RatingSnapshot\>  | 最新レーティングと RD / volatility                                                                                                                                                                        | 1 件 ~100 B、1000 件で ~100 KB |
 | `nc_meta`     | object                             | `lastReplayEventId`, `schemaVersion`, `needsCleanup`, `retryQueue: Array<{eventId: number, retryCount: number, lastAttempt: number}>`, `failedWrites: number[]`（リトライ上限超過イベント ID の一覧）など | ~10 KB                         |
 
-**ストレージクォータ**: Chrome の `chrome.storage.local` は ~10 MB。1000 イベント規模で合計 ~1 MB 程度を想定。クォータ超過時は UI に警告を表示し、古いイベントの削除を促す。
 
 ### 7.3 スキーマ
 
@@ -130,7 +129,7 @@ type RatingSnapshot = {
 
 - **アルゴリズム**: Glicko-2（初期 rating 1500 / RD 350 / volatility 0.06。Options で変更可）。各 CompareEvent を 1 rating period として扱い、逐次的に計算する。
 - **verdict 解釈**: `"better"` = currentVideo 勝利、`"worse"` = opponentVideo 勝利、`"same"` = 引き分け。
-- **計算タイミング**: 比較イベントが追加されるたびに即時で Glicko-2 を再計算し `nc_ratings` を更新する。Options でパラメータ変更や再計算を行う場合は全イベントをリプレイする。大規模データセット（100+ イベント）の場合は Web Worker を使用して UI ブロックを回避する。
+- **計算タイミング**: 比較イベントが追加されるたびに即時で Glicko-2 を再計算し `nc_ratings` を更新する。Options でパラメータ変更や再計算を行う場合は全イベントをリプレイする。
 - **リプレイ手順**:
   1. `nc_events.items` から `deleted = false` の CompareEvent を抽出し、ID 昇順で走査
   2. イベントに登場する videoId の VideoSnapshot/AuthorProfile を `nc_videos`/`nc_authors` から取得し、存在しない場合はイベントをエラーログに記録してスキップする（リプレイ中に新規登録は行わない）。UI には「スキップされたイベント数」を通知
@@ -166,9 +165,9 @@ type RatingSnapshot = {
 ### 9.3 拡張ページ / Options
 
 1. **評価済み動画一覧**: VideoSnapshot + 最新レーティングのテーブル（ページネーション: 50 件/ページ）。投稿者（名前）フィルタ／検索、ソート（Rating / タイトル / 最終判定日時）、昇順/降順切替。列は「サムネ / タイトル / 投稿者 / Rating / RD / 最終判定日時」。サムネに動画リンクを付与。
-2. **評価イベント一覧**: CompareEvent テーブル（ページネーション: 100 件/ページ）。検索（ID/タイトル/動画ID/投稿者）・評価フィルタ・削除済み表示の切替・サムネ表示の切替。列は「ID / 日時 / 基準 / 比較対象 / 評価 / 操作」。行アクションで論理削除／復活・評価変更・完全削除（削除済みのみ）を行う。
+2. **評価イベント一覧**: CompareEvent テーブル（ページネーション: 100 件/ページ）。検索・評価フィルタ・削除済み表示の切替・サムネ表示の切替。行アクションで論理削除／復活・評価変更・完全削除（削除済みのみ）を行う。詳細なUIは実装を参照。
 3. **Options 設定**:
-   - オーバーレイ自動閉鎖（ms）、比較候補数、Glicko-2 初期値を編集。変更後はイベントログをリプレイ。
+   - オーバーレイ自動閉鎖（ms）、比較候補数、Glicko-2 初期値、イベント一覧サムネ表示を編集。Glicko-2 初期値変更時はレーティング再計算、比較候補数変更時は recentWindow を再構築。
    - レーティング再計算ボタン。
    - データ操作:
    - 全データ削除（設定・履歴・レーティング等を初期化）。confirm で確認してから実行。
@@ -194,13 +193,10 @@ type RatingSnapshot = {
   - 前回の試行から 1 秒（1 回目）→3 秒（2 回目）→5 秒（3 回目）経過後に再試行。タイミングは Chrome の Alarms API で制御。
   - `persistent = true` になったイベントは retryQueue から削除。
   - 3 回失敗後は `nc_meta.failedWrites` に eventId を追加し、Options でユーザーに通知。手動で再試行または破棄を選択できる。
-  - **ストレージクォータ超過時**: リトライを中止し、UI に「ストレージ容量不足」警告を即座に表示。古いイベントの削除を促す。
 - **イベント ID 採番の競合回避**:
   - `nc_events.nextId` を read → increment → write のトランザクション的に扱い、`chrome.storage.local.get` と `chrome.storage.local.set` をアトミックに実行。
   - 並行書き込みが発生した場合、後続は `set` 時に他の書き込みを検出し（`nc_events` 全体を再取得して nextId を確認）、nextId を再取得して再試行（最大 3 回）。
   - Service worker の single-threaded 特性により、実際の競合は稀だが、念のため実装。
-- レーティング再計算中は UI を読み取り専用にし、完了時に解除。
-- 異常終了時は `nc_meta.lastReplayEventId` を基点に再開。
 - データはローカル保存のみ。外部送信なし。権限は最小限 (`activeTab`, `storage`, 指定 origin)。
 - デバッグログには動画タイトル等が含まれるため、ユーザー操作でのみ取得可能。
 

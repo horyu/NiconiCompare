@@ -308,8 +308,10 @@ function normalizeSettings(settings: NcSettings): NcSettings {
     ),
     overlayAutoCloseMs: Math.min(
       5000,
-      Math.max(500, settings.overlayAutoCloseMs || 2000)
+      Math.max(500, settings.overlayAutoCloseMs || 1500)
     ),
+    showEventThumbnails:
+      settings.showEventThumbnails ?? DEFAULT_SETTINGS.showEventThumbnails,
     glicko: settings.glicko || DEFAULT_SETTINGS.glicko
   }
 }
@@ -317,27 +319,11 @@ function normalizeSettings(settings: NcSettings): NcSettings {
 
 **バリデーション範囲**:
 - `recentWindowSize`: 1〜10 の整数
-- `overlayAutoCloseMs`: 500〜5000ms（デフォルト: 2000ms）
+- `overlayAutoCloseMs`: 500?5000ms
+- `showEventThumbnails`: boolean
 - `glicko`: 初期値の妥当性チェック
 
-### 5.4 ストレージクォータ管理
-
-**Chrome 制限**: `chrome.storage.local` は約 10 MB
-
-**想定利用量** (1000 イベント規模):
-
-- nc_events: 150 KB
-- nc_videos: 500 KB (1000 件)
-- nc_ratings: 100 KB
-- 合計: ~1 MB
-
-**クォータ超過時の対応**:
-
-1. UI に警告バナー表示
-2. 古いイベントの削除を促す
-3. `chrome.storage.local.getBytesInUse()` で使用量監視（※現状未実装）
-
-### 5.5 書き込みパフォーマンス最適化
+### 5.4 書き込みパフォーマンス最適化
 
 **課題**: 頻繁な小規模書き込みは遅い
 
@@ -373,6 +359,7 @@ async function saveCompareEvent(event: CompareEvent) {
 - watch ページ右上付近に常駐し、`overlayEnabled` が true の間は常に比較操作が可能。
 - `nc_state.recentWindow` の LRU 候補と `currentVideoId` を同一カード内で確認でき、任意のペアに対して verdict を一手で送信できる。
 - verdict 送信後は `MESSAGE_TYPES.recordEvent` → `MESSAGE_TYPES.requestState` の順で state を再取得し最新 UI に追従する。
+- 直前と同一の verdict を送信した場合は該当イベントを削除し、UI を再同期する。
 - JSON-LD が取得できない場合はステータスメッセージ表示と verdict ボタン無効化を行い、メタデータが復旧したら自動で再有効化する。
 - `overlayEnabled` / `overlayAutoCloseMs` は chrome.storage に保存された設定値を唯一の情報源として参照し、マウスの hover/out に応じて自動開閉できる。
 
@@ -380,6 +367,7 @@ async function saveCompareEvent(event: CompareEvent) {
 
 - 表示位置の微調整・カードレイアウト・アクセシビリティ属性・hover での展開方法など、UI の細部は `src/contents/overlay.ts` を参照する。変更時はコードと合わせてスクリーンショット資料を更新し、仕様書では改めて定義しない。
 - Select のラベル表記、ステータス文言、auto-close アニメーションなども実装ベースで運用し、アーキテクチャ文書では管理対象外とする。
+- `PLASMO_PUBLIC_KEEP_OVERLAY_OPEN` が true の場合、auto-close を無効化する。
 
 ### 6.2 Popup
 
@@ -399,6 +387,9 @@ async function saveCompareEvent(event: CompareEvent) {
 └────────────────────────────────────┘
 ```
 
+**補足**:
+- Storage 状態として `needsCleanup` / `retryQueue` / `failedWrites` を表示する。
+
 ### 6.3 Options
 
 **レイアウト**: タブ切り替え
@@ -417,6 +408,8 @@ async function saveCompareEvent(event: CompareEvent) {
 └─────────────────────────────────────────────────┘
 ページネーション: < 前へ [1..N] 次へ >
 ```
+
+**イベント一覧タブ**: 検索、評価フィルタ、削除済み/サムネ表示切替、論理削除/復活/評価変更/完全削除などの行アクションを提供。詳細は実装を参照。
 
 ---
 
@@ -537,8 +530,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 ### 9.2 最適化手法
 
 1. **メモリキャッシュ**: `nc_videos`/`nc_authors`を最大 100 件キャッシュ
-2. **Web Worker**: 100+イベントのリプレイ時に使用
-3. **仮想スクロール**: Options のテーブルで 1000 件以上の表示時
+2. **仮想スクロール**: Options のテーブルで 1000 件以上の表示時
 
 ---
 
@@ -581,7 +573,6 @@ interface RatingPlugin {
 **改訂履歴**:
 
 - 2025-12-18: 初版作成
-
 
 
 
