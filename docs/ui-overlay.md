@@ -38,6 +38,7 @@
 - Tailwind CSS utility classes でスタイリング（`fixed`, `top-0`, `right-0`, `z-[2147483647]` など）
 - verdict ボタンは 3 つ（再生中/引き分け/選択中）で、`submitVerdict` を通じて background へ送信
 - verdict ボタンは最後に押したものが選択状態になり、`currentVideoId` の切替時に解除される
+- サムネイルは current/opponent の2枚表示。opponent 側は新規タブで watch ページを開くリンクにしている
 - Select は `opacity-0` で透明化し、`label` 内の `span` と重ねる構造。候補ラベルは `{index}. videoId | title`
 - 状態: `useState` で currentVideoId, recentWindow, opponentVideoId, videoSnapshots, lastVerdict を管理
 
