@@ -37,6 +37,7 @@ export type NcSettings = {
   recentWindowSize: number
   overlayEnabled: boolean
   overlayAutoCloseMs: number
+  showEventThumbnails: boolean
   glicko: {
     rating: number
     rd: number

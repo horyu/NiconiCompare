@@ -68,6 +68,20 @@ type DeleteEventMessage = {
   }
 }
 
+type RestoreEventMessage = {
+  type: typeof MESSAGE_TYPES.restoreEvent
+  payload: {
+    eventId: number
+  }
+}
+
+type PurgeEventMessage = {
+  type: typeof MESSAGE_TYPES.purgeEvent
+  payload: {
+    eventId: number
+  }
+}
+
 type DeleteAllDataMessage = {
   type: typeof MESSAGE_TYPES.deleteAllData
 }
@@ -90,6 +104,21 @@ type MetaActionMessage = {
     | { action: "cleanup" }
 }
 
+type RebuildRatingsMessage = {
+  type: typeof MESSAGE_TYPES.rebuildRatings
+}
+
+type ExportDataMessage = {
+  type: typeof MESSAGE_TYPES.exportData
+}
+
+type ImportDataMessage = {
+  type: typeof MESSAGE_TYPES.importData
+  payload: {
+    data: Partial<StorageShape>
+  }
+}
+
 type RequestStateMessage = {
   type: typeof MESSAGE_TYPES.requestState
 }
@@ -99,10 +128,15 @@ type Message =
   | UpdateCurrentVideoMessage
   | RecordEventMessage
   | DeleteEventMessage
+  | RestoreEventMessage
+  | PurgeEventMessage
   | DeleteAllDataMessage
   | ToggleOverlayMessage
   | UpdateSettingsMessage
   | MetaActionMessage
+  | RebuildRatingsMessage
+  | ExportDataMessage
+  | ImportDataMessage
   | RequestStateMessage
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -138,6 +172,16 @@ chrome.runtime.onMessage.addListener(
             sendResponse({ ok: true, deleted })
             break
           }
+          case MESSAGE_TYPES.restoreEvent: {
+            const restored = await handleRestoreEvent(message.payload.eventId)
+            sendResponse({ ok: true, restored })
+            break
+          }
+          case MESSAGE_TYPES.purgeEvent: {
+            const purged = await handlePurgeEvent(message.payload.eventId)
+            sendResponse({ ok: true, purged })
+            break
+          }
           case MESSAGE_TYPES.deleteAllData:
             await handleDeleteAllData()
             sendResponse({ ok: true })
@@ -152,6 +196,19 @@ chrome.runtime.onMessage.addListener(
             break
           case MESSAGE_TYPES.metaAction:
             await handleMetaAction(message.payload)
+            sendResponse({ ok: true })
+            break
+          case MESSAGE_TYPES.rebuildRatings:
+            await handleRebuildRatings()
+            sendResponse({ ok: true })
+            break
+          case MESSAGE_TYPES.exportData: {
+            const data = await handleExportData()
+            sendResponse({ ok: true, data })
+            break
+          }
+          case MESSAGE_TYPES.importData:
+            await handleImportData(message.payload.data)
             sendResponse({ ok: true })
             break
           case MESSAGE_TYPES.requestState: {
@@ -442,6 +499,87 @@ async function handleDeleteEvent(eventId: number) {
   return true
 }
 
+async function handleRestoreEvent(eventId: number) {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    console.warn("chrome.storage.local is unavailable.")
+    return false
+  }
+
+  const result = await storage.get([
+    STORAGE_KEYS.events,
+    STORAGE_KEYS.settings,
+    STORAGE_KEYS.ratings
+  ])
+  const events =
+    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
+  const settings =
+    (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
+
+  const index = events.items.findIndex((event) => event.id === eventId)
+  if (index === -1) {
+    return false
+  }
+
+  if (!events.items[index].deleted) {
+    return true
+  }
+
+  const updatedEvents = produce(events, (draft) => {
+    draft.items[index] = { ...draft.items[index], deleted: false }
+  })
+  const nextRatings = rebuildRatingsFromEvents(updatedEvents.items, settings)
+
+  await storage.set({
+    [STORAGE_KEYS.events]: updatedEvents,
+    [STORAGE_KEYS.ratings]: nextRatings
+  })
+
+  return true
+}
+
+async function handlePurgeEvent(eventId: number) {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    console.warn("chrome.storage.local is unavailable.")
+    return false
+  }
+
+  const result = await storage.get([
+    STORAGE_KEYS.events,
+    STORAGE_KEYS.settings,
+    STORAGE_KEYS.meta
+  ])
+  const events =
+    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
+  const settings =
+    (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
+  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+
+  const index = events.items.findIndex((event) => event.id === eventId)
+  if (index === -1) {
+    return false
+  }
+
+  if (!events.items[index].deleted) {
+    return false
+  }
+
+  const updatedEvents: NcEventsBucket = {
+    items: events.items.filter((event) => event.id !== eventId),
+    nextId: events.nextId
+  }
+  const nextRatings = rebuildRatingsFromEvents(updatedEvents.items, settings)
+
+  await storage.set({
+    [STORAGE_KEYS.events]: updatedEvents,
+    [STORAGE_KEYS.ratings]: nextRatings,
+    [STORAGE_KEYS.meta]: { ...meta, needsCleanup: true }
+  })
+
+  return true
+}
+
 async function handleToggleOverlay(enabled: boolean) {
   const storage = chrome?.storage?.local
   if (!storage) {
@@ -474,7 +612,8 @@ async function readStateSnapshot() {
       events: DEFAULT_EVENTS_BUCKET,
       ratings: {},
       meta: DEFAULT_META,
-      videos: {}
+      videos: {},
+      authors: {}
     }
   }
   const result = await storage.get([
@@ -483,7 +622,8 @@ async function readStateSnapshot() {
     STORAGE_KEYS.events,
     STORAGE_KEYS.ratings,
     STORAGE_KEYS.meta,
-    STORAGE_KEYS.videos
+    STORAGE_KEYS.videos,
+    STORAGE_KEYS.authors
   ])
   return {
     settings: (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS,
@@ -492,7 +632,8 @@ async function readStateSnapshot() {
       (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET,
     ratings: (result[STORAGE_KEYS.ratings] as NcRatings) ?? {},
     meta: (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META,
-    videos: (result[STORAGE_KEYS.videos] as NcVideos) ?? {}
+    videos: (result[STORAGE_KEYS.videos] as NcVideos) ?? {},
+    authors: (result[STORAGE_KEYS.authors] as NcAuthors) ?? {}
   }
 }
 
@@ -528,6 +669,19 @@ async function handleUpdateSettings(partial: Partial<NcSettings>) {
         nextSettings.recentWindowSize
       )
     }
+  }
+
+  if (
+    nextSettings.glicko.rating !== currentSettings.glicko.rating ||
+    nextSettings.glicko.rd !== currentSettings.glicko.rd ||
+    nextSettings.glicko.volatility !== currentSettings.glicko.volatility
+  ) {
+    const events =
+      (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
+    updates[STORAGE_KEYS.ratings] = rebuildRatingsFromEvents(
+      events.items,
+      nextSettings
+    )
   }
 
   await storage.set(updates)
@@ -566,6 +720,111 @@ async function handleMetaAction(payload: MetaActionMessage["payload"]) {
       }
     })
   }
+}
+
+async function handleRebuildRatings() {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    console.warn("chrome.storage.local is unavailable.")
+    return
+  }
+
+  const result = await storage.get([STORAGE_KEYS.events, STORAGE_KEYS.settings])
+  const settings =
+    (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
+  const events =
+    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
+  const nextRatings = rebuildRatingsFromEvents(events.items, settings)
+
+  await storage.set({
+    [STORAGE_KEYS.ratings]: nextRatings
+  })
+}
+
+async function handleExportData() {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    console.warn("chrome.storage.local is unavailable.")
+    return {
+      [STORAGE_KEYS.settings]: DEFAULT_SETTINGS,
+      [STORAGE_KEYS.state]: DEFAULT_STATE,
+      [STORAGE_KEYS.videos]: {},
+      [STORAGE_KEYS.authors]: {},
+      [STORAGE_KEYS.events]: DEFAULT_EVENTS_BUCKET,
+      [STORAGE_KEYS.ratings]: {},
+      [STORAGE_KEYS.meta]: DEFAULT_META
+    }
+  }
+
+  const result = await storage.get(Object.values(STORAGE_KEYS))
+  return {
+    [STORAGE_KEYS.settings]:
+      (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS,
+    [STORAGE_KEYS.state]:
+      (result[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE,
+    [STORAGE_KEYS.videos]: (result[STORAGE_KEYS.videos] as NcVideos) ?? {},
+    [STORAGE_KEYS.authors]: (result[STORAGE_KEYS.authors] as NcAuthors) ?? {},
+    [STORAGE_KEYS.events]:
+      (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET,
+    [STORAGE_KEYS.ratings]: (result[STORAGE_KEYS.ratings] as NcRatings) ?? {},
+    [STORAGE_KEYS.meta]: (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  }
+}
+
+async function handleImportData(data: Partial<StorageShape>) {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    console.warn("chrome.storage.local is unavailable.")
+    return
+  }
+
+  const nextSettings = normalizeSettings(
+    (data[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
+  )
+  const nextEvents =
+    (data[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
+  const nextState = (data[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
+  const nextMeta = (data[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const nextVideos = (data[STORAGE_KEYS.videos] as NcVideos) ?? {}
+  const nextAuthors = (data[STORAGE_KEYS.authors] as NcAuthors) ?? {}
+
+  const eventItems = Array.isArray(nextEvents.items) ? nextEvents.items : []
+  const maxEventId = eventItems.reduce(
+    (max, event) => Math.max(max, event.id),
+    0
+  )
+  const normalizedEvents: NcEventsBucket = {
+    items: eventItems,
+    nextId: Math.max(nextEvents.nextId ?? 0, maxEventId + 1, 1)
+  }
+  const normalizedMeta: NcMeta = {
+    ...nextMeta,
+    needsCleanup:
+      nextMeta.needsCleanup ||
+      normalizedEvents.items.some((event) => event.deleted)
+  }
+
+  const rebuiltState: NcState = {
+    ...nextState,
+    recentWindow: rebuildRecentWindowFromEvents(
+      normalizedEvents.items,
+      nextSettings.recentWindowSize
+    )
+  }
+  const nextRatings = rebuildRatingsFromEvents(
+    normalizedEvents.items,
+    nextSettings
+  )
+
+  await storage.set({
+    [STORAGE_KEYS.settings]: nextSettings,
+    [STORAGE_KEYS.state]: rebuiltState,
+    [STORAGE_KEYS.events]: normalizedEvents,
+    [STORAGE_KEYS.meta]: normalizedMeta,
+    [STORAGE_KEYS.videos]: nextVideos,
+    [STORAGE_KEYS.authors]: nextAuthors,
+    [STORAGE_KEYS.ratings]: nextRatings
+  })
 }
 
 function getOrCreateRatingSnapshot(
@@ -867,6 +1126,8 @@ function normalizeSettings(settings: NcSettings): NcSettings {
       5000,
       Math.max(500, settings.overlayAutoCloseMs || 1500)
     ),
+    showEventThumbnails:
+      settings.showEventThumbnails ?? DEFAULT_SETTINGS.showEventThumbnails,
     glicko: settings.glicko || DEFAULT_SETTINGS.glicko
   }
 }

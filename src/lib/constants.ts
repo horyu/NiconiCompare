@@ -14,6 +14,7 @@ export const DEFAULT_SETTINGS: NcSettings = {
   recentWindowSize: 5,
   overlayEnabled: true,
   overlayAutoCloseMs: 2000,
+  showEventThumbnails: true,
   glicko: {
     rating: 1500,
     rd: 350,
@@ -44,9 +45,14 @@ export const MESSAGE_TYPES = {
   updateCurrentVideo: "nc/updateCurrentVideo",
   recordEvent: "nc/recordEvent",
   deleteEvent: "nc/deleteEvent",
+  restoreEvent: "nc/restoreEvent",
+  purgeEvent: "nc/purgeEvent",
   deleteAllData: "nc/deleteAllData",
   toggleOverlay: "nc/toggleOverlay",
   requestState: "nc/requestState",
   updateSettings: "nc/updateSettings",
-  metaAction: "nc/metaAction"
+  metaAction: "nc/metaAction",
+  rebuildRatings: "nc/rebuildRatings",
+  exportData: "nc/exportData",
+  importData: "nc/importData"
 } as const
