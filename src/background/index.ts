@@ -473,7 +473,8 @@ async function readStateSnapshot() {
       state: DEFAULT_STATE,
       events: DEFAULT_EVENTS_BUCKET,
       ratings: {},
-      meta: DEFAULT_META
+      meta: DEFAULT_META,
+      videos: {}
     }
   }
   const result = await storage.get([
@@ -481,7 +482,8 @@ async function readStateSnapshot() {
     STORAGE_KEYS.state,
     STORAGE_KEYS.events,
     STORAGE_KEYS.ratings,
-    STORAGE_KEYS.meta
+    STORAGE_KEYS.meta,
+    STORAGE_KEYS.videos
   ])
   return {
     settings: (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS,
@@ -489,7 +491,8 @@ async function readStateSnapshot() {
     events:
       (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET,
     ratings: (result[STORAGE_KEYS.ratings] as NcRatings) ?? {},
-    meta: (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+    meta: (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META,
+    videos: (result[STORAGE_KEYS.videos] as NcVideos) ?? {}
   }
 }
 

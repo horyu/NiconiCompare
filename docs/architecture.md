@@ -47,9 +47,9 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
                  │ chrome.storage.onChanged
 ┌────────────────┴─────────────────┬──────────────────────────┐
 │  Popup (popup/)                  │  Options (options/)      │
-│  - レーティング概要              │  - 設定編集              │
-│  - 直近イベント表示              │  - データ管理            │
-│  - overlayEnabled トグル         │  - Export/Import         │
+│  - 直近イベント表示              │  - 設定編集              │
+│  - overlayEnabled トグル         │  - データ管理            │
+│                                 │  - Export/Import         │
 └──────────────────────────────────┴──────────────────────────┘
 ```
 
@@ -59,7 +59,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 | ------------------ | ---------------------------------------------- | ----------------------------------- |
 | **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得        | React 18.2.0, TypeScript, Tailwind CSS v4, Plasmo CSUI |
 | **Service Worker** | イベントソーシング、Glicko-2 計算、Storage I/O | TypeScript, chrome.storage API      |
-| **Popup**          | レーティング表示、直近イベント管理             | React 18.2.0, TypeScript            |
+| **Popup**          | 直近イベント表示、overlayEnabled トグル         | React 18.2.0, TypeScript            |
 | **Options**        | 詳細設定、データ操作、エクスポート/インポート  | React 18.2.0, TypeScript            |
 | **Storage**        | 永続化層                                       | chrome.storage.local (Key-Value)  |
 
@@ -253,7 +253,7 @@ function updateRatings(
 
 - 初期 RD 350 → 比較を重ねると RD が低下
 - RD 100 以下 = 安定したレーティング
-- RD 100 超 = さらなる比較が必要（Popup で優先表示）
+- RD 100 超 = さらなる比較が必要
 
 ---
 
@@ -391,11 +391,11 @@ async function saveCompareEvent(event: CompareEvent) {
 ┌────────────────────────────────────┐
 │  [NiconiCompare]  [overlayEnabled] │ ← ヘッダー
 ├────────────────────────────────────┤
-│  直近イベント (最新10件)            │
-│  ├─ [削除] sm111 vs sm222 (良い)   │
-│  └─ ...                            │
+│  #106   [thumb]   >   [thumb]      │
+│  2025/12/21                         │
+│  22:29:56                           │
 ├────────────────────────────────────┤
-│  [詳細設定を開く (Options)] ───────►│
+│  Storage 状態                      │
 └────────────────────────────────────┘
 ```
 
@@ -580,3 +580,7 @@ interface RatingPlugin {
 **改訂履歴**:
 
 - 2025-12-18: 初版作成
+
+
+
+

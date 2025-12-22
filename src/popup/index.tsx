@@ -1,20 +1,15 @@
 import { useEffect, useState } from "react"
 
+import "../style.css"
+
 import { MESSAGE_TYPES } from "../lib/constants"
-import type {
-  NcEventsBucket,
-  NcMeta,
-  NcRatings,
-  NcSettings,
-  NcState
-} from "../lib/types"
+import type { NcEventsBucket, NcMeta, NcSettings, NcVideos } from "../lib/types"
 
 type PopupSnapshot = {
   settings: NcSettings
-  state: NcState
   events: NcEventsBucket
-  ratings: NcRatings
   meta: NcMeta
+  videos: NcVideos
 }
 
 export default function Popup() {
@@ -51,7 +46,7 @@ export default function Popup() {
 
   if (loading) {
     return (
-      <main style={containerStyle}>
+      <main className="w-80 p-4 flex flex-col gap-4 font-sans">
         <p>読込中...</p>
       </main>
     )
@@ -59,22 +54,21 @@ export default function Popup() {
 
   if (!snapshot) {
     return (
-      <main style={containerStyle}>
+      <main className="w-80 p-4 flex flex-col gap-4 font-sans">
         <p>状態を取得できませんでした。</p>
-        {error && <small style={{ color: "#ff8080" }}>{error}</small>}
+        {error && <small className="text-red-300">{error}</small>}
       </main>
     )
   }
 
   const lastEvents = buildRecentEvents(snapshot.events)
-  const unresolvedRatings = findUnresolvedRatings(snapshot.ratings)
   const meta = snapshot.meta
 
   return (
-    <main style={containerStyle}>
-      <header style={headerStyle}>
+    <main className="w-80 p-4 flex flex-col gap-4 font-sans">
+      <header className="flex items-center justify-between">
         <strong>NiconiCompare</strong>
-        <label style={toggleLabelStyle}>
+        <label className="text-xs flex items-center gap-2">
           <input
             type="checkbox"
             checked={snapshot.settings.overlayEnabled}
@@ -85,63 +79,47 @@ export default function Popup() {
       </header>
 
       <section>
-        <h3 style={sectionTitleStyle}>比較候補</h3>
-        {snapshot.state.recentWindow.length === 0 ? (
-          <p style={mutedStyle}>まだ比較イベントがありません。</p>
-        ) : (
-          <ul style={listStyle}>
-            {snapshot.state.recentWindow.map((videoId) => (
-              <li key={videoId}>{videoId}</li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section>
-        <h3 style={sectionTitleStyle}>直近イベント</h3>
+        <h3 className="text-sm mb-2">直近イベント</h3>
         {lastEvents.length === 0 ? (
-          <p style={mutedStyle}>イベントなし</p>
+          <p className="text-xs opacity-70">イベントなし</p>
         ) : (
-          <ul style={listStyle}>
-            {lastEvents.map((event) => (
-              <li key={event.id}>
-                <strong>#{event.id}</strong> {event.currentVideoId} vs{" "}
-                {event.opponentVideoId}{" "}
-                <span style={verdictStyle(event.verdict)}>
-                  {labelVerdict(event.verdict)}
-                </span>
-                <small style={timestampStyle}>
-                  {new Date(event.timestamp).toLocaleString()}
-                </small>
-              </li>
-            ))}
+          <ul className="list-none p-0 m-0 flex flex-col gap-1 text-[13px]">
+            {lastEvents.map((event) => {
+              const timestamp = new Date(event.timestamp)
+              return (
+                <li
+                  key={event.id}
+                  className="grid grid-cols-[auto_96px_auto_96px] items-center gap-0 p-2 rounded-lg bg-slate-900/10">
+                  <div className="flex flex-col gap-0.5 text-[10px]">
+                    <strong>#{event.id}</strong>
+                    <span>{timestamp.toLocaleDateString()}</span>
+                    <span>{timestamp.toLocaleTimeString()}</span>
+                  </div>
+                  {renderVideoCard(
+                    snapshot.videos[event.currentVideoId],
+                    event.currentVideoId
+                  )}
+                  <span className="w-fit justify-self-center text-base font-bold text-center text-slate-700">
+                    {labelVerdict(event.verdict)}
+                  </span>
+                  {renderVideoCard(
+                    snapshot.videos[event.opponentVideoId],
+                    event.opponentVideoId
+                  )}
+                </li>
+              )
+            })}
           </ul>
         )}
       </section>
 
       <section>
-        <h3 style={sectionTitleStyle}>未確定動画 (RD &gt; 100)</h3>
-        {unresolvedRatings.length === 0 ? (
-          <p style={mutedStyle}>未確定なし</p>
-        ) : (
-          <ul style={listStyle}>
-            {unresolvedRatings.map((rating) => (
-              <li key={rating.videoId}>
-                {rating.videoId} — Rating {rating.rating.toFixed(0)} / RD{" "}
-                {rating.rd.toFixed(0)}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section>
-        <h3 style={sectionTitleStyle}>Storage 状態</h3>
-        <ul style={listStyle}>
+        <h3 className="text-sm mb-2">Storage 状態</h3>
+        <ul className="list-none p-0 m-0 flex flex-col gap-1 text-[13px]">
           <li>
             needsCleanup:{" "}
             {meta.needsCleanup ? (
-              <span style={{ color: "#dc2626" }}>要対応</span>
+              <span className="text-red-600">要対応</span>
             ) : (
               "OK"
             )}
@@ -151,57 +129,9 @@ export default function Popup() {
         </ul>
       </section>
 
-      {error && <small style={{ color: "#ff8080" }}>{error}</small>}
+      {error && <small className="text-red-300">{error}</small>}
     </main>
   )
-}
-
-const containerStyle: React.CSSProperties = {
-  width: 320,
-  padding: 16,
-  display: "flex",
-  flexDirection: "column",
-  gap: 16,
-  fontFamily: "system-ui, sans-serif"
-}
-
-const headerStyle: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center"
-}
-
-const sectionTitleStyle: React.CSSProperties = {
-  fontSize: 14,
-  margin: "0 0 8px"
-}
-
-const listStyle: React.CSSProperties = {
-  listStyle: "none",
-  padding: 0,
-  margin: 0,
-  display: "flex",
-  flexDirection: "column",
-  gap: 4,
-  fontSize: 13
-}
-
-const mutedStyle: React.CSSProperties = {
-  fontSize: 12,
-  opacity: 0.7
-}
-
-const toggleLabelStyle: React.CSSProperties = {
-  fontSize: 12,
-  display: "flex",
-  gap: 8,
-  alignItems: "center"
-}
-
-const timestampStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: 11,
-  opacity: 0.6
 }
 
 function buildRecentEvents(events: NcEventsBucket) {
@@ -211,39 +141,35 @@ function buildRecentEvents(events: NcEventsBucket) {
     .slice(0, 5)
 }
 
-function findUnresolvedRatings(ratings: NcRatings) {
-  return Object.values(ratings)
-    .filter((rating) => rating.rd > 100)
-    .sort((a, b) => b.rd - a.rd)
-    .slice(0, 5)
-}
-
 function labelVerdict(verdict: string) {
   switch (verdict) {
     case "better":
-      return "良い"
+      return ">"
     case "same":
-      return "同じ"
+      return "="
     case "worse":
-      return "悪い"
+      return "<"
     default:
       return verdict
   }
 }
 
-function verdictStyle(verdict: string): React.CSSProperties {
-  const colors: Record<string, string> = {
-    better: "#16a34a",
-    same: "#52525b",
-    worse: "#dc2626"
-  }
-  return {
-    display: "inline-block",
-    marginLeft: 4,
-    padding: "2px 6px",
-    borderRadius: 999,
-    fontSize: 11,
-    background: colors[verdict] ?? "#64748b",
-    color: "#fff"
-  }
+function renderVideoCard(
+  video: PopupSnapshot["videos"][string] | undefined,
+  videoId: string
+) {
+  const thumbnailUrl = video?.thumbnailUrls?.[0]
+  return (
+    <div className="flex flex-col items-center gap-1 w-24">
+      {thumbnailUrl ? (
+        <img
+          src={thumbnailUrl}
+          alt={`${videoId} thumbnail`}
+          className="w-24 h-[54px] rounded-md object-cover bg-slate-800"
+        />
+      ) : (
+        <div className="w-24 h-[54px] rounded-md bg-slate-800" />
+      )}
+    </div>
+  )
 }

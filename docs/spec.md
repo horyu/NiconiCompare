@@ -31,7 +31,7 @@
 ## 4. コアワークフロー
 
 1. **視聴中比較**: 再生ページ右上の小型アイコンをホバーすると比較カードが開き、直近 N 件から比較対象を選び「良い・同じ・悪い」を登録。
-2. **ログ補正**: Popup/拡張ページから直近イベントを確認し、誤ったものを無効化または verdict を修正。
+2. **ログ補正**: 拡張ページから直近イベントを確認し、誤ったものを無効化または verdict を修正。
 3. **ランキング活用**: 保存済み動画一覧でレーティング順・未確定動画（RD が高い動画）を確認し、視聴計画や整理に活かす。
 
 ## 5. ドメイン要件
@@ -103,7 +103,7 @@ type CompareEvent = {
   currentVideoId: string;
   opponentVideoId: string;
   verdict: "better" | "same" | "worse"; // currentVideo（視聴中）視点。invalid 値は UI でバリデーション
-  deleted: boolean; // Popup操作で論理削除し、Optionsから完全削除可能
+  deleted: boolean; // Options操作で論理削除し、Optionsから完全削除可能
   persistent?: boolean; // storage 書き込み完了フラグ（生成時 undefined、書き込み成功後に true、リトライ中は false）
 };
 
@@ -160,9 +160,8 @@ type RatingSnapshot = {
 
 ### 9.2 Popup
 
-- 最新レーティング概要（Top/Bottom/未確定）と直近イベント一覧（最新 10 件）を表示。**未確定動画**の定義: RD > 100 の動画（初期値 RD 350 のため、新規追加動画や比較回数の少ない動画が該当）。
+- 直近イベント一覧を表示（イベント ID と日時、current/opponent のサムネ表示、勝敗は `>` `=` `<` で表記）。
 - `overlayEnabled` トグルを提供し、オーバーレイ表示と動画/author 情報の取得を ON/OFF できる（デフォルト ON）。その他の詳細設定は拡張ページへ誘導。
-- 直近イベントに対して `deleted` フラグの On/Off（論理削除／復活）を即時適用できる。完全削除は Options 側で実行。
 
 ### 9.3 拡張ページ / Options
 
