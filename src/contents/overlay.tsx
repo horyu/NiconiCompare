@@ -133,6 +133,7 @@ export default function Overlay() {
       if (!isReady || !overlaySettings.overlayAndCaptureEnabled) {
         return
       }
+      setStatusMessage(undefined)
       if (currentVideoId === videoData.video.videoId) return
 
       setCurrentVideoId(videoData.video.videoId)
