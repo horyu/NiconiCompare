@@ -63,7 +63,9 @@ export default function Overlay() {
       if (areaName !== "local") return
 
       if (changes[STORAGE_KEYS.settings]?.newValue) {
-        setOverlaySettings(changes[STORAGE_KEYS.settings].newValue ?? DEFAULT_SETTINGS)
+        setOverlaySettings(
+          changes[STORAGE_KEYS.settings].newValue ?? DEFAULT_SETTINGS
+        )
       }
 
       if (changes[STORAGE_KEYS.videos]?.newValue) {
@@ -147,7 +149,12 @@ export default function Overlay() {
 
       await refreshState()
     },
-    [currentVideoId, isReady, refreshState, overlaySettings.overlayAndCaptureEnabled]
+    [
+      currentVideoId,
+      isReady,
+      refreshState,
+      overlaySettings.overlayAndCaptureEnabled
+    ]
   )
 
   // JSON-LD observer

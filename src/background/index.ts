@@ -1129,7 +1129,8 @@ function normalizeSettings(settings: NcSettings): NcSettings {
       Math.max(500, settings.overlayAutoCloseMs || 1500)
     ),
     overlayAndCaptureEnabled:
-      settings.overlayAndCaptureEnabled ?? DEFAULT_SETTINGS.overlayAndCaptureEnabled,
+      settings.overlayAndCaptureEnabled ??
+      DEFAULT_SETTINGS.overlayAndCaptureEnabled,
     showEventThumbnails:
       settings.showEventThumbnails ?? DEFAULT_SETTINGS.showEventThumbnails,
     glicko: settings.glicko || DEFAULT_SETTINGS.glicko
