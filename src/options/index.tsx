@@ -83,6 +83,7 @@ export default function OptionsPage() {
   const [deletingAll, setDeletingAll] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [bytesInUse, setBytesInUse] = useState<number | null>(null)
   const importFileRef = useRef<HTMLInputElement | null>(null)
 
   const refreshState = useCallback(async (silent = false) => {
@@ -108,6 +109,16 @@ export default function OptionsPage() {
       glickoVolatility: String(next.settings.glicko.volatility)
     })
     setEventShowThumbnails(next.settings.showEventThumbnails)
+    
+    // ストレージ使用量を取得
+    try {
+      const bytes = await chrome.storage.local.getBytesInUse()
+      setBytesInUse(bytes)
+    } catch (error) {
+      console.error("Failed to get bytes in use:", error)
+      setBytesInUse(null)
+    }
+    
     setLoading(false)
   }, [])
 
@@ -1059,6 +1070,14 @@ export default function OptionsPage() {
                 <h3 className="text-sm font-semibold">
                   エクスポート/インポート
                 </h3>
+                {bytesInUse !== null && (
+                  <div className="text-sm text-slate-600">
+                    ストレージ使用量: {(bytesInUse / 1024).toFixed(2)} KB
+                    {" / "}
+                    {(chrome.storage.local.QUOTA_BYTES / 1024 / 1024).toFixed(0)}{" "}
+                    MB
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={handleExport}
