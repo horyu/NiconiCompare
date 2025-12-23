@@ -1,8 +1,5 @@
 # NiconiCompare アーキテクチャ設計書
 
-**Version**: 1.0.0  
-**Last Updated**: 2025-12-18
-
 本書は NiconiCompare の技術アーキテクチャ、コンポーネント設計、データフローを詳述する。
 
 ---
@@ -24,7 +21,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
                     ▼
 ┌─────────────────────────────────────────────────────────────┐
 │            Content Script (contents/)                       │
-│  - DOM Injection (オーバーレイアイコン)                      │
+│  - DOM Injection (オーバーレイパネル)                        │
 │  - JSON-LD パース → VideoSnapshot 生成                       │
 │  - 比較カードUI (React)                                      │
 └────────────────┬────────────────────────────────────────────┘
@@ -78,7 +75,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
      ↓
 [4] Service Worker: nc_videos/nc_authorsに保存
      ↓
-[5] Content Script: オーバーレイアイコンを表示
+[5] Content Script: オーバーレイパネルを表示
      ↓
 [6] ユーザーがホバー → 比較カード展開 → 評価ボタンクリック
      ↓
@@ -124,8 +121,8 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
      └─ 失敗
          ↓
 [2] nc_videosに該当videoIdのスナップショット存在確認
-     ├─ 存在 → 既存データを使用 (UIに警告アイコン表示)
-     │         比較イベント登録は許可
+    ├─ 存在 → 既存データを使用（UIはメッセージ表示のみ）
+    │         比較イベント登録は許可
      └─ 不在 → エラーメッセージ表示
                比較入力を完全抑制
      ↓
@@ -567,11 +564,3 @@ interface RatingPlugin {
 
 // Elo, TrueSkill等を追加可能
 ```
-
----
-
-**改訂履歴**:
-
-- 2025-12-18: 初版作成
-
-

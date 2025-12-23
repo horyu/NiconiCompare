@@ -1,7 +1,5 @@
 # Content Overlay Implementation Snapshot
 
-**Last Updated**: 2025-12-20
-
 オーバーレイ UI は `src/contents/overlay.tsx` に React + Tailwind CSS v4 で実装されている。仕様書では不変要件のみを定義しており、本ドキュメントでは実装の現状を素早く把握できるよう、コンポーネント構造と状態管理、ソース参照ポイントをまとめる。UI 変更時はこのファイルを更新し、仕様との齟齬を防ぐ。
 
 ## 参考ソース
