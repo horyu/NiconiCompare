@@ -349,66 +349,23 @@ async function saveCompareEvent(event: CompareEvent) {
 
 ### 6.1 Content Overlay
 
-実装は Plasmo CSUI で DOM に直接マウントされる。UI レイアウトやアニメーションは頻繁に変わるため本書では「守るべき機能要件」のみを列挙し、詳細な構造は `src/contents/overlay.ts` と `docs/ui-overlay.md`（DOM/状態まとめ）を正とする。仕様レイヤー（docs/spec.md §9.1）との関係は以下。
+実装は Plasmo CSUI で DOM に直接マウントされる。
 
-**不変要件（仕様で固定）**
+**役割**: 比較UIの常駐、動画メタデータの抽出とService Workerへの転送、比較操作の受付。
 
-- watch ページ右上付近に常駐し、`overlayAndCaptureEnabled` が true の間は常に比較操作が可能。
-- `nc_state.recentWindow` の LRU 候補と `currentVideoId` を同一カード内で確認でき、任意のペアに対して verdict を一手で送信できる。
-- verdict 送信後は `MESSAGE_TYPES.recordEvent` → `MESSAGE_TYPES.requestState` の順で state を再取得し最新 UI に追従する。
-- 直前と同一の verdict を送信した場合は該当イベントを削除し、UI を再同期する。
-- JSON-LD が取得できない場合はステータスメッセージ表示と verdict ボタン無効化を行い、メタデータが復旧したら自動で再有効化する。
-- `overlayAndCaptureEnabled` / `overlayAutoCloseMs` は chrome.storage に保存された設定値を唯一の情報源として参照し、マウスの hover/out に応じて自動開閉できる。
-
-**実装依存の要素（コード参照）**
-
-- 表示位置の微調整・カードレイアウト・アクセシビリティ属性・hover での展開方法など、UI の細部は `src/contents/overlay.ts` を参照する。変更時はコードと合わせてスクリーンショット資料を更新し、仕様書では改めて定義しない。
-- Select のラベル表記、ステータス文言、auto-close アニメーションなども実装ベースで運用し、アーキテクチャ文書では管理対象外とする。
-- `PLASMO_PUBLIC_KEEP_OVERLAY_OPEN` が true の場合、auto-close を無効化する。
+**仕様/実装詳細**: `docs/spec.md §9.1` と `src/contents/overlay.ts` / `docs/ui-overlay.md` を正とする。
 
 ### 6.2 Popup
 
-**サイズ**: 幅 320px、高さ可変
+**役割**: 直近イベントの確認と overlayAndCaptureEnabled の切替、Storage 状態の簡易表示。
 
-**レイアウト**:
-
-```
-┌────────────────────────────────────┐
-│  [NiconiCompare]  [overlayAndCaptureEnabled] │ ← ヘッダー
-├────────────────────────────────────┤
-│  #106   [thumb]   >   [thumb]      │
-│  2025/12/21                         │
-│  22:29:56                           │
-├────────────────────────────────────┤
-│  Storage 状態                      │
-└────────────────────────────────────┘
-```
-
-**補足**:
-- Storage 状態として `needsCleanup` / `retryQueue` / `failedWrites` を表示する。
+**UI詳細**: `docs/spec.md §9.2` と `src/popup/index.tsx` を正とする。
 
 ### 6.3 Options
 
-**レイアウト**: タブ切り替え
+**役割**: データ閲覧（動画一覧 / イベント一覧）と設定・データ操作を提供する。
 
-```
-[動画一覧] [イベント一覧] [設定] [データ操作]
-
-<動画一覧タブ>
-┌─────────────────────────────────────────────────┐
-│ 検索: [_________] 投稿者: [入力/候補]  ソート: [▼] │
-│ 並び順: [昇順/降順]                               │
-├─────────────────────────────────────────────────┤
-│ サムネ | タイトル      | 投稿者 | Rating | RD | 最終判定日時 │
-│ [img]  | Example Video | Alice  | 1650   | 50 | 2025/01/01 │
-│ ...                                             │
-└─────────────────────────────────────────────────┘
-ページネーション: < 前へ [1..N] 次へ >
-```
-
-動画一覧は最新レーティングがある動画のみ表示し、ソートは Rating / RD / タイトル / 最終判定日時。
-
-**イベント一覧タブ**: 検索、評価フィルタ、無効化済み/サムネ表示切替、無効化/復活/評価変更/削除などの行アクションを提供。詳細は実装を参照。
+**UI詳細**: `docs/spec.md §9.3` と `src/options/index.tsx` を正とする。
 
 ---
 
@@ -461,57 +418,7 @@ async function saveCompareEvent(event: CompareEvent) {
 
 ## 8. エラーハンドリング
 
-### 8.1 Storage 書き込みリトライ
-
-**戦略**: Exponential Backoff
-
-```typescript
-const RETRY_DELAYS = [1000, 3000, 5000]; // ms
-
-async function writeWithRetry(data: any, eventId: number) {
-  for (let i = 0; i < RETRY_DELAYS.length; i++) {
-    try {
-      await chrome.storage.local.set(data);
-      return; // 成功
-    } catch (error) {
-      console.error(`Write failed (attempt ${i + 1}):`, error);
-
-      if (i < RETRY_DELAYS.length - 1) {
-        await sleep(RETRY_DELAYS[i]);
-      } else {
-        // 3回失敗 → failedWritesに追加
-        addToFailedWrites(eventId);
-      }
-    }
-  }
-}
-```
-
-### 8.2 JSON-LD 取得失敗
-
-**原因別対応**:
-
-| 原因                       | 対応                                  |
-| -------------------------- | ------------------------------------- |
-| JSON-LD 要素が存在しない   | エラーログ + 既存スナップショット使用 |
-| JSON パースエラー          | エラーログ + UI に警告表示            |
-| `author.url`フィールド欠損 | エラーログ + 比較入力抑制             |
-
-### 8.3 Service Worker 停止対策
-
-**課題**: 非アクティブ時に Service Worker が停止
-
-**解決策**: chrome.alarms API で定期実行
-
-```typescript
-chrome.alarms.create("retryQueueCheck", { periodInMinutes: 1 });
-
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === "retryQueueCheck") {
-    processRetryQueue();
-  }
-});
-```
+**方針**: Storage 書き込みリトライ、JSON-LD 取得失敗時の扱い、Service Worker 停止対策の詳細は `docs/spec.md` と実装を正とする。
 
 ---
 

@@ -49,91 +49,18 @@
 
 ## 6. アーキテクチャ
 
-- **Background (service worker)**: chrome.storage I/O、event sourcing、Glicko-2 計算、`nc_meta.needsCleanup` 管理。
-- **Content overlay**: watch ページ DOM 監視、比較カード UI、ショートカット無しのマウス操作。
-- **Popup**: 直近イベント表示。設定変更は不可。
-- **Options / 拡張ページ**: 詳細設定（比較候補数、オーバーレイ自動閉鎖、Glicko-2 初期値、イベント一覧の表示設定）、イベント履歴、エクスポート/インポート、クリーンアップ等のメンテナンス。
+技術アーキテクチャ/データフロー/責務分担の詳細は `docs/architecture.md` を正とする。
+本書では UI 仕様やドメイン要件に関わる挙動のみを扱う。
 
 ## 7. データと永続化
 
-### 7.1 Storage 方針
-
-- すべて `chrome.storage.local` に保存。クラウド同期は対象外。
-- JSON で分割保存し、配列更新は `chrome.storage.local.set` でまとめて書き込む。
-- イベント削除時に `nc_meta.needsCleanup = true` をセットし、バックグラウンドタスクまたは Options のクリーンアップ操作で孤立データを削除する。
-
-### 7.2 キー構造
-
-| Key           | 型                                 | 内容                                                                                                                                                                                                      | 想定最大サイズ                 |
-| ------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| `nc_settings` | object                             | ユーザー設定（比較候補数、オーバーレイ自動閉鎖、イベント一覧サムネ表示、Glicko-2 初期値等）                                                                                                                  | ~2 KB                          |
-| `nc_state`    | object                             | 再生状態（直近 LRU、現在の videoId など）                                                                                                                                                                 | ~5 KB                          |
-| `nc_videos`   | record\<videoId, VideoSnapshot\>   | 動画スナップショット                                                                                                                                                                                      | 1 件 ~500 B、1000 件で ~500 KB |
-| `nc_authors`  | record\<authorUrl, AuthorProfile\> | 投稿者情報                                                                                                                                                                                                | 1 件 ~200 B、500 件で ~100 KB  |
-| `nc_events`   | object                             | `items: CompareEvent[]`, `nextId: number`（次に採番する ID。初期値は items の最大 ID + 1、空配列の場合は 1）                                                                                              | 1 件 ~150 B、1000 件で ~150 KB |
-| `nc_ratings`  | record\<videoId, RatingSnapshot\>  | 最新レーティングと RD / volatility                                                                                                                                                                        | 1 件 ~100 B、1000 件で ~100 KB |
-| `nc_meta`     | object                             | `lastReplayEventId`, `schemaVersion`, `needsCleanup`, `retryQueue: Array<{eventId: number, retryCount: number, lastAttempt: number}>`, `failedWrites: number[]`（リトライ上限超過イベント ID の一覧）など | ~10 KB                         |
-
-
-### 7.3 スキーマ
-
-```ts
-type VideoSnapshot = {
-  videoId: string;
-  title: string;
-  authorUrl: string;
-  thumbnailUrls: string[]; // JSON-LD の thumbnailUrl は通常単一だが、将来的な複数対応のため配列化
-  lengthSeconds: number;
-  capturedAt: number;
-};
-
-type AuthorProfile = {
-  authorUrl: string;
-  name: string;
-  capturedAt: number;
-};
-
-type CompareEvent = {
-  id: number;
-  timestamp: number;
-  currentVideoId: string;
-  opponentVideoId: string;
-  verdict: "better" | "same" | "worse"; // currentVideo（視聴中）視点。invalid 値は UI でバリデーション
-  disabled: boolean; // Options操作で無効化し、Optionsから削除可能
-  persistent?: boolean; // storage 書き込み完了フラグ（生成時 undefined、書き込み成功後に true、リトライ中は false）
-};
-
-type RatingSnapshot = {
-  videoId: string;
-  rating: number;
-  rd: number;
-  volatility: number;
-  updatedFromEventId: number;
-};
-```
-
-> VideoSnapshot / AuthorProfile は比較イベントを登録する瞬間に JSON-LD から取得して `nc_videos` / `nc_authors` に保存し、リプレイ時にはそこから読み出すだけで新規登録は行わない。
-
-### 7.4 動画メタ取得 (JSON-LD)
-
-- watch ページの `<script type="application/ld+json">` に含まれる `VideoObject` から `thumbnailUrl[]` と `author.url/name` を取得。
-  - `author.url` は VideoSnapshot の `authorUrl` フィールドおよび AuthorProfile のキーとして使用。
-  - `author.name` は AuthorProfile の `name` フィールドに保存し、オーバーレイ UI で投稿者名を表示する際は `nc_authors[videoSnapshot.authorUrl].name` から取得する。
-- 再訪時にも同 JSON-LD から最新スナップショットを取得・上書き。
-- JSON-LD が取得できない場合は DOM 属性や別 API にフォールバックせず、オーバーレイにエラーメッセージを表示して比較入力を抑制する（ログにも記録）。
+データは `chrome.storage.local` に永続化する。
+キー構造・スキーマ・JSON-LD 取得仕様・保存更新の詳細は `docs/architecture.md` と実装を正とする。
 
 ## 8. レーティングとリプレイ
 
-- **アルゴリズム**: Glicko-2（初期 rating 1500 / RD 350 / volatility 0.06。Options で変更可）。各 CompareEvent を 1 rating period として扱い、逐次的に計算する。
-- **verdict 解釈**: `"better"` = currentVideo 勝利、`"worse"` = opponentVideo 勝利、`"same"` = 引き分け。
-- **計算タイミング**: 比較イベントが追加されるたびに即時で Glicko-2 を再計算し `nc_ratings` を更新する。Options でパラメータ変更や再計算を行う場合は全イベントをリプレイする。
-- **リプレイ手順**:
-  1. `nc_events.items` から `disabled = false` の CompareEvent を抽出し、ID 昇順で走査
-  2. イベントに登場する videoId の VideoSnapshot/AuthorProfile を `nc_videos`/`nc_authors` から取得し、存在しない場合はイベントをエラーログに記録してスキップする（リプレイ中に新規登録は行わない）。UI には「スキップされたイベント数」を通知
-  3. 取得できた VideoSnapshot/AuthorProfile を用いて Glicko-2 計算を実行
-  4. Glicko-2 計算結果を `nc_ratings` に反映
-  5. `nc_meta.lastReplayEventId` を更新
-  6. Options でクリーンアップを実行した場合、リプレイに登場しない videoId/authorUrl を `nc_ratings`/`nc_videos`/`nc_authors` から削除し、`needsCleanup = false` に戻す
+レーティングは Glicko-2 を用い、比較イベント追加ごとに即時計算する。
+Options から再計算（リプレイ）を実行できる。詳細手順は `docs/architecture.md` と実装を正とする。
 
 ## 9. UI 仕様
 
@@ -185,17 +112,8 @@ type RatingSnapshot = {
 
 ## 11. エラー処理・セキュリティ
 
-- **storage 書き込み失敗時のリトライ**:
-  - `nc_meta.retryQueue` に `{eventId, retryCount, lastAttempt}` を追加し、service worker 上で定期チェック（1 分ごと）。
-  - 前回の試行から 1 秒（1 回目）→3 秒（2 回目）→5 秒（3 回目）経過後に再試行。タイミングは Chrome の Alarms API で制御。
-  - `persistent = true` になったイベントは retryQueue から削除。
-  - 3 回失敗後は `nc_meta.failedWrites` に eventId を追加し、Options でユーザーに通知。手動で再試行または破棄を選択できる。
-- **イベント ID 採番の競合回避**:
-  - `nc_events.nextId` を read → increment → write のトランザクション的に扱い、`chrome.storage.local.get` と `chrome.storage.local.set` をアトミックに実行。
-  - 並行書き込みが発生した場合、後続は `set` 時に他の書き込みを検出し（`nc_events` 全体を再取得して nextId を確認）、nextId を再取得して再試行（最大 3 回）。
-  - Service worker の single-threaded 特性により、実際の競合は稀だが、念のため実装。
-- データはローカル保存のみ。外部送信なし。権限は最小限 (`activeTab`, `storage`, 指定 origin)。
-- デバッグログには動画タイトル等が含まれるため、ユーザー操作でのみ取得可能。
+詳細は `docs/architecture.md` と実装を正とする。
+UI 上でユーザーに見せる振る舞いは本書の該当箇所に従う。
 
 ---
 
