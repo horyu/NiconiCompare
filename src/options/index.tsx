@@ -109,7 +109,7 @@ export default function OptionsPage() {
       glickoVolatility: String(next.settings.glicko.volatility)
     })
     setEventShowThumbnails(next.settings.showEventThumbnails)
-    
+
     // ストレージ使用量を取得
     try {
       const bytes = await chrome.storage.local.getBytesInUse()
@@ -118,7 +118,7 @@ export default function OptionsPage() {
       console.error("Failed to get bytes in use:", error)
       setBytesInUse(null)
     }
-    
+
     setLoading(false)
   }, [])
 
@@ -889,6 +889,10 @@ export default function OptionsPage() {
                     const opponentVideo = snapshot.videos[event.opponentVideoId]
                     const timestamp = new Date(event.timestamp)
                     const isBusy = eventBusyId === event.id
+                    const currentIsWinner =
+                      !event.disabled && event.verdict === "better"
+                    const opponentIsWinner =
+                      !event.disabled && event.verdict === "worse"
                     return (
                       <div
                         key={event.id}
@@ -899,26 +903,41 @@ export default function OptionsPage() {
                           <br />
                           {timestamp.toLocaleTimeString()}
                         </div>
-                        <EventVideoLabel
-                          videoId={event.currentVideoId}
-                          video={currentVideo}
-                          authorName={
-                            currentVideo
-                              ? snapshot.authors[currentVideo.authorUrl]?.name
-                              : undefined
-                          }
-                          showThumbnail={eventShowThumbnails}
-                        />
-                        <EventVideoLabel
-                          videoId={event.opponentVideoId}
-                          video={opponentVideo}
-                          authorName={
-                            opponentVideo
-                              ? snapshot.authors[opponentVideo.authorUrl]?.name
-                              : undefined
-                          }
-                          showThumbnail={eventShowThumbnails}
-                        />
+                        <div
+                          className={
+                            currentIsWinner
+                              ? "border-l-4 border-l-slate-400 pl-2"
+                              : ""
+                          }>
+                          <EventVideoLabel
+                            videoId={event.currentVideoId}
+                            video={currentVideo}
+                            authorName={
+                              currentVideo
+                                ? snapshot.authors[currentVideo.authorUrl]?.name
+                                : undefined
+                            }
+                            showThumbnail={eventShowThumbnails}
+                          />
+                        </div>
+                        <div
+                          className={
+                            opponentIsWinner
+                              ? "border-l-4 border-l-slate-400 pl-2"
+                              : ""
+                          }>
+                          <EventVideoLabel
+                            videoId={event.opponentVideoId}
+                            video={opponentVideo}
+                            authorName={
+                              opponentVideo
+                                ? snapshot.authors[opponentVideo.authorUrl]
+                                    ?.name
+                                : undefined
+                            }
+                            showThumbnail={eventShowThumbnails}
+                          />
+                        </div>
                         <select
                           value={event.verdict}
                           disabled={event.disabled || isBusy}
@@ -1074,7 +1093,9 @@ export default function OptionsPage() {
                   <div className="text-sm text-slate-600">
                     ストレージ使用量: {(bytesInUse / 1024).toFixed(2)} KB
                     {" / "}
-                    {(chrome.storage.local.QUOTA_BYTES / 1024 / 1024).toFixed(0)}{" "}
+                    {(chrome.storage.local.QUOTA_BYTES / 1024 / 1024).toFixed(
+                      0
+                    )}{" "}
                     MB
                   </div>
                 )}
