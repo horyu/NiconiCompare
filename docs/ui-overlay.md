@@ -20,13 +20,14 @@
 <Overlay> // Plasmo CSUI React Component
   <div className="fixed top-0 right-0 z-[2147483647] ...">
     <strong>NiconiCompare</strong>
-    {statusMessage && <span>{statusMessage}</span>}
+    {displayStatus && <span>{displayStatus}</span>}
     {showControls && (
       <div> // verdict buttons + video comparison grid
         <button onClick={submitVerdict('better')}>再生中の動画</button>
         <button onClick={submitVerdict('same')}>引き分け</button>
         <button onClick={submitVerdict('worse')}>選択中の動画</button>
         // Video thumbnails + labels + custom select
+        <button onClick={togglePinnedOpponent}>🔒/🔓</button>
       </div>
     )}
   </div>
@@ -38,7 +39,9 @@
 - verdict ボタンは最後に押したものが選択状態になり、`currentVideoId` の切替時に解除される
 - サムネイルは current/opponent の2枚表示。opponent 側は新規タブで watch ページを開くリンクにしている
 - Select は `opacity-0` で透明化し、`label` 内の `span` と重ねる構造。候補ラベルは `{index}. videoId | title`
-- 状態: `useState` で currentVideoId, recentWindow, opponentVideoId, videoSnapshots, lastVerdict を管理
+- ピン留めボタンは Select 右側に配置し、ピン留め中は Select を無効化する
+- ピン留め中に `currentVideoId` と `pinnedOpponentVideoId` が一致した場合は「比較不可」メッセージを表示し、verdict 入力を無効化する
+- 状態: `useState` で currentVideoId, recentWindow, opponentVideoId, pinnedOpponentVideoId, videoSnapshots, lastVerdict を管理
 
 ## 状態管理と通信
 
@@ -49,6 +52,7 @@
 - **JSON-LD監視**: `MutationObserver` + `requestIdleCallback` で watch page の metadata 変更を検知
   - 取得成功時は `registerSnapshot` & `updateCurrentVideo` メッセージを送信
 - **State同期**: `refreshState` → `MESSAGE_TYPES.requestState` で最新状態を取得
+- **ピン留め切替**: `togglePinnedOpponent` → `MESSAGE_TYPES.updatePinnedOpponent`
 - **Verdict送信**: `submitVerdict` → `MESSAGE_TYPES.recordEvent` 送信後、state を再取得して UI 更新
 
 > スクリーンショットは任意で別資料にまとめる。必要に応じて Captured UI へのリンクを追加してよいが、このドキュメントではテキスト記述のみを保持する。

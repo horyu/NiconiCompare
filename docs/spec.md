@@ -72,6 +72,8 @@ Options から再計算（リプレイ）を実行できる。詳細手順は `d
 
 - watch ページの DOM に固定表示され、`overlayAndCaptureEnabled` が true の間は常に現在視聴中の動画（left）と LRU から選択した動画（right）の比較を登録できる。
 - chrome.storage/state から取得した `nc_state.recentWindow` を候補 Select に反映し、選択した videoId のタイトル・サムネイルなど基本情報を同じカード内で確認できる。
+- 比較対象（opponent）はピン留めでき、`nc_state.pinnedOpponentVideoId` に保存される。ピン留め中は Select 変更を無効化し、ページリロード/拡張再起動後も固定状態を維持する。
+- `pinnedOpponentVideoId` が再生中の動画と一致する場合は「比較不可」のステータスメッセージを表示し、verdict 入力を無効化する。
 - verdict 入力（再生中の動画/引き分け/選択中の動画）は 1 アクションで送信でき、送信後は最新の state を再取得して UI を更新する。
 - JSON-LD の取得状況を監視し、メタデータが不足しているときはステータスメッセージとともに verdict ボタンを無効化する（既存 VideoSnapshot がある場合は LRU 表示のみ継続してもよい）。
 - `overlayAndCaptureEnabled` と `overlayAutoCloseMs` は `nc_settings` を唯一のソースとし、トグル変更 → UI 表示/非表示、マウスホバー解除 → 自動的にコントロールを閉じる動作が保証される。
