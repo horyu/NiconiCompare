@@ -183,6 +183,7 @@ export default function OptionsPage() {
     const normalizedSearch = videoSearch.trim().toLowerCase()
 
     const videos = Object.values(snapshot.videos).filter((video) => {
+      const hasRating = Boolean(snapshot.ratings[video.videoId])
       const matchesSearch =
         normalizedSearch.length === 0 ||
         video.videoId.toLowerCase().includes(normalizedSearch) ||
@@ -190,7 +191,7 @@ export default function OptionsPage() {
       const matchesAuthor =
         videoAuthor === "all" ||
         snapshot.authors[video.authorUrl]?.name === videoAuthor
-      return matchesSearch && matchesAuthor
+      return hasRating && matchesSearch && matchesAuthor
     })
 
     type VideoItem = (typeof videos)[number]
