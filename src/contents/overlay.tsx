@@ -303,7 +303,8 @@ export default function Overlay() {
   }
   const selectableWindow = recentWindow.filter((id) => id !== currentVideoId)
   const hasVideos = selectableWindow.length > 0
-  const canSubmit = hasVideos && currentVideoId && opponentVideoId
+  const canSubmit =
+    hasVideos && currentVideoId && opponentVideoId && !statusMessage
   const opponentWatchUrl = opponentVideoId
     ? `https://www.nicovideo.jp/watch/${opponentVideoId}`
     : undefined
