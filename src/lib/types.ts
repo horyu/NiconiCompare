@@ -35,7 +35,7 @@ export type RatingSnapshot = {
 
 export type NcSettings = {
   recentWindowSize: number
-  overlayEnabled: boolean
+  overlayAndCaptureEnabled: boolean
   overlayAutoCloseMs: number
   showEventThumbnails: boolean
   glicko: {

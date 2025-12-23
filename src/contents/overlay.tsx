@@ -39,6 +39,7 @@ export default function Overlay() {
   const [opponentVideoId, setOpponentVideoId] = useState<string>()
   const [overlaySettings, setOverlaySettings] =
     useState<NcSettings>(DEFAULT_SETTINGS)
+  const [isReady, setIsReady] = useState(false)
   const [videoSnapshots, setVideoSnapshots] = useState<
     Record<string, VideoSnapshot>
   >({})
@@ -62,9 +63,7 @@ export default function Overlay() {
       if (areaName !== "local") return
 
       if (changes[STORAGE_KEYS.settings]?.newValue) {
-        setOverlaySettings(
-          changes[STORAGE_KEYS.settings].newValue ?? DEFAULT_SETTINGS
-        )
+        setOverlaySettings(changes[STORAGE_KEYS.settings].newValue ?? DEFAULT_SETTINGS)
       }
 
       if (changes[STORAGE_KEYS.videos]?.newValue) {
@@ -105,13 +104,16 @@ export default function Overlay() {
       type: MESSAGE_TYPES.requestState
     })
 
-    if (!response?.ok) return
+    if (!response?.ok) {
+      return
+    }
 
     const data = response.data as StateResponse
     setOverlaySettings(data.settings)
     setRecentWindow(data.state.recentWindow)
     setCurrentVideoId(data.state.currentVideoId)
     await loadVideoSnapshots()
+    setIsReady(true)
 
     if (data.state.currentVideoId) {
       setStatusMessage(undefined)
@@ -120,8 +122,15 @@ export default function Overlay() {
     }
   }, [loadVideoSnapshots])
 
+  useEffect(() => {
+    refreshState()
+  }, [refreshState])
+
   const handleVideoChange = useCallback(
     async (videoData: { video: VideoSnapshot; author: AuthorProfile }) => {
+      if (!isReady || !overlaySettings.overlayAndCaptureEnabled) {
+        return
+      }
       if (currentVideoId === videoData.video.videoId) return
 
       setCurrentVideoId(videoData.video.videoId)
@@ -138,11 +147,14 @@ export default function Overlay() {
 
       await refreshState()
     },
-    [currentVideoId, refreshState]
+    [currentVideoId, isReady, refreshState, overlaySettings.overlayAndCaptureEnabled]
   )
 
   // JSON-LD observer
   useEffect(() => {
+    if (!isReady || !overlaySettings.overlayAndCaptureEnabled) {
+      return
+    }
     const cleanup = observeLdJsonChanges({
       onVideoDataChange: handleVideoChange,
       onError: setStatusMessage
@@ -156,7 +168,7 @@ export default function Overlay() {
     }
 
     return cleanup
-  }, [handleVideoChange])
+  }, [handleVideoChange, isReady, overlaySettings.overlayAndCaptureEnabled])
 
   // Auto-close handler
   useEffect(() => {
@@ -166,7 +178,7 @@ export default function Overlay() {
       return
     }
 
-    if (!overlaySettings.overlayEnabled) {
+    if (!isReady || !overlaySettings.overlayAndCaptureEnabled) {
       setShowControls(false)
       clearAutoCloseTimer()
       return
@@ -182,7 +194,8 @@ export default function Overlay() {
     scheduleAutoClose()
   }, [
     isHovered,
-    overlaySettings.overlayEnabled,
+    isReady,
+    overlaySettings.overlayAndCaptureEnabled,
     overlaySettings.overlayAutoCloseMs,
     clearAutoCloseTimer,
     scheduleAutoClose
@@ -284,10 +297,10 @@ export default function Overlay() {
         : "bg-white/20 hover:bg-white/30"
     ].join(" ")
 
-  if (!overlaySettings.overlayEnabled) {
+  // NOTE: dev mode (HMR) では一瞬表示されることがあるが、prod build では発生しない。
+  if (!isReady || !overlaySettings.overlayAndCaptureEnabled) {
     return null
   }
-
   const selectableWindow = recentWindow.filter((id) => id !== currentVideoId)
   const hasVideos = selectableWindow.length > 0
   const canSubmit = hasVideos && currentVideoId && opponentVideoId

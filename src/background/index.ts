@@ -590,14 +590,14 @@ async function handleToggleOverlay(enabled: boolean) {
   const settings =
     (data[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
 
-  if (settings.overlayEnabled === enabled) {
+  if (settings.overlayAndCaptureEnabled === enabled) {
     return
   }
 
   await storage.set({
     [STORAGE_KEYS.settings]: {
       ...settings,
-      overlayEnabled: enabled
+      overlayAndCaptureEnabled: enabled
     }
   })
 }
@@ -626,7 +626,9 @@ async function readStateSnapshot() {
     STORAGE_KEYS.authors
   ])
   return {
-    settings: (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS,
+    settings: normalizeSettings(
+      (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
+    ),
     state: (result[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE,
     events:
       (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET,
@@ -1126,6 +1128,8 @@ function normalizeSettings(settings: NcSettings): NcSettings {
       5000,
       Math.max(500, settings.overlayAutoCloseMs || 1500)
     ),
+    overlayAndCaptureEnabled:
+      settings.overlayAndCaptureEnabled ?? DEFAULT_SETTINGS.overlayAndCaptureEnabled,
     showEventThumbnails:
       settings.showEventThumbnails ?? DEFAULT_SETTINGS.showEventThumbnails,
     glicko: settings.glicko || DEFAULT_SETTINGS.glicko

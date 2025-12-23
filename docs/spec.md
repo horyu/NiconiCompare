@@ -146,11 +146,11 @@ type RatingSnapshot = {
 
 **不変要件**
 
-- watch ページの DOM に固定表示され、`overlayEnabled` が true の間は常に現在視聴中の動画（right）と LRU から選択した動画（left）の比較を登録できる。
+- watch ページの DOM に固定表示され、`overlayAndCaptureEnabled` が true の間は常に現在視聴中の動画（right）と LRU から選択した動画（left）の比較を登録できる。
 - chrome.storage/state から取得した `nc_state.recentWindow` を候補 Select に反映し、選択した videoId のタイトル・サムネイルなど基本情報を同じカード内で確認できる。
 - verdict 入力（良い/同じ/悪い）は 1 アクションで送信でき、送信後は最新の state を再取得して UI を更新する。
 - JSON-LD の取得状況を監視し、メタデータが不足しているときはステータスメッセージとともに verdict ボタンを無効化する（既存 VideoSnapshot がある場合は LRU 表示のみ継続してもよい）。
-- `overlayEnabled` と `overlayAutoCloseMs` は `nc_settings` を唯一のソースとし、トグル変更 → UI 表示/非表示、マウスホバー解除 → 自動的にコントロールを閉じる動作が保証される。
+- `overlayAndCaptureEnabled` と `overlayAutoCloseMs` は `nc_settings` を唯一のソースとし、トグル変更 → UI 表示/非表示、マウスホバー解除 → 自動的にコントロールを閉じる動作が保証される。
 
 **実装依存の要素**
 
@@ -160,7 +160,7 @@ type RatingSnapshot = {
 ### 9.2 Popup
 
 - 直近イベント一覧を表示（イベント ID と日時、current/opponent のサムネ表示、勝敗は `>` `=` `<` で表記）。
-- `overlayEnabled` トグルを提供し、オーバーレイ表示と動画/author 情報の取得を ON/OFF できる（デフォルト ON）。その他の詳細設定は拡張ページへ誘導。
+- `overlayAndCaptureEnabled` トグルを提供し、オーバーレイ表示と動画/author 情報の取得を ON/OFF できる（デフォルト ON）。その他の詳細設定は拡張ページへ誘導。
 
 ### 9.3 拡張ページ / Options
 

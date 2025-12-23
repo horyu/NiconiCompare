@@ -12,7 +12,7 @@
   - CSS注入: PlasmoGetStyle による data-text import
   - JSON-LD 監視と state 更新: extractVideoDataFromLdJson, observeLdJsonChanges
   - verdict 送信と UI 更新: submitVerdict, refreshState
-  - auto-close・overlayEnabled の制御: useEffect による自動制御
+  - auto-close・overlayAndCaptureEnabled の制御: useEffect による自動制御
 
 > 最新の実装詳細はソースコードを直接参照すること。
 

@@ -71,10 +71,10 @@ export default function Popup() {
         <label className="text-xs flex items-center gap-2">
           <input
             type="checkbox"
-            checked={snapshot.settings.overlayEnabled}
+            checked={snapshot.settings.overlayAndCaptureEnabled}
             onChange={(e) => toggleOverlay(e.target.checked)}
           />
-          オーバーレイ
+          オーバーレイ・動画情報取得
         </label>
       </header>
 

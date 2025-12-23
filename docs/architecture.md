@@ -48,7 +48,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 ┌────────────────┴─────────────────┬──────────────────────────┐
 │  Popup (popup/)                  │  Options (options/)      │
 │  - 直近イベント表示              │  - 設定編集              │
-│  - overlayEnabled トグル         │  - データ管理            │
+│  - overlayAndCaptureEnabled トグル │  - データ管理            │
 │                                 │  - Export/Import         │
 └──────────────────────────────────┴──────────────────────────┘
 ```
@@ -59,7 +59,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 | ------------------ | ---------------------------------------------- | ----------------------------------- |
 | **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得        | React 18.2.0, TypeScript, Tailwind CSS v4, Plasmo CSUI |
 | **Service Worker** | イベントソーシング、Glicko-2 計算、Storage I/O | TypeScript, chrome.storage API      |
-| **Popup**          | 直近イベント表示、overlayEnabled トグル         | React 18.2.0, TypeScript            |
+| **Popup**          | 直近イベント表示、overlayAndCaptureEnabled トグル | React 18.2.0, TypeScript            |
 | **Options**        | 詳細設定、データ操作、エクスポート/インポート  | React 18.2.0, TypeScript            |
 | **Storage**        | 永続化層                                       | chrome.storage.local (Key-Value)  |
 
@@ -356,12 +356,12 @@ async function saveCompareEvent(event: CompareEvent) {
 
 **不変要件（仕様で固定）**
 
-- watch ページ右上付近に常駐し、`overlayEnabled` が true の間は常に比較操作が可能。
+- watch ページ右上付近に常駐し、`overlayAndCaptureEnabled` が true の間は常に比較操作が可能。
 - `nc_state.recentWindow` の LRU 候補と `currentVideoId` を同一カード内で確認でき、任意のペアに対して verdict を一手で送信できる。
 - verdict 送信後は `MESSAGE_TYPES.recordEvent` → `MESSAGE_TYPES.requestState` の順で state を再取得し最新 UI に追従する。
 - 直前と同一の verdict を送信した場合は該当イベントを削除し、UI を再同期する。
 - JSON-LD が取得できない場合はステータスメッセージ表示と verdict ボタン無効化を行い、メタデータが復旧したら自動で再有効化する。
-- `overlayEnabled` / `overlayAutoCloseMs` は chrome.storage に保存された設定値を唯一の情報源として参照し、マウスの hover/out に応じて自動開閉できる。
+- `overlayAndCaptureEnabled` / `overlayAutoCloseMs` は chrome.storage に保存された設定値を唯一の情報源として参照し、マウスの hover/out に応じて自動開閉できる。
 
 **実装依存の要素（コード参照）**
 
@@ -377,7 +377,7 @@ async function saveCompareEvent(event: CompareEvent) {
 
 ```
 ┌────────────────────────────────────┐
-│  [NiconiCompare]  [overlayEnabled] │ ← ヘッダー
+│  [NiconiCompare]  [overlayAndCaptureEnabled] │ ← ヘッダー
 ├────────────────────────────────────┤
 │  #106   [thumb]   >   [thumb]      │
 │  2025/12/21                         │
@@ -573,6 +573,5 @@ interface RatingPlugin {
 **改訂履歴**:
 
 - 2025-12-18: 初版作成
-
 
 
