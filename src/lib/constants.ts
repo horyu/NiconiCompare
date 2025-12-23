@@ -22,6 +22,8 @@ export const DEFAULT_SETTINGS: NcSettings = {
   }
 }
 
+export const MAX_RECENT_WINDOW_SIZE = 50
+
 export const DEFAULT_STATE: NcState = {
   currentVideoId: undefined,
   pinnedOpponentVideoId: undefined,

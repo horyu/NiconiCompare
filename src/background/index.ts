@@ -5,6 +5,7 @@ import {
   DEFAULT_META,
   DEFAULT_SETTINGS,
   DEFAULT_STATE,
+  MAX_RECENT_WINDOW_SIZE,
   MESSAGE_TYPES,
   STORAGE_KEYS
 } from "../lib/constants"
@@ -1194,7 +1195,7 @@ function normalizeSettings(settings: NcSettings): NcSettings {
   return {
     ...settings,
     recentWindowSize: Math.min(
-      10,
+      MAX_RECENT_WINDOW_SIZE,
       Math.max(1, Math.floor(settings.recentWindowSize || 5))
     ),
     overlayAutoCloseMs: Math.min(

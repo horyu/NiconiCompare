@@ -10,7 +10,7 @@ import {
 
 import "../style.css"
 
-import { MESSAGE_TYPES } from "../lib/constants"
+import { MAX_RECENT_WINDOW_SIZE, MESSAGE_TYPES } from "../lib/constants"
 import type {
   CompareEvent,
   NcAuthors,
@@ -1013,11 +1013,11 @@ export default function OptionsPage() {
               className="grid grid-cols-2 gap-4"
               onSubmit={handleSettingsSubmit}>
               <label className="text-sm flex flex-col gap-1">
-                比較候補数 (1-10)
+                比較候補数 (1-{MAX_RECENT_WINDOW_SIZE})
                 <input
                   type="number"
                   min={1}
-                  max={10}
+                  max={MAX_RECENT_WINDOW_SIZE}
                   value={settingsForm.recentWindowSize}
                   onChange={handleSettingsChange("recentWindowSize")}
                   className="border border-slate-200 rounded-md px-2 py-1"
