@@ -21,7 +21,7 @@ export type CompareEvent = {
   currentVideoId: string
   opponentVideoId: string
   verdict: Verdict
-  deleted: boolean
+  disabled: boolean
   persistent?: boolean
 }
 

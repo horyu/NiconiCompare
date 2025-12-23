@@ -351,7 +351,7 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
 
   const targetEvent = payload.eventId
     ? events.items.find(
-        (event) => event.id === payload.eventId && !event.deleted
+        (event) => event.id === payload.eventId && !event.disabled
       )
     : undefined
   const isTargetSamePair =
@@ -400,7 +400,7 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     currentVideoId: payload.currentVideoId,
     opponentVideoId: payload.opponentVideoId,
     verdict: payload.verdict,
-    deleted: false,
+    disabled: false,
     persistent: false
   }
 
@@ -481,12 +481,12 @@ async function handleDeleteEvent(eventId: number) {
     return false
   }
 
-  if (events.items[index].deleted) {
+  if (events.items[index].disabled) {
     return true
   }
 
   const updatedEvents = produce(events, (draft) => {
-    draft.items[index] = { ...draft.items[index], deleted: true }
+    draft.items[index] = { ...draft.items[index], disabled: true }
   })
   const nextRatings = rebuildRatingsFromEvents(updatedEvents.items, settings)
 
@@ -521,12 +521,12 @@ async function handleRestoreEvent(eventId: number) {
     return false
   }
 
-  if (!events.items[index].deleted) {
+  if (!events.items[index].disabled) {
     return true
   }
 
   const updatedEvents = produce(events, (draft) => {
-    draft.items[index] = { ...draft.items[index], deleted: false }
+    draft.items[index] = { ...draft.items[index], disabled: false }
   })
   const nextRatings = rebuildRatingsFromEvents(updatedEvents.items, settings)
 
@@ -561,7 +561,7 @@ async function handlePurgeEvent(eventId: number) {
     return false
   }
 
-  if (!events.items[index].deleted) {
+  if (!events.items[index].disabled) {
     return false
   }
 
@@ -803,7 +803,7 @@ async function handleImportData(data: Partial<StorageShape>) {
     ...nextMeta,
     needsCleanup:
       nextMeta.needsCleanup ||
-      normalizedEvents.items.some((event) => event.deleted)
+      normalizedEvents.items.some((event) => event.disabled)
   }
 
   const rebuiltState: NcState = {
@@ -853,7 +853,7 @@ function rebuildRatingsFromEvents(
 ): NcRatings {
   const nextRatings: NcRatings = {}
   const orderedEvents = events
-    .filter((event) => !event.deleted)
+    .filter((event) => !event.disabled)
     .sort((a, b) => a.id - b.id)
 
   for (const event of orderedEvents) {
@@ -1046,7 +1046,7 @@ async function performCleanup() {
   const referencedAuthors = new Set<string>()
 
   events.items
-    .filter((event) => !event.deleted)
+    .filter((event) => !event.disabled)
     .forEach((event) => {
       if (event.currentVideoId) {
         referencedVideos.add(event.currentVideoId)
@@ -1098,7 +1098,7 @@ function rebuildRecentWindowFromEvents(events: CompareEvent[], size: number) {
   ) {
     const event = events[i]
     inspected++
-    if (event.deleted) {
+    if (event.disabled) {
       continue
     }
     const candidates = [event.currentVideoId, event.opponentVideoId]

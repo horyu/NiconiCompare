@@ -136,7 +136,7 @@ export default function Popup() {
 
 function buildRecentEvents(events: NcEventsBucket) {
   return [...events.items]
-    .filter((event) => !event.deleted)
+    .filter((event) => !event.disabled)
     .sort((a, b) => b.id - a.id)
     .slice(0, 5)
 }

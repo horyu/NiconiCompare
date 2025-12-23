@@ -97,7 +97,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 ```
 [1] Options: 「レーティング再計算」ボタンクリック
      ↓
-[2] Service Worker: nc_eventsからdeleted=falseのイベントを抽出
+[2] Service Worker: nc_eventsからdisabled=falseのイベントを抽出
      ↓
 [3] ID昇順でループ開始
      ├─ [3.1] VideoSnapshot/AuthorProfile取得 (nc_videos/nc_authors)
@@ -141,7 +141,7 @@ NiconiCompare は厳密なイベント再生モデルではなく、**実用的�
 
 - **イベントログ (nc_events)**: CompareEvent を時系列で蓄積
 - **マテリアライズドビュー (nc_ratings)**: 最新レーティングをキャッシュ
-- **編集許容**: 過去イベントの verdict 変更や削除を許可（論理削除）
+- **編集許容**: 過去イベントの verdict 変更や削除を許可（無効化）
 
 ### 3.2 イベント型定義
 
@@ -152,7 +152,7 @@ type CompareEvent = {
   currentVideoId: string; // 比較対象 (現在動画)
   opponentVideoId: string; // 比較対象 (選択動画)
   verdict: "better" | "same" | "worse"; // currentVideo視点の評価
-  deleted: boolean; // 論理削除フラグ
+  disabled: boolean; // 無効化フラグ
   persistent?: boolean; // Storage書き込み完了フラグ
 };
 ```
@@ -406,7 +406,7 @@ async function saveCompareEvent(event: CompareEvent) {
 ページネーション: < 前へ [1..N] 次へ >
 ```
 
-**イベント一覧タブ**: 検索、評価フィルタ、削除済み/サムネ表示切替、論理削除/復活/評価変更/完全削除などの行アクションを提供。詳細は実装を参照。
+**イベント一覧タブ**: 検索、評価フィルタ、無効化済み/サムネ表示切替、無効化/復活/評価変更/削除などの行アクションを提供。詳細は実装を参照。
 
 ---
 

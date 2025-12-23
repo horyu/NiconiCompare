@@ -44,8 +44,8 @@
     - いずれの場合もエラーログに記録し、ユーザーはページリロードで再取得を試行できる
     - JSON-LD の構造変更やフィールド欠損（`author.url` 不在など）も同様に扱う
 - `nc_state.recentWindow` として opponentVideo 候補 (選択肢) の LRU を設定値の件数だけ保持する。LRU 更新は「比較イベントの storage 書き込み成功後」および「`currentVideoId` が新しい動画へ切り替わった際」に行い、比較に登場した currentVideo/opponentVideo や直前まで視聴していた動画を最新順に並べる（書き込み失敗時は LRU を更新しない）。currentVideo（現在再生中の動画）は別途 `nc_state.currentVideoId` で管理する。
-  - **設定値変更時の LRU 再構築**: 「直近 100 件までの CompareEvent（deleted = true を除外）を時系列逆順に走査し、登場した opponentVideo を重複除去しながら新しい設定値ぶん埋める」アルゴリズムで LRU を再構築する。100 件の根拠は「最大設定値 10 × 10 倍のバッファ」として十分なイベント履歴を確保するため。`currentVideoId` は LRU に含めず、別途保持し続ける。
-- 削除はまず CompareEvent に `deleted = true` をセットする論理削除とし、Options から「完全削除」操作を行うまでは `nc_events.items` から除去しない。
+  - **設定値変更時の LRU 再構築**: 「直近 100 件までの CompareEvent（disabled = true を除外）を時系列逆順に走査し、登場した opponentVideo を重複除去しながら新しい設定値ぶん埋める」アルゴリズムで LRU を再構築する。100 件の根拠は「最大設定値 10 × 10 倍のバッファ」として十分なイベント履歴を確保するため。`currentVideoId` は LRU に含めず、別途保持し続ける。
+- イベントの無効化は CompareEvent に `disabled = true` をセットするフラグ運用とし、Options から「削除」操作を行うまでは `nc_events.items` から除去しない。
 
 ## 6. アーキテクチャ
 
@@ -99,7 +99,7 @@ type CompareEvent = {
   currentVideoId: string;
   opponentVideoId: string;
   verdict: "better" | "same" | "worse"; // currentVideo（視聴中）視点。invalid 値は UI でバリデーション
-  deleted: boolean; // Options操作で論理削除し、Optionsから完全削除可能
+  disabled: boolean; // Options操作で無効化し、Optionsから削除可能
   persistent?: boolean; // storage 書き込み完了フラグ（生成時 undefined、書き込み成功後に true、リトライ中は false）
 };
 
@@ -128,7 +128,7 @@ type RatingSnapshot = {
 - **verdict 解釈**: `"better"` = currentVideo 勝利、`"worse"` = opponentVideo 勝利、`"same"` = 引き分け。
 - **計算タイミング**: 比較イベントが追加されるたびに即時で Glicko-2 を再計算し `nc_ratings` を更新する。Options でパラメータ変更や再計算を行う場合は全イベントをリプレイする。
 - **リプレイ手順**:
-  1. `nc_events.items` から `deleted = false` の CompareEvent を抽出し、ID 昇順で走査
+  1. `nc_events.items` から `disabled = false` の CompareEvent を抽出し、ID 昇順で走査
   2. イベントに登場する videoId の VideoSnapshot/AuthorProfile を `nc_videos`/`nc_authors` から取得し、存在しない場合はイベントをエラーログに記録してスキップする（リプレイ中に新規登録は行わない）。UI には「スキップされたイベント数」を通知
   3. 取得できた VideoSnapshot/AuthorProfile を用いて Glicko-2 計算を実行
   4. Glicko-2 計算結果を `nc_ratings` に反映
@@ -162,7 +162,7 @@ type RatingSnapshot = {
 ### 9.3 拡張ページ / Options
 
 1. **評価済み動画一覧**: VideoSnapshot + 最新レーティングのテーブル（ページネーション: 50 件/ページ）。投稿者（名前）フィルタ／検索、ソート（Rating / タイトル / 最終判定日時）、昇順/降順切替。列は「サムネ / タイトル / 投稿者 / Rating / RD / 最終判定日時」。サムネに動画リンクを付与。
-2. **評価イベント一覧**: CompareEvent テーブル（ページネーション: 100 件/ページ）。検索・評価フィルタ・削除済み表示の切替・サムネ表示の切替。行アクションで論理削除／復活・評価変更・完全削除（削除済みのみ）を行う。詳細なUIは実装を参照。
+2. **評価イベント一覧**: CompareEvent テーブル（ページネーション: 100 件/ページ）。検索・評価フィルタ・無効化済み表示の切替・サムネ表示の切替。行アクションで無効化／復活・評価変更・削除（無効化済みのみ）を行う。詳細なUIは実装を参照。
 3. **Options 設定**:
    - オーバーレイ自動閉鎖（ms）、比較候補数、Glicko-2 初期値、イベント一覧サムネ表示を編集。Glicko-2 初期値変更時はレーティング再計算、比較候補数変更時は recentWindow を再構築。
    - レーティング再計算ボタン。
@@ -181,7 +181,7 @@ type RatingSnapshot = {
 - `nc_authors`/`nc_videos` の整合性チェックは行わないが、欠損は UI で明示。
 - クリーンアップ実装:
   - バックグラウンドで定期的にチェックし、参照されない `nc_ratings`/`nc_videos`/`nc_authors` を削除して `needsCleanup = false` に戻す。ユーザーが手動でクリーンアップボタンを押した場合も同じ処理を実行する。
-- 削除（論理削除）操作は CompareEvent の `deleted` を true に設定する形で即時反映し、Undo 操作で false に戻せるようにする。Options から「完全削除」を実行した場合のみ、該当イベントを `nc_events.items` から物理削除する。
+- 無効化操作は CompareEvent の `disabled` を true に設定する形で即時反映し、Undo 操作で false に戻せるようにする。Options から「削除」を実行した場合のみ、該当イベントを `nc_events.items` から物理削除する。
 
 ## 11. エラー処理・セキュリティ
 

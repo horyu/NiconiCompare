@@ -165,7 +165,7 @@ export default function OptionsPage() {
     const map = new Map<string, number>()
     if (!snapshot) return map
     for (const event of snapshot.events.items) {
-      if (event.deleted) continue
+      if (event.disabled) continue
       map.set(
         event.currentVideoId,
         Math.max(map.get(event.currentVideoId) ?? 0, event.timestamp)
@@ -230,7 +230,7 @@ export default function OptionsPage() {
     if (!snapshot) return []
     const normalizedSearch = eventSearch.trim().toLowerCase()
     const events = snapshot.events.items.filter((event) => {
-      if (!eventIncludeDeleted && event.deleted) {
+      if (!eventIncludeDeleted && event.disabled) {
         return false
       }
       if (eventVerdict !== "all" && event.verdict !== eventVerdict) {
@@ -360,7 +360,7 @@ export default function OptionsPage() {
     target: CompareEvent,
     verdict: Verdict
   ) => {
-    if (target.deleted) {
+    if (target.disabled) {
       return
     }
     setEventBusyId(target.id)
@@ -400,10 +400,10 @@ export default function OptionsPage() {
         throw new Error(response?.error ?? "delete failed")
       }
       await refreshState(true)
-      setToast({ tone: "success", text: "イベントを削除しました。" })
+      setToast({ tone: "success", text: "イベントを無効化しました。" })
     } catch (error) {
       console.error(error)
-      setToast({ tone: "error", text: "イベント削除に失敗しました。" })
+      setToast({ tone: "error", text: "イベントの無効化に失敗しました。" })
     } finally {
       setEventBusyId(null)
     }
@@ -421,10 +421,10 @@ export default function OptionsPage() {
         throw new Error(response?.error ?? "restore failed")
       }
       await refreshState(true)
-      setToast({ tone: "success", text: "イベントを復活しました。" })
+      setToast({ tone: "success", text: "イベントを有効化しました。" })
     } catch (error) {
       console.error(error)
-      setToast({ tone: "error", text: "イベント復活に失敗しました。" })
+      setToast({ tone: "error", text: "イベントの有効化に失敗しました。" })
     } finally {
       setEventBusyId(null)
     }
@@ -432,7 +432,7 @@ export default function OptionsPage() {
 
   const handlePurgeEvent = async (eventId: number) => {
     const confirmed = confirm(
-      "削除済みイベントを完全削除します。元に戻せません。続行しますか？"
+      "無効化済みイベントを削除します。元に戻せません。続行しますか？"
     )
     if (!confirmed) return
     setEventBusyId(eventId)
@@ -446,10 +446,10 @@ export default function OptionsPage() {
         throw new Error(response?.error ?? "purge failed")
       }
       await refreshState(true)
-      setToast({ tone: "success", text: "イベントを完全削除しました。" })
+      setToast({ tone: "success", text: "イベントを削除しました。" })
     } catch (error) {
       console.error(error)
-      setToast({ tone: "error", text: "完全削除に失敗しました。" })
+      setToast({ tone: "error", text: "削除に失敗しました。" })
     } finally {
       setEventBusyId(null)
     }
@@ -831,7 +831,7 @@ export default function OptionsPage() {
                     setEventIncludeDeleted(event.target.checked)
                   }
                 />
-                削除済みも表示
+                無効化済みも表示
               </label>
               <label className="text-sm flex items-center gap-2 mb-1">
                 <input
@@ -903,7 +903,7 @@ export default function OptionsPage() {
                         />
                         <select
                           value={event.verdict}
-                          disabled={event.deleted || isBusy}
+                          disabled={event.disabled || isBusy}
                           onChange={(e) =>
                             handleEventVerdictChange(
                               event,
@@ -916,13 +916,13 @@ export default function OptionsPage() {
                           <option value="worse">比較対象が良い</option>
                         </select>
                         <div className="flex flex-col gap-2">
-                          {!event.deleted ? (
+                          {!event.disabled ? (
                             <button
                               type="button"
                               onClick={() => handleDeleteEvent(event.id)}
                               disabled={isBusy}
                               className="px-3 py-1 rounded border border-slate-200 text-xs hover:bg-slate-100 disabled:opacity-50">
-                              削除
+                              無効化
                             </button>
                           ) : (
                             <>
@@ -931,20 +931,20 @@ export default function OptionsPage() {
                                 onClick={() => handleRestoreEvent(event.id)}
                                 disabled={isBusy}
                                 className="px-3 py-1 rounded border border-slate-200 text-xs hover:bg-slate-100 disabled:opacity-50">
-                                復活
+                                有効化
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handlePurgeEvent(event.id)}
                                 disabled={isBusy}
                                 className="px-3 py-1 rounded border border-rose-200 text-xs text-rose-700 hover:bg-rose-50 disabled:opacity-50">
-                                完全削除
+                                削除
                               </button>
                             </>
                           )}
-                          {event.deleted && (
+                          {event.disabled && (
                             <span className="text-[10px] text-rose-500">
-                              削除済み
+                              無効化済み
                             </span>
                           )}
                         </div>
