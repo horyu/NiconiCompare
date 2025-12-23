@@ -309,10 +309,15 @@ async function handleUpdateCurrentVideo(videoId: string) {
     console.warn("chrome.storage.local is unavailable.")
     return
   }
-  const data = await storage.get([STORAGE_KEYS.state, STORAGE_KEYS.settings])
+  const data = await storage.get([
+    STORAGE_KEYS.state,
+    STORAGE_KEYS.settings,
+    STORAGE_KEYS.videos
+  ])
   const state = (data[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
   const settings =
     (data[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
+  const videos = (data[STORAGE_KEYS.videos] as NcVideos) ?? {}
 
   if (state.currentVideoId === videoId) {
     return
@@ -323,7 +328,8 @@ async function handleUpdateCurrentVideo(videoId: string) {
       draft.recentWindow = insertVideoIntoRecentWindow(
         draft.recentWindow,
         settings.recentWindowSize,
-        state.currentVideoId
+        state.currentVideoId,
+        videos
       )
     }
     draft.currentVideoId = videoId
@@ -339,7 +345,8 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     STORAGE_KEYS.events,
     STORAGE_KEYS.state,
     STORAGE_KEYS.settings,
-    STORAGE_KEYS.ratings
+    STORAGE_KEYS.ratings,
+    STORAGE_KEYS.videos
   ])
 
   const events =
@@ -348,6 +355,7 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
   const settings =
     (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
   const ratings = (result[STORAGE_KEYS.ratings] as NcRatings) ?? {}
+  const videos = (result[STORAGE_KEYS.videos] as NcVideos) ?? {}
 
   const targetEvent = payload.eventId
     ? events.items.find(
@@ -437,7 +445,8 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
       draft.recentWindow,
       settings.recentWindowSize,
       payload.currentVideoId,
-      payload.opponentVideoId
+      payload.opponentVideoId,
+      videos
     )
   })
 
@@ -649,12 +658,14 @@ async function handleUpdateSettings(partial: Partial<NcSettings>) {
   const result = await storage.get([
     STORAGE_KEYS.settings,
     STORAGE_KEYS.events,
-    STORAGE_KEYS.state
+    STORAGE_KEYS.state,
+    STORAGE_KEYS.videos
   ])
 
   const currentSettings =
     (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
   const nextSettings = normalizeSettings({ ...currentSettings, ...partial })
+  const videos = (result[STORAGE_KEYS.videos] as NcVideos) ?? {}
 
   const updates: Partial<StorageShape> = {
     [STORAGE_KEYS.settings]: nextSettings
@@ -668,7 +679,8 @@ async function handleUpdateSettings(partial: Partial<NcSettings>) {
       ...state,
       recentWindow: rebuildRecentWindowFromEvents(
         events.items,
-        nextSettings.recentWindowSize
+        nextSettings.recentWindowSize,
+        videos
       )
     }
   }
@@ -810,7 +822,8 @@ async function handleImportData(data: Partial<StorageShape>) {
     ...nextState,
     recentWindow: rebuildRecentWindowFromEvents(
       normalizedEvents.items,
-      nextSettings.recentWindowSize
+      nextSettings.recentWindowSize,
+      nextVideos
     )
   }
   const nextRatings = rebuildRatingsFromEvents(
@@ -885,24 +898,28 @@ function buildRecentWindow(
   current: string[],
   size: number,
   currentVideoId: string,
-  opponentVideoId: string
+  opponentVideoId: string,
+  videos: NcVideos
 ) {
+  const hasVideo = (id: string) => !!(id && videos[id])
   const deduped = current.filter(
-    (id) => id !== currentVideoId && id !== opponentVideoId && !!id
+    (id) => id !== currentVideoId && id !== opponentVideoId && hasVideo(id)
   )
-  const next = [currentVideoId, opponentVideoId, ...deduped].filter(Boolean)
+  const next = [currentVideoId, opponentVideoId, ...deduped].filter(hasVideo)
   return next.slice(0, Math.max(1, size))
 }
 
 function insertVideoIntoRecentWindow(
   current: string[],
   size: number,
-  videoId: string
+  videoId: string,
+  videos: NcVideos
 ) {
-  if (!videoId) {
-    return current
+  const filtered = current.filter((id) => videos[id])
+  if (!videoId || !videos[videoId]) {
+    return filtered
   }
-  const deduped = current.filter((id) => id !== videoId)
+  const deduped = filtered.filter((id) => id !== videoId)
   return [videoId, ...deduped].slice(0, Math.max(1, size))
 }
 
@@ -1085,7 +1102,11 @@ async function performCleanup() {
   })
 }
 
-function rebuildRecentWindowFromEvents(events: CompareEvent[], size: number) {
+function rebuildRecentWindowFromEvents(
+  events: CompareEvent[],
+  size: number,
+  videos: NcVideos
+) {
   if (size <= 0) {
     return []
   }
@@ -1104,6 +1125,9 @@ function rebuildRecentWindowFromEvents(events: CompareEvent[], size: number) {
     const candidates = [event.currentVideoId, event.opponentVideoId]
     for (const candidate of candidates) {
       if (!candidate) {
+        continue
+      }
+      if (!videos[candidate]) {
         continue
       }
       if (!next.includes(candidate)) {
