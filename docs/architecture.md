@@ -6,7 +6,7 @@
 
 ## 1. システムアーキテクチャ概要
 
-NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能として実装され、イベントソーシングパターンと Glicko-2 レーティングアルゴリズムを組み合わせた分散型システムである。
+NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能として実装され、イベントログ中心の設計と Glicko-2 レーティングアルゴリズムを組み合わせた分散型システムである。
 
 ### 1.1 アーキテクチャ図
 
@@ -29,7 +29,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
                  ▼
 ┌─────────────────────────────────────────────────────────────┐
 │         Service Worker (background/)                        │
-│  - イベントソーシング (CompareEvent 管理)                     │
+│  - イベントログ管理 (CompareEvent)                            │
 │  - Glicko-2 計算エンジン                                     │
 │  - Storage I/O (chrome.storage.local)                       │
 │  - リトライキュー & エラーハンドリング                        │
@@ -55,7 +55,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 | コンポーネント     | 責務                                           | 技術スタック                        |
 | ------------------ | ---------------------------------------------- | ----------------------------------- |
 | **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得        | React 18.2.0, TypeScript, Tailwind CSS v4, Plasmo CSUI |
-| **Service Worker** | イベントソーシング、Glicko-2 計算、Storage I/O | TypeScript, chrome.storage API      |
+| **Service Worker** | イベントログ管理、Glicko-2 計算、Storage I/O | TypeScript, chrome.storage API      |
 | **Popup**          | 直近イベント表示、overlayAndCaptureEnabled トグル | React 18.2.0, TypeScript            |
 | **Options**        | 詳細設定、データ操作、エクスポート/インポート  | React 18.2.0, TypeScript            |
 | **Storage**        | 永続化層                                       | chrome.storage.local (Key-Value)  |
@@ -133,11 +133,11 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 
 ---
 
-## 3. イベントソーシング設計
+## 3. イベントログ設計
 
 ### 3.1 イベント駆動アーキテクチャ
 
-NiconiCompare は「純粋なイベントソーシング」ではなく、**実用的イベントソーシング**を採用:
+NiconiCompare は厳密なイベント再生モデルではなく、**実用的なイベントログ運用**を採用:
 
 - **イベントログ (nc_events)**: CompareEvent を時系列で蓄積
 - **マテリアライズドビュー (nc_ratings)**: 最新レーティングをキャッシュ
