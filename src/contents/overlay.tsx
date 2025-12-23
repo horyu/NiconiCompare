@@ -37,6 +37,7 @@ export default function Overlay() {
   const [currentVideoId, setCurrentVideoId] = useState<string>()
   const [recentWindow, setRecentWindow] = useState<string[]>([])
   const [opponentVideoId, setOpponentVideoId] = useState<string>()
+  const [pinnedOpponentVideoId, setPinnedOpponentVideoId] = useState<string>()
   const [overlaySettings, setOverlaySettings] =
     useState<NcSettings>(DEFAULT_SETTINGS)
   const [isReady, setIsReady] = useState(false)
@@ -114,6 +115,7 @@ export default function Overlay() {
     setOverlaySettings(data.settings)
     setRecentWindow(data.state.recentWindow)
     setCurrentVideoId(data.state.currentVideoId)
+    setPinnedOpponentVideoId(data.state.pinnedOpponentVideoId)
     await loadVideoSnapshots()
     setIsReady(true)
 
@@ -214,6 +216,14 @@ export default function Overlay() {
     const selectableWindow = recentWindow.filter((id) => id !== currentVideoId)
     const currentChanged = previousCurrentVideoIdRef.current !== currentVideoId
 
+    if (pinnedOpponentVideoId) {
+      if (opponentVideoId !== pinnedOpponentVideoId) {
+        setOpponentVideoId(pinnedOpponentVideoId)
+      }
+      previousCurrentVideoIdRef.current = currentVideoId
+      return
+    }
+
     if (selectableWindow.length === 0) {
       setOpponentVideoId(undefined)
       previousCurrentVideoIdRef.current = currentVideoId
@@ -236,12 +246,29 @@ export default function Overlay() {
     }
 
     previousCurrentVideoIdRef.current = currentVideoId
-  }, [recentWindow, currentVideoId, opponentVideoId])
+  }, [recentWindow, currentVideoId, opponentVideoId, pinnedOpponentVideoId])
 
   useEffect(() => {
     setLastVerdict(undefined)
     setLastEventId(undefined)
   }, [currentVideoId, opponentVideoId])
+
+  const togglePinnedOpponent = useCallback(async () => {
+    if (!opponentVideoId && !pinnedOpponentVideoId) {
+      return
+    }
+
+    const nextPinned = pinnedOpponentVideoId ? undefined : opponentVideoId
+    const response = await chrome.runtime.sendMessage({
+      type: MESSAGE_TYPES.updatePinnedOpponent,
+      payload: { videoId: nextPinned }
+    })
+
+    if (response?.ok) {
+      setPinnedOpponentVideoId(nextPinned)
+      await refreshState()
+    }
+  }, [opponentVideoId, pinnedOpponentVideoId, refreshState])
 
   const submitVerdict = async (verdict: Verdict) => {
     if (lastVerdict === verdict) {
@@ -310,9 +337,14 @@ export default function Overlay() {
     return null
   }
   const selectableWindow = recentWindow.filter((id) => id !== currentVideoId)
-  const hasVideos = selectableWindow.length > 0
-  const canSubmit =
-    hasVideos && currentVideoId && opponentVideoId && !statusMessage
+  const hasSelectableCandidates = selectableWindow.length > 0
+  const isPinned = !!pinnedOpponentVideoId
+  const pinnedSameMessage =
+    isPinned && pinnedOpponentVideoId === currentVideoId
+      ? "比較不可: 再生中と同じ動画が固定されています"
+      : undefined
+  const displayStatus = statusMessage ?? pinnedSameMessage
+  const canSubmit = currentVideoId && opponentVideoId && !displayStatus
   const opponentWatchUrl = opponentVideoId
     ? `https://www.nicovideo.jp/watch/${opponentVideoId}`
     : undefined
@@ -324,9 +356,9 @@ export default function Overlay() {
       onMouseLeave={() => setIsHovered(false)}>
       <strong className="text-right w-full">NiconiCompare</strong>
 
-      {statusMessage && (
+      {displayStatus && (
         <span className="text-xs opacity-80 text-right w-full">
-          {statusMessage}
+          {displayStatus}
         </span>
       )}
 
@@ -410,41 +442,59 @@ export default function Overlay() {
 
               {/* Custom select */}
               <div className="w-full flex flex-col items-start">
-                <label
-                  htmlFor="nc-select"
-                  className="relative w-full flex items-center">
-                  <span className="pt-[3px] pb-[1px] px-1.5 pr-6 rounded border border-white/30 bg-[#1f1f1f] text-[12px] overflow-hidden text-ellipsis whitespace-nowrap pointer-events-none w-full">
-                    {hasVideos
-                      ? opponentVideoId ?? "比較候補を選択してください"
-                      : "比較対象がありません"}
-                  </span>
-                  <span className="absolute right-2 text-[10px] opacity-70 pointer-events-none">
-                    ▼
-                  </span>
-                  <select
-                    id="nc-select"
-                    value={opponentVideoId ?? ""}
-                    onChange={(e) => setOpponentVideoId(e.target.value)}
-                    onBlur={() => {
-                      if (forceKeepOverlayOpen) {
-                        return
-                      }
-                      if (!autoCloseTimerRef.current) {
-                        scheduleAutoClose()
-                      }
-                    }}
-                    className="absolute inset-0 opacity-0 cursor-pointer z-[5] text-black bg-white">
-                    {!hasVideos ? (
-                      <option value="">比較候補なし</option>
-                    ) : (
-                      selectableWindow.map((id, index) => (
-                        <option key={id} value={id}>
-                          {index + 1}. {formatVideoLabel(id)}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                </label>
+                <div className="w-full flex items-center gap-1">
+                  <label
+                    htmlFor="nc-select"
+                    className="relative flex-1 flex items-center">
+                    <span className="pt-[3px] pb-[1px] px-1.5 pr-6 rounded border border-white/30 bg-[#1f1f1f] text-[12px] overflow-hidden text-ellipsis whitespace-nowrap pointer-events-none w-full">
+                      {opponentVideoId
+                        ? opponentVideoId
+                        : hasSelectableCandidates
+                          ? "比較候補を選択してください"
+                          : "比較対象がありません"}
+                    </span>
+                    <span className="absolute right-2 text-[10px] opacity-70 pointer-events-none">
+                      ▼
+                    </span>
+                    <select
+                      id="nc-select"
+                      value={opponentVideoId ?? ""}
+                      disabled={isPinned}
+                      onChange={(e) => setOpponentVideoId(e.target.value)}
+                      onBlur={() => {
+                        if (forceKeepOverlayOpen) {
+                          return
+                        }
+                        if (!autoCloseTimerRef.current) {
+                          scheduleAutoClose()
+                        }
+                      }}
+                      className={[
+                        "absolute inset-0 opacity-0 z-[5] text-black bg-white",
+                        isPinned ? "cursor-not-allowed" : "cursor-pointer"
+                      ].join(" ")}>
+                      {!hasSelectableCandidates ? (
+                        <option value="">比較候補なし</option>
+                      ) : (
+                        selectableWindow.map((id, index) => (
+                          <option key={id} value={id}>
+                            {index + 1}. {formatVideoLabel(id)}
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={togglePinnedOpponent}
+                    disabled={!opponentVideoId}
+                    title={isPinned ? "固定解除" : "比較対象を固定"}
+                    className="px-1.5 py-1 rounded border border-white/30 bg-[#1f1f1f] text-[12px] leading-none disabled:opacity-40">
+                    <span className="inline-block filter grayscale">
+                      {isPinned ? "🔒" : "🔓"}
+                    </span>
+                  </button>
+                </div>
                 <div className="text-[14px] opacity-90 self-stretch text-left break-all overflow-hidden">
                   {opponentVideoId
                     ? videoSnapshots[opponentVideoId]?.title ?? ""

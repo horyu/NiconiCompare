@@ -47,6 +47,7 @@ export type NcSettings = {
 
 export type NcState = {
   currentVideoId?: string
+  pinnedOpponentVideoId?: string
   recentWindow: string[]
 }
 

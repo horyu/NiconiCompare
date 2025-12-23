@@ -51,6 +51,11 @@ type UpdateCurrentVideoMessage = {
   payload: { videoId: string }
 }
 
+type UpdatePinnedOpponentMessage = {
+  type: typeof MESSAGE_TYPES.updatePinnedOpponent
+  payload: { videoId?: string }
+}
+
 type RecordEventMessage = {
   type: typeof MESSAGE_TYPES.recordEvent
   payload: {
@@ -126,6 +131,7 @@ type RequestStateMessage = {
 type Message =
   | RegisterSnapshotMessage
   | UpdateCurrentVideoMessage
+  | UpdatePinnedOpponentMessage
   | RecordEventMessage
   | DeleteEventMessage
   | RestoreEventMessage
@@ -160,6 +166,10 @@ chrome.runtime.onMessage.addListener(
             break
           case MESSAGE_TYPES.updateCurrentVideo:
             await handleUpdateCurrentVideo(message.payload.videoId)
+            sendResponse({ ok: true })
+            break
+          case MESSAGE_TYPES.updatePinnedOpponent:
+            await handleUpdatePinnedOpponent(message.payload.videoId)
             sendResponse({ ok: true })
             break
           case MESSAGE_TYPES.recordEvent: {
@@ -337,6 +347,26 @@ async function handleUpdateCurrentVideo(videoId: string) {
 
   await storage.set({
     [STORAGE_KEYS.state]: nextState
+  })
+}
+
+async function handleUpdatePinnedOpponent(videoId?: string) {
+  const storage = chrome?.storage?.local
+  if (!storage) {
+    console.warn("chrome.storage.local is unavailable.")
+    return
+  }
+
+  const data = await storage.get([STORAGE_KEYS.state, STORAGE_KEYS.videos])
+  const state = (data[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
+  const videos = (data[STORAGE_KEYS.videos] as NcVideos) ?? {}
+  const nextPinned = videoId && videos[videoId] ? videoId : undefined
+
+  await storage.set({
+    [STORAGE_KEYS.state]: {
+      ...state,
+      pinnedOpponentVideoId: nextPinned
+    }
   })
 }
 
@@ -634,17 +664,36 @@ async function readStateSnapshot() {
     STORAGE_KEYS.videos,
     STORAGE_KEYS.authors
   ])
+  const settings = normalizeSettings(
+    (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
+  )
+  const state = (result[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
+  const videos = (result[STORAGE_KEYS.videos] as NcVideos) ?? {}
+  const events =
+    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
+  const ratings = (result[STORAGE_KEYS.ratings] as NcRatings) ?? {}
+  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const authors = (result[STORAGE_KEYS.authors] as NcAuthors) ?? {}
+
+  let normalizedState = state
+  if (state.pinnedOpponentVideoId && !videos[state.pinnedOpponentVideoId]) {
+    normalizedState = {
+      ...state,
+      pinnedOpponentVideoId: undefined
+    }
+    await storage.set({
+      [STORAGE_KEYS.state]: normalizedState
+    })
+  }
+
   return {
-    settings: normalizeSettings(
-      (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
-    ),
-    state: (result[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE,
-    events:
-      (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET,
-    ratings: (result[STORAGE_KEYS.ratings] as NcRatings) ?? {},
-    meta: (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META,
-    videos: (result[STORAGE_KEYS.videos] as NcVideos) ?? {},
-    authors: (result[STORAGE_KEYS.authors] as NcAuthors) ?? {}
+    settings,
+    state: normalizedState,
+    events,
+    ratings,
+    meta,
+    videos,
+    authors
   }
 }
 

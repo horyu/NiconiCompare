@@ -24,6 +24,7 @@ export const DEFAULT_SETTINGS: NcSettings = {
 
 export const DEFAULT_STATE: NcState = {
   currentVideoId: undefined,
+  pinnedOpponentVideoId: undefined,
   recentWindow: []
 }
 
@@ -43,6 +44,7 @@ export const DEFAULT_META: NcMeta = {
 export const MESSAGE_TYPES = {
   registerSnapshot: "nc/registerSnapshot",
   updateCurrentVideo: "nc/updateCurrentVideo",
+  updatePinnedOpponent: "nc/updatePinnedOpponent",
   recordEvent: "nc/recordEvent",
   deleteEvent: "nc/deleteEvent",
   restoreEvent: "nc/restoreEvent",
