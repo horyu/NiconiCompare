@@ -56,6 +56,9 @@ export default function OptionsPage() {
   const [error, setError] = useState<string>()
   const [toast, setToast] = useState<Toast | null>(null)
   const [activeTab, setActiveTab] = useState<TabKey>("videos")
+  const showToast = useCallback((tone: Toast["tone"], text: string) => {
+    setToast({ tone, text })
+  }, [])
 
   const [settingsForm, setSettingsForm] = useState({
     recentWindowSize: "5",
@@ -143,6 +146,9 @@ export default function OptionsPage() {
   useEffect(() => {
     setEventPage(1)
   }, [eventSearch, eventVerdict, eventIncludeDeleted])
+  useEffect(() => {
+    setToast(null)
+  }, [activeTab])
 
   useEffect(() => {
     const plasmoRoot = document.getElementById("__plasmo")
@@ -297,7 +303,6 @@ export default function OptionsPage() {
   const handleSettingsSubmit = async (event: FormEvent) => {
     event.preventDefault()
     setSavingSettings(true)
-    setToast(null)
     try {
       const payload: Partial<NcSettings> = {
         recentWindowSize: Number(settingsForm.recentWindowSize),
@@ -316,10 +321,10 @@ export default function OptionsPage() {
         throw new Error(response?.error ?? "update failed")
       }
       await refreshState(true)
-      setToast({ tone: "success", text: "設定を更新しました。" })
+      showToast("success", "設定を更新しました。")
     } catch (error) {
       console.error(error)
-      setToast({ tone: "error", text: "設定の更新に失敗しました。" })
+      showToast("error", "設定の更新に失敗しました。")
       if (snapshot) {
         setSettingsForm({
           recentWindowSize: String(snapshot.settings.recentWindowSize),
@@ -336,7 +341,6 @@ export default function OptionsPage() {
 
   const handleRebuildRatings = async () => {
     setRebuildingRatings(true)
-    setToast(null)
     try {
       const response = await chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.rebuildRatings
@@ -345,10 +349,10 @@ export default function OptionsPage() {
         throw new Error(response?.error ?? "rebuild failed")
       }
       await refreshState(true)
-      setToast({ tone: "success", text: "レーティングを再計算しました。" })
+      showToast("success", "レーティングを再計算しました。")
     } catch (error) {
       console.error(error)
-      setToast({ tone: "error", text: "再計算に失敗しました。" })
+      showToast("error", "再計算に失敗しました。")
     } finally {
       setRebuildingRatings(false)
     }
@@ -356,7 +360,6 @@ export default function OptionsPage() {
 
   const handleToggleEventThumbnails = async (checked: boolean) => {
     setEventShowThumbnails(checked)
-    setToast(null)
     try {
       const response = await chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.updateSettings,
@@ -368,7 +371,7 @@ export default function OptionsPage() {
       await refreshState(true)
     } catch (error) {
       console.error(error)
-      setToast({ tone: "error", text: "設定の更新に失敗しました。" })
+      showToast("error", "設定の更新に失敗しました。")
       setEventShowThumbnails(snapshot?.settings.showEventThumbnails ?? true)
     }
   }
@@ -381,7 +384,6 @@ export default function OptionsPage() {
       return
     }
     setEventBusyId(target.id)
-    setToast(null)
     try {
       const response = await chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.recordEvent,
@@ -396,10 +398,10 @@ export default function OptionsPage() {
         throw new Error(response?.error ?? "update failed")
       }
       await refreshState(true)
-      setToast({ tone: "success", text: "イベントを更新しました。" })
+      showToast("success", "イベントを更新しました。")
     } catch (error) {
       console.error(error)
-      setToast({ tone: "error", text: "イベント更新に失敗しました。" })
+      showToast("error", "イベント更新に失敗しました。")
     } finally {
       setEventBusyId(null)
     }
@@ -407,7 +409,6 @@ export default function OptionsPage() {
 
   const handleDeleteEvent = async (eventId: number) => {
     setEventBusyId(eventId)
-    setToast(null)
     try {
       const response = await chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.deleteEvent,
@@ -417,10 +418,10 @@ export default function OptionsPage() {
         throw new Error(response?.error ?? "delete failed")
       }
       await refreshState(true)
-      setToast({ tone: "success", text: "イベントを無効化しました。" })
+      showToast("success", "イベントを無効化しました。")
     } catch (error) {
       console.error(error)
-      setToast({ tone: "error", text: "イベントの無効化に失敗しました。" })
+      showToast("error", "イベントの無効化に失敗しました。")
     } finally {
       setEventBusyId(null)
     }
@@ -428,7 +429,6 @@ export default function OptionsPage() {
 
   const handleRestoreEvent = async (eventId: number) => {
     setEventBusyId(eventId)
-    setToast(null)
     try {
       const response = await chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.restoreEvent,
@@ -438,10 +438,10 @@ export default function OptionsPage() {
         throw new Error(response?.error ?? "restore failed")
       }
       await refreshState(true)
-      setToast({ tone: "success", text: "イベントを有効化しました。" })
+      showToast("success", "イベントを有効化しました。")
     } catch (error) {
       console.error(error)
-      setToast({ tone: "error", text: "イベントの有効化に失敗しました。" })
+      showToast("error", "イベントの有効化に失敗しました。")
     } finally {
       setEventBusyId(null)
     }
@@ -453,7 +453,6 @@ export default function OptionsPage() {
     )
     if (!confirmed) return
     setEventBusyId(eventId)
-    setToast(null)
     try {
       const response = await chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.purgeEvent,
@@ -463,10 +462,10 @@ export default function OptionsPage() {
         throw new Error(response?.error ?? "purge failed")
       }
       await refreshState(true)
-      setToast({ tone: "success", text: "イベントを削除しました。" })
+      showToast("success", "イベントを削除しました。")
     } catch (error) {
       console.error(error)
-      setToast({ tone: "error", text: "削除に失敗しました。" })
+      showToast("error", "削除に失敗しました。")
     } finally {
       setEventBusyId(null)
     }
@@ -504,7 +503,6 @@ export default function OptionsPage() {
       return
     }
     setDeletingAll(true)
-    setToast(null)
     try {
       const response = await chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.deleteAllData
@@ -513,10 +511,10 @@ export default function OptionsPage() {
         throw new Error(response?.error ?? "delete all failed")
       }
       await refreshState(true)
-      setToast({ tone: "success", text: "全データを削除しました。" })
+      showToast("success", "全データを削除しました。")
     } catch (error) {
       console.error(error)
-      setToast({ tone: "error", text: "全データの削除に失敗しました。" })
+      showToast("error", "全データの削除に失敗しました。")
     } finally {
       setDeletingAll(false)
     }
@@ -524,7 +522,6 @@ export default function OptionsPage() {
 
   const handleExport = async () => {
     setExporting(true)
-    setToast(null)
     try {
       const response = await chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.exportData
@@ -540,10 +537,10 @@ export default function OptionsPage() {
       anchor.download = "niconi-compare-data.json"
       anchor.click()
       URL.revokeObjectURL(url)
-      setToast({ tone: "success", text: "エクスポートしました。" })
+      showToast("success", "エクスポートしました。")
     } catch (error) {
       console.error(error)
-      setToast({ tone: "error", text: "エクスポートに失敗しました。" })
+      showToast("error", "エクスポートに失敗しました。")
     } finally {
       setExporting(false)
     }
@@ -552,14 +549,10 @@ export default function OptionsPage() {
   const handleImport = async () => {
     const file = importFileRef.current?.files?.[0]
     if (!file) {
-      setToast({
-        tone: "error",
-        text: "インポートするJSONを選択してください。"
-      })
+      showToast("error", "インポートするJSONを選択してください。")
       return
     }
     setImporting(true)
-    setToast(null)
     try {
       const text = await file.text()
       const data = JSON.parse(text) as Record<string, unknown>
@@ -574,10 +567,10 @@ export default function OptionsPage() {
         importFileRef.current.value = ""
       }
       await refreshState(true)
-      setToast({ tone: "success", text: "インポートしました。" })
+      showToast("success", "インポートしました。")
     } catch (error) {
       console.error(error)
-      setToast({ tone: "error", text: "インポートに失敗しました。" })
+      showToast("error", "インポートに失敗しました。")
     } finally {
       setImporting(false)
     }
@@ -609,7 +602,7 @@ export default function OptionsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="max-w-6xl mx-auto p-8 flex flex-col gap-6 font-sans">
+      <div className="max-w-6xl mx-auto p-6 flex flex-col gap-6 font-sans">
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold">NiconiCompare Options</h1>
@@ -636,14 +629,23 @@ export default function OptionsPage() {
         </header>
 
         {toast && (
-          <div
-            className={[
-              "rounded-md px-4 py-2 text-sm",
-              toast.tone === "success"
-                ? "bg-emerald-100 text-emerald-900"
-                : "bg-rose-100 text-rose-900"
-            ].join(" ")}>
-            {toast.text}
+          <div className="fixed top-16 right-10 z-50">
+            <div
+              className={[
+                "flex items-center gap-3 rounded-md px-4 py-2 text-sm",
+                toast.tone === "success"
+                  ? "bg-emerald-100 text-emerald-900"
+                  : "bg-rose-100 text-rose-900"
+              ].join(" ")}>
+              {toast.text}
+              <button
+                type="button"
+                onClick={() => setToast(null)}
+                aria-label="トーストを閉じる"
+                className="text-base leading-none opacity-70 hover:opacity-100">
+                ×
+              </button>
+            </div>
           </div>
         )}
 
