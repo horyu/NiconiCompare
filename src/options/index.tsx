@@ -199,6 +199,9 @@ export default function OptionsPage() {
       (snapshot.ratings[left.videoId]?.rating ?? 0)
     const compareByTitle = (left: VideoItem, right: VideoItem) =>
       left.title.localeCompare(right.title)
+    const compareByRd = (left: VideoItem, right: VideoItem) =>
+      (snapshot.ratings[right.videoId]?.rd ?? 0) -
+      (snapshot.ratings[left.videoId]?.rd ?? 0)
     const compareByLastVerdict = (left: VideoItem, right: VideoItem) =>
       (lastEventByVideo.get(right.videoId) ?? 0) -
       (lastEventByVideo.get(left.videoId) ?? 0)
@@ -206,9 +209,11 @@ export default function OptionsPage() {
     const sorter =
       videoSort === "title"
         ? compareByTitle
-        : videoSort === "lastVerdict"
-          ? compareByLastVerdict
-          : compareByRating
+        : videoSort === "rd"
+          ? compareByRd
+          : videoSort === "lastVerdict"
+            ? compareByLastVerdict
+            : compareByRating
 
     const direction = videoSortOrder === "asc" ? -1 : 1
     return videos.sort((left, right) => direction * sorter(left, right))
@@ -693,6 +698,7 @@ export default function OptionsPage() {
                   onChange={(event) => setVideoSort(event.target.value)}
                   className="border border-slate-200 rounded-md px-2 py-1">
                   <option value="rating">Rating</option>
+                  <option value="rd">RD</option>
                   <option value="title">タイトル</option>
                   <option value="lastVerdict">最終判定日時</option>
                 </select>
