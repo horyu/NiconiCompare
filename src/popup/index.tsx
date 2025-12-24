@@ -115,10 +115,14 @@ export default function Popup() {
 
       <section>
         <h3 className="text-sm mb-2">Storage 状態</h3>
-        <ul className="list-none p-0 m-0 flex flex-col gap-1 text-[13px]">
-          <li>保存再試行（イベント書き込み）: {meta.retryQueue.length} 件</li>
-          <li>保存失敗（イベント書き込み）: {meta.failedWrites.length} 件</li>
-        </ul>
+        {meta.retryQueue.length === 0 && meta.failedWrites.length === 0 ? (
+          <div className="text-[13px] text-slate-500">問題なし</div>
+        ) : (
+          <ul className="list-none p-0 m-0 flex flex-col gap-1 text-[13px]">
+            <li>保存再試行（イベント書き込み）: {meta.retryQueue.length} 件</li>
+            <li>保存失敗（イベント書き込み）: {meta.failedWrites.length} 件</li>
+          </ul>
+        )}
       </section>
 
       {error && <small className="text-red-300">{error}</small>}
