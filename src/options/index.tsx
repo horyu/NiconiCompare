@@ -923,9 +923,9 @@ export default function OptionsPage() {
                   onChange={(event) => setEventVerdict(event.target.value)}
                   className="border border-slate-200 rounded-md px-2 py-1">
                   <option value="all">全て</option>
-                  <option value="better">基準が良い</option>
+                  <option value="better">勝ち</option>
                   <option value="same">引き分け</option>
-                  <option value="worse">比較対象が良い</option>
+                  <option value="worse">負け</option>
                 </select>
               </label>
               <label className="text-sm flex items-center gap-2 mb-1">
@@ -957,7 +957,7 @@ export default function OptionsPage() {
             />
 
             <div className="border border-slate-200 rounded-lg overflow-hidden">
-              <div className="grid grid-cols-[40px_70px_1fr_1fr_130px_90px] gap-2 bg-slate-100 text-xs font-semibold px-3 py-2">
+              <div className="grid grid-cols-[40px_70px_1fr_1fr_90px_90px] gap-2 bg-slate-100 text-xs font-semibold px-3 py-2">
                 <div>ID</div>
                 <div>日時</div>
                 <div>基準</div>
@@ -983,7 +983,7 @@ export default function OptionsPage() {
                     return (
                       <div
                         key={event.id}
-                        className="grid grid-cols-[40px_70px_1fr_1fr_130px_90px] gap-2 items-center px-3 py-2 text-sm">
+                        className="grid grid-cols-[40px_70px_1fr_1fr_90px_90px] gap-2 items-center px-3 py-2 text-sm">
                         <div className="font-medium">#{event.id}</div>
                         <div className="text-xs text-slate-500">
                           {timestamp.toLocaleDateString()}
@@ -1035,9 +1035,9 @@ export default function OptionsPage() {
                             )
                           }
                           className="border border-slate-200 rounded-md px-2 py-1 text-sm">
-                          <option value="better">基準が良い</option>
+                          <option value="better">勝ち</option>
                           <option value="same">引き分け</option>
-                          <option value="worse">比較対象が良い</option>
+                          <option value="worse">負け</option>
                         </select>
                         <div className="flex flex-col gap-2">
                           {!event.disabled ? (
