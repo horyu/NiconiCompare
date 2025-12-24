@@ -44,7 +44,7 @@
     - いずれの場合もエラーログに記録し、ユーザーはページリロードで再取得を試行できる
     - JSON-LD の構造変更やフィールド欠損（`author.url` 不在など）も同様に扱う
 - `nc_state.recentWindow` として opponentVideo 候補 (選択肢) の LRU を設定値の件数だけ保持する。LRU 更新は「比較イベントの storage 書き込み成功後」および「`currentVideoId` が新しい動画へ切り替わった際」に行い、比較に登場した currentVideo/opponentVideo や直前まで視聴していた動画を最新順に並べる（書き込み失敗時は LRU を更新しない）。currentVideo（現在再生中の動画）は別途 `nc_state.currentVideoId` で管理する。
-  - **設定値変更時の LRU 再構築**: 「直近 100 件までの CompareEvent（disabled = true を除外）を時系列逆順に走査し、登場した opponentVideo を重複除去しながら新しい設定値ぶん埋める」アルゴリズムで LRU を再構築する。100 件の根拠は「最大設定値 10 × 10 倍のバッファ」として十分なイベント履歴を確保するため。`currentVideoId` は LRU に含めず、別途保持し続ける。
+  - **設定値変更時の LRU 再構築**: 「直近 100 件までの CompareEvent（disabled = true を除外）を時系列逆順に走査し、登場した currentVideo/opponentVideo を重複除去しながら新しい設定値ぶん埋める」アルゴリズムで LRU を再構築する。100 件の根拠は「最大設定値 10 × 10 倍のバッファ」として十分なイベント履歴を確保するため。`currentVideoId` は別途 `nc_state.currentVideoId` でも保持する。
 - イベントの無効化は CompareEvent に `disabled = true` をセットするフラグ運用とし、Options から「削除」操作を行うまでは `nc_events.items` から除去しない。
 
 ## 6. アーキテクチャ

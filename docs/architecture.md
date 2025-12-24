@@ -149,7 +149,7 @@ NiconiCompare は厳密なイベント再生モデルではなく、**実用的�
 ```typescript
 type CompareEvent = {
   id: number; // グローバル一意ID (nextIdから採番)
-  timestamp: number; // UnixタイムスタンプHIRO
+  timestamp: number; // Unixタイムスタンプ（ミリ秒）
   currentVideoId: string; // 比較対象 (現在動画)
   opponentVideoId: string; // 比較対象 (選択動画)
   verdict: "better" | "same" | "worse"; // currentVideo視点の評価
@@ -319,7 +319,7 @@ function normalizeSettings(settings: NcSettings): NcSettings {
 ```
 
 **バリデーション範囲**:
-- `recentWindowSize`: 1〜10 の整数
+- `recentWindowSize`: 1〜50 の整数
 - `overlayAutoCloseMs`: 500?5000ms
 - `showEventThumbnails`: boolean
 - `glicko`: 初期値の妥当性チェック
