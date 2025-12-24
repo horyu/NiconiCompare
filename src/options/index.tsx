@@ -658,6 +658,12 @@ export default function OptionsPage() {
       showToast("error", "インポートするJSONを選択してください。")
       return
     }
+    const confirmed = window.confirm(
+      "現在のデータを上書きします。インポートしてもよろしいですか？"
+    )
+    if (!confirmed) {
+      return
+    }
     setImporting(true)
     try {
       const text = await file.text()
