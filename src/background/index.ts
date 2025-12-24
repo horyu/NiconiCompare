@@ -384,52 +384,85 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     "videos"
   ])
 
-  const targetEvent = payload.eventId
-    ? events.items.find(
-        (event) => event.id === payload.eventId && !event.disabled
-      )
-    : undefined
-  const isTargetSamePair =
-    targetEvent &&
-    ((targetEvent.currentVideoId === payload.currentVideoId &&
-      targetEvent.opponentVideoId === payload.opponentVideoId) ||
-      (targetEvent.currentVideoId === payload.opponentVideoId &&
-        targetEvent.opponentVideoId === payload.currentVideoId))
-
-  if (targetEvent && isTargetSamePair) {
-    const updatedEvents = produce(events, (draft) => {
-      const index = draft.items.findIndex(
-        (event) => event.id === targetEvent.id
-      )
-      if (index !== -1) {
-        draft.items[index] = {
-          ...draft.items[index],
-          verdict: payload.verdict,
-          timestamp: Date.now()
-        }
-      }
-    })
-
+  const targetEvent = findTargetEvent(events, payload)
+  if (targetEvent && isSamePairEvent(targetEvent, payload)) {
+    const updatedEvents = updateEventVerdict(
+      events,
+      targetEvent.id,
+      payload.verdict
+    )
     const nextRatings = rebuildRatingsFromEvents(updatedEvents.items, settings)
-
-    try {
-      await setStorageData({
-        events: updatedEvents,
-        ratings: nextRatings
-      })
-      await markEventPersistent(targetEvent.id)
-      await removeRetryEntry(targetEvent.id)
-      return targetEvent.id
-    } catch (error) {
-      console.error("Failed to persist event", error)
-      await queueEventRetry(targetEvent.id)
-      throw error
-    }
+    return persistEventChanges(targetEvent.id, {
+      events: updatedEvents,
+      ratings: nextRatings
+    })
   }
 
   const eventId = events.nextId
+  const newEvent = buildNewEvent(eventId, payload)
+  const updatedEvents = appendEvent(events, newEvent)
+  const nextRatings = updateRatingsForNewEvent(
+    ratings,
+    payload,
+    settings,
+    eventId
+  )
+  const updatedState = updateStateForNewEvent(state, settings, payload, videos)
 
-  const newEvent: CompareEvent = {
+  return persistEventChanges(eventId, {
+    events: updatedEvents,
+    state: updatedState,
+    ratings: nextRatings
+  })
+}
+
+function findTargetEvent(
+  events: NcEventsBucket,
+  payload: RecordEventMessage["payload"]
+): CompareEvent | undefined {
+  if (!payload.eventId) {
+    return undefined
+  }
+
+  return events.items.find(
+    (event) => event.id === payload.eventId && !event.disabled
+  )
+}
+
+function isSamePairEvent(
+  event: CompareEvent,
+  payload: RecordEventMessage["payload"]
+): boolean {
+  return (
+    (event.currentVideoId === payload.currentVideoId &&
+      event.opponentVideoId === payload.opponentVideoId) ||
+    (event.currentVideoId === payload.opponentVideoId &&
+      event.opponentVideoId === payload.currentVideoId)
+  )
+}
+
+function updateEventVerdict(
+  events: NcEventsBucket,
+  eventId: number,
+  verdict: Verdict
+): NcEventsBucket {
+  return produce(events, (draft) => {
+    const index = draft.items.findIndex((event) => event.id === eventId)
+    if (index !== -1) {
+      draft.items[index] = {
+        ...draft.items[index],
+        verdict,
+        timestamp: Date.now()
+      }
+    }
+  })
+}
+
+function buildNewEvent(
+  eventId: number,
+  payload: RecordEventMessage["payload"]
+): CompareEvent {
+  return {
     id: eventId,
     timestamp: Date.now(),
     currentVideoId: payload.currentVideoId,
@@ -438,12 +471,24 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     disabled: false,
     persistent: false
   }
+}
 
-  const updatedEvents: NcEventsBucket = {
+function appendEvent(
+  events: NcEventsBucket,
+  newEvent: CompareEvent
+): NcEventsBucket {
+  return {
     items: [...events.items, newEvent],
-    nextId: eventId + 1
+    nextId: newEvent.id + 1
   }
+}
 
+function updateRatingsForNewEvent(
+  ratings: NcRatings,
+  payload: RecordEventMessage["payload"],
+  settings: NcSettings,
+  eventId: number
+): NcRatings {
   const leftRating = getOrCreateRatingSnapshot(
     ratings,
     payload.currentVideoId,
@@ -455,7 +500,7 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     settings
   )
 
-  const nextRatings = produce(ratings, (draft) => {
+  return produce(ratings, (draft) => {
     const { left, right } = updatePairRatings({
       settings,
       left: leftRating,
@@ -466,8 +511,15 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     draft[left.videoId] = left
     draft[right.videoId] = right
   })
+}
 
-  const updatedState = produce(state, (draft) => {
+function updateStateForNewEvent(
+  state: NcState,
+  settings: NcSettings,
+  payload: RecordEventMessage["payload"],
+  videos: NcVideos
+): NcState {
+  return produce(state, (draft) => {
     draft.recentWindow = buildRecentWindow(
       draft.recentWindow,
       settings.recentWindowSize,
@@ -476,13 +528,18 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
       videos
     )
   })
+}
 
+async function persistEventChanges(
+  eventId: number,
+  updates: Partial<{
+    events: NcEventsBucket
+    state: NcState
+    ratings: NcRatings
+  }>
+): Promise<number> {
   try {
-    await setStorageData({
-      events: updatedEvents,
-      state: updatedState,
-      ratings: nextRatings
-    })
+    await setStorageData(updates)
     await markEventPersistent(eventId)
     await removeRetryEntry(eventId)
     return eventId
