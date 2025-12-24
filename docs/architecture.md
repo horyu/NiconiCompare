@@ -108,7 +108,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
      ↓
 [4] nc_meta.lastReplayEventIdを最終イベントIDに更新
      ↓
-[5] クリーンアップ実行時は、孤立データを削除（評価済みイベントで参照されている動画と、現在再生中の動画は保持）
+[5] クリーンアップ実行時は、孤立データを削除（評価済みイベントで参照されている動画、現在再生中の動画、recentWindow に載っている動画、固定中の比較対象は保持）
 [5-補足] クリーンアップは `chrome.alarms` の24時間周期で発火し、`runAutoCleanupIfNeeded` が最終実行時刻（`nc_meta.lastCleanupAt`）から24時間以上経過している場合に実行する
      ↓
 [6] UI更新通知 (chrome.storage.onChanged)

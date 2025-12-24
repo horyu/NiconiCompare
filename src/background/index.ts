@@ -1138,6 +1138,14 @@ async function performCleanup() {
   if (state.currentVideoId) {
     referencedVideos.add(state.currentVideoId)
   }
+  if (state.pinnedOpponentVideoId) {
+    referencedVideos.add(state.pinnedOpponentVideoId)
+  }
+  state.recentWindow.forEach((videoId) => {
+    if (videoId) {
+      referencedVideos.add(videoId)
+    }
+  })
 
   Object.values(videos).forEach((video) => {
     if (video.authorUrl) {
