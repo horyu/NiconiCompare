@@ -109,6 +109,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 [4] nc_meta.lastReplayEventIdを最終イベントIDに更新
      ↓
 [5] needsCleanup=trueの場合、孤立データを削除（評価済みイベントで参照されている動画と、現在再生中の動画は保持）
+[5-補足] クリーンアップは `chrome.alarms` の24時間周期で発火し、`runAutoCleanupIfNeeded` が最終実行時刻（`nc_meta.lastCleanupAt`）から24時間以上経過している場合に実行する
      ↓
 [6] UI更新通知 (chrome.storage.onChanged)
 ```
@@ -271,6 +272,9 @@ Chrome Storage Local は、Key-Value 型のストレージ（JSON シリアラ�
 | `nc_events`   | {items: CompareEvent[], nextId: number} | 150 B/件   |
 | `nc_ratings`  | Map<string, RatingSnapshot>             | 100 B/件   |
 | `nc_meta`     | Object                                  | ~10 KB     |
+
+**nc_meta の主な用途**:
+- lastReplayEventId / needsCleanup / lastCleanupAt などのメタ情報を保持
 
 ### 5.2 データ更新の不変性管理
 

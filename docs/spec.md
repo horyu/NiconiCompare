@@ -109,7 +109,7 @@ Options から再計算（リプレイ）を実行できる。詳細手順は `d
 - **全データ削除**: 設定・履歴・レーティングを含む `nc_*` を初期化し、confirm で確認してから実行。
 - `nc_authors`/`nc_videos` の整合性チェックは行わないが、欠損は UI で明示。
 - クリーンアップ実装:
-  - バックグラウンドで定期的にチェックし、参照されない `nc_ratings`/`nc_videos`/`nc_authors` を削除して `needsCleanup = false` に戻す（評価済みイベントで参照されている動画と、現在再生中の動画は保持）。ユーザーが手動でクリーンアップボタンを押した場合も同じ処理を実行する。
+  - `chrome.alarms` で24時間ごとに発火し、`runAutoCleanupIfNeeded` が `nc_meta.lastCleanupAt` を参照して24時間以上経過している場合のみ実行する。参照されない `nc_ratings`/`nc_videos`/`nc_authors` を削除して `needsCleanup = false` に戻す（評価済みイベントで参照されている動画と、現在再生中の動画は保持）。最終実行時刻は `nc_meta.lastCleanupAt` に保存する。ユーザーが手動でクリーンアップボタンを押した場合も同じ処理を実行する。
 - 無効化操作は CompareEvent の `disabled` を true に設定する形で即時反映し、Undo 操作で false に戻せるようにする。Options から「削除」を実行した場合のみ、該当イベントを `nc_events.items` から物理削除する。
 
 ## 11. エラー処理・セキュリティ

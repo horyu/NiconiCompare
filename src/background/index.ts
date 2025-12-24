@@ -27,6 +27,7 @@ import type {
 } from "../lib/types"
 
 const RETRY_DELAYS = [1000, 3000, 5000]
+const AUTO_CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000
 
 processRetryQueue().catch((error) =>
   console.error("Retry queue processing failed", error)
@@ -34,10 +35,16 @@ processRetryQueue().catch((error) =>
 
 if (chrome?.alarms) {
   chrome.alarms.create("nc.processRetry", { periodInMinutes: 1 })
+  chrome.alarms.create("nc.autoCleanup", { periodInMinutes: 60 * 24 })
   chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === "nc.processRetry") {
       processRetryQueue().catch((error) =>
         console.error("Retry queue processing failed", error)
+      )
+    }
+    if (alarm.name === "nc.autoCleanup") {
+      runAutoCleanupIfNeeded().catch((error) =>
+        console.error("Failed to run auto cleanup", error)
       )
     }
   })
@@ -150,10 +157,16 @@ chrome.runtime.onInstalled.addListener(() => {
   ensureDefaults().catch((error) =>
     console.error("Failed to init defaults", error)
   )
+  runAutoCleanupIfNeeded().catch((error) =>
+    console.error("Failed to run auto cleanup", error)
+  )
 })
 
 ensureDefaults().catch((error) =>
   console.error("Failed to init defaults", error)
+)
+runAutoCleanupIfNeeded().catch((error) =>
+  console.error("Failed to run auto cleanup", error)
 )
 
 chrome.runtime.onMessage.addListener(
@@ -270,6 +283,15 @@ async function ensureDefaults() {
 
   if (Object.keys(updates).length > 0) {
     await chrome.storage.local.set(updates)
+  }
+}
+
+async function runAutoCleanupIfNeeded() {
+  const result = await chrome.storage.local.get(STORAGE_KEYS.meta)
+  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const lastCleanupAt = Number(meta.lastCleanupAt ?? 0)
+  if (Date.now() - lastCleanupAt >= AUTO_CLEANUP_INTERVAL_MS) {
+    await performCleanup()
   }
 }
 
@@ -848,7 +870,12 @@ async function handleImportData(data: Partial<StorageShape>) {
   const nextEvents =
     (data[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
   const nextState = (data[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
-  const nextMeta = (data[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const rawMeta = (data[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const nextMeta: NcMeta = {
+    ...DEFAULT_META,
+    ...rawMeta,
+    lastCleanupAt: Number(rawMeta.lastCleanupAt ?? 0)
+  }
   const nextVideos = (data[STORAGE_KEYS.videos] as NcVideos) ?? {}
   const nextAuthors = (data[STORAGE_KEYS.authors] as NcAuthors) ?? {}
 
@@ -1152,7 +1179,8 @@ async function performCleanup() {
     [STORAGE_KEYS.authors]: cleanedAuthors,
     [STORAGE_KEYS.meta]: {
       ...meta,
-      needsCleanup: false
+      needsCleanup: false,
+      lastCleanupAt: Date.now()
     }
   })
 }
