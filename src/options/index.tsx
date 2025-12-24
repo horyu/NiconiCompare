@@ -1151,14 +1151,14 @@ export default function OptionsPage() {
                   type="submit"
                   disabled={savingSettings}
                   className="px-4 py-2 rounded-md bg-slate-900 text-white text-sm disabled:opacity-50">
-                  {savingSettings ? "保存中..." : "保存"}
+                  保存
                 </button>
                 <button
                   type="button"
                   onClick={handleRebuildRatings}
                   disabled={rebuildingRatings}
                   className="px-4 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100 disabled:opacity-50">
-                  {rebuildingRatings ? "再計算中..." : "レーティング再計算"}
+                  レーティング再計算
                 </button>
               </div>
             </form>
@@ -1191,7 +1191,7 @@ export default function OptionsPage() {
                   onClick={handleExport}
                   disabled={exporting}
                   className="px-3 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100 disabled:opacity-50">
-                  {exporting ? "書き出し中..." : "JSON エクスポート"}
+                  JSON エクスポート
                 </button>
                 <div className="flex flex-col gap-2">
                   <input
@@ -1205,7 +1205,7 @@ export default function OptionsPage() {
                     onClick={handleImport}
                     disabled={importing}
                     className="px-3 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100 disabled:opacity-50">
-                    {importing ? "読み込み中..." : "JSON インポート"}
+                    JSON インポート
                   </button>
                 </div>
               </div>
@@ -1271,7 +1271,7 @@ export default function OptionsPage() {
                   onClick={handleDeleteAllData}
                   disabled={deletingAll}
                   className="px-3 py-2 rounded-md border border-rose-200 text-rose-700 text-sm hover:bg-rose-50 disabled:opacity-50">
-                  {deletingAll ? "削除中..." : "全データ削除"}
+                  全データ削除
                 </button>
               </div>
             </div>
