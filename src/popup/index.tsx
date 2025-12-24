@@ -116,14 +116,6 @@ export default function Popup() {
       <section>
         <h3 className="text-sm mb-2">Storage 状態</h3>
         <ul className="list-none p-0 m-0 flex flex-col gap-1 text-[13px]">
-          <li>
-            needsCleanup:{" "}
-            {meta.needsCleanup ? (
-              <span className="text-red-600">要対応</span>
-            ) : (
-              "OK"
-            )}
-          </li>
           <li>retryQueue: {meta.retryQueue.length} 件</li>
           <li>failedWrites: {meta.failedWrites.length} 件</li>
         </ul>
