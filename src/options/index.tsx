@@ -630,9 +630,16 @@ export default function OptionsPage() {
       const data = JSON.stringify(response.data, null, 2)
       const blob = new Blob([data], { type: "application/json" })
       const url = URL.createObjectURL(blob)
+      const now = new Date()
+      const pad2 = (value: number) => value.toString().padStart(2, "0")
+      const filename = `NiconiCompareData-${now.getFullYear()}${pad2(
+        now.getMonth() + 1
+      )}${pad2(now.getDate())}${pad2(now.getHours())}${pad2(
+        now.getMinutes()
+      )}${pad2(now.getSeconds())}.json`
       const anchor = document.createElement("a")
       anchor.href = url
-      anchor.download = "niconi-compare-data.json"
+      anchor.download = filename
       anchor.click()
       URL.revokeObjectURL(url)
       showToast("success", "エクスポートしました。")
@@ -1287,7 +1294,8 @@ export default function OptionsPage() {
               <div className="flex flex-col gap-3">
                 <h3 className="text-sm font-semibold">Storage 状態</h3>
                 <div className="text-sm text-slate-600">
-                  保存再試行（イベント書き込み）: {snapshot.meta.retryQueue.length} 件
+                  保存再試行（イベント書き込み）:{" "}
+                  {snapshot.meta.retryQueue.length} 件
                 </div>
                 {snapshot.meta.retryQueue.length > 0 && (
                   <button
@@ -1298,7 +1306,8 @@ export default function OptionsPage() {
                   </button>
                 )}
                 <div className="text-sm text-slate-600">
-                  保存失敗（イベント書き込み）: {snapshot.meta.failedWrites.length} 件
+                  保存失敗（イベント書き込み）:{" "}
+                  {snapshot.meta.failedWrites.length} 件
                 </div>
                 {snapshot.meta.failedWrites.length > 0 && (
                   <button
