@@ -108,7 +108,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
      ↓
 [4] nc_meta.lastReplayEventIdを最終イベントIDに更新
      ↓
-[5] needsCleanup=trueの場合、孤立データを削除
+[5] needsCleanup=trueの場合、孤立データを削除（評価済みイベントで参照されている動画と、現在再生中の動画は保持）
      ↓
 [6] UI更新通知 (chrome.storage.onChanged)
 ```

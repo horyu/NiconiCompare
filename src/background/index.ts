@@ -1100,7 +1100,8 @@ async function performCleanup() {
     STORAGE_KEYS.videos,
     STORAGE_KEYS.authors,
     STORAGE_KEYS.ratings,
-    STORAGE_KEYS.meta
+    STORAGE_KEYS.meta,
+    STORAGE_KEYS.state
   ])
   const events =
     (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
@@ -1108,6 +1109,7 @@ async function performCleanup() {
   const authors = (result[STORAGE_KEYS.authors] as NcAuthors) ?? {}
   const ratings = (result[STORAGE_KEYS.ratings] as NcRatings) ?? {}
   const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const state = (result[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
 
   const referencedVideos = new Set<string>()
   const referencedAuthors = new Set<string>()
@@ -1122,6 +1124,9 @@ async function performCleanup() {
         referencedVideos.add(event.opponentVideoId)
       }
     })
+  if (state.currentVideoId) {
+    referencedVideos.add(state.currentVideoId)
+  }
 
   Object.values(videos).forEach((video) => {
     if (video.authorUrl) {
