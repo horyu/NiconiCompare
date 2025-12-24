@@ -90,6 +90,7 @@ export default function OptionsPage() {
   const [deletingAll, setDeletingAll] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [importFileName, setImportFileName] = useState("")
   const [bytesInUse, setBytesInUse] = useState<number | null>(null)
   const importFileRef = useRef<HTMLInputElement | null>(null)
 
@@ -671,6 +672,7 @@ export default function OptionsPage() {
       if (importFileRef.current) {
         importFileRef.current.value = ""
       }
+      setImportFileName("")
       await refreshState(true)
       showToast("success", "インポートしました。")
     } catch (error) {
@@ -1264,12 +1266,17 @@ export default function OptionsPage() {
                     ref={importFileRef}
                     type="file"
                     accept="application/json"
-                    className="text-sm"
+                    onChange={(event) => {
+                      setImportFileName(
+                        event.currentTarget.files?.[0]?.name ?? ""
+                      )
+                    }}
+                    className="text-sm file:mr-2 file:rounded-md file:border file:border-slate-200 file:bg-white file:px-3 file:py-2 file:text-sm file:hover:bg-slate-100"
                   />
                   <button
                     type="button"
                     onClick={handleImport}
-                    disabled={importing}
+                    disabled={importing || !importFileName}
                     className="px-3 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100 disabled:opacity-50">
                     JSON インポート
                   </button>
