@@ -25,6 +25,12 @@ import type {
   Verdict,
   VideoSnapshot
 } from "../lib/types"
+import {
+  getRawStorageData,
+  getStorageData,
+  readAllStorage,
+  setStorageData
+} from "./services/storage"
 
 const RETRY_DELAYS = [1000, 3000, 5000]
 const AUTO_CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000
@@ -255,39 +261,46 @@ chrome.runtime.onMessage.addListener(
 )
 
 async function ensureDefaults() {
-  const result = await chrome.storage.local.get(Object.values(STORAGE_KEYS))
-  const updates: Partial<StorageShape> = {}
+  const result = await getRawStorageData([
+    "settings",
+    "state",
+    "events",
+    "meta",
+    "videos",
+    "authors",
+    "ratings"
+  ])
+  const updates: Parameters<typeof setStorageData>[0] = {}
 
-  if (!result[STORAGE_KEYS.settings]) {
-    updates[STORAGE_KEYS.settings] = DEFAULT_SETTINGS
+  if (!result.settings) {
+    updates.settings = DEFAULT_SETTINGS
   }
-  if (!result[STORAGE_KEYS.state]) {
-    updates[STORAGE_KEYS.state] = DEFAULT_STATE
+  if (!result.state) {
+    updates.state = DEFAULT_STATE
   }
-  if (!result[STORAGE_KEYS.events]) {
-    updates[STORAGE_KEYS.events] = DEFAULT_EVENTS_BUCKET
+  if (!result.events) {
+    updates.events = DEFAULT_EVENTS_BUCKET
   }
-  if (!result[STORAGE_KEYS.meta]) {
-    updates[STORAGE_KEYS.meta] = DEFAULT_META
+  if (!result.meta) {
+    updates.meta = DEFAULT_META
   }
-  if (!result[STORAGE_KEYS.videos]) {
-    updates[STORAGE_KEYS.videos] = {}
+  if (!result.videos) {
+    updates.videos = {}
   }
-  if (!result[STORAGE_KEYS.authors]) {
-    updates[STORAGE_KEYS.authors] = {}
+  if (!result.authors) {
+    updates.authors = {}
   }
-  if (!result[STORAGE_KEYS.ratings]) {
-    updates[STORAGE_KEYS.ratings] = {}
+  if (!result.ratings) {
+    updates.ratings = {}
   }
 
   if (Object.keys(updates).length > 0) {
-    await chrome.storage.local.set(updates)
+    await setStorageData(updates)
   }
 }
 
 async function runAutoCleanupIfNeeded() {
-  const result = await chrome.storage.local.get(STORAGE_KEYS.meta)
-  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const { meta } = await getStorageData(["meta"])
   const lastCleanupAt = Number(meta.lastCleanupAt ?? 0)
   if (Date.now() - lastCleanupAt >= AUTO_CLEANUP_INTERVAL_MS) {
     await performCleanup()
@@ -295,19 +308,14 @@ async function runAutoCleanupIfNeeded() {
 }
 
 async function handleDeleteAllData() {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    console.warn("chrome.storage.local is unavailable.")
-    return
-  }
-  await storage.set({
-    [STORAGE_KEYS.settings]: DEFAULT_SETTINGS,
-    [STORAGE_KEYS.state]: DEFAULT_STATE,
-    [STORAGE_KEYS.events]: DEFAULT_EVENTS_BUCKET,
-    [STORAGE_KEYS.meta]: DEFAULT_META,
-    [STORAGE_KEYS.videos]: {},
-    [STORAGE_KEYS.authors]: {},
-    [STORAGE_KEYS.ratings]: {}
+  await setStorageData({
+    settings: DEFAULT_SETTINGS,
+    state: DEFAULT_STATE,
+    events: DEFAULT_EVENTS_BUCKET,
+    meta: DEFAULT_META,
+    videos: {},
+    authors: {},
+    ratings: {}
   })
 }
 
@@ -315,41 +323,26 @@ async function handleRegisterSnapshot(payload: {
   video: VideoSnapshot
   author: AuthorProfile
 }) {
-  const data = await chrome.storage.local.get([
-    STORAGE_KEYS.videos,
-    STORAGE_KEYS.authors
-  ])
-  const videos = (data[STORAGE_KEYS.videos] as NcVideos) ?? {}
-  const authors = (data[STORAGE_KEYS.authors] as NcAuthors) ?? {}
+  const { videos, authors } = await getStorageData(["videos", "authors"])
 
-  const updates: Partial<StorageShape> = {}
-  updates[STORAGE_KEYS.videos] = {
-    ...videos,
-    [payload.video.videoId]: payload.video
-  }
-  updates[STORAGE_KEYS.authors] = {
-    ...authors,
-    [payload.author.authorUrl]: payload.author
-  }
-
-  await chrome.storage.local.set(updates)
+  await setStorageData({
+    videos: {
+      ...videos,
+      [payload.video.videoId]: payload.video
+    },
+    authors: {
+      ...authors,
+      [payload.author.authorUrl]: payload.author
+    }
+  })
 }
 
 async function handleUpdateCurrentVideo(videoId: string) {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    console.warn("chrome.storage.local is unavailable.")
-    return
-  }
-  const data = await storage.get([
-    STORAGE_KEYS.state,
-    STORAGE_KEYS.settings,
-    STORAGE_KEYS.videos
+  const { state, settings, videos } = await getStorageData([
+    "state",
+    "settings",
+    "videos"
   ])
-  const state = (data[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
-  const settings =
-    (data[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
-  const videos = (data[STORAGE_KEYS.videos] as NcVideos) ?? {}
 
   if (state.currentVideoId === videoId) {
     return
@@ -367,25 +360,15 @@ async function handleUpdateCurrentVideo(videoId: string) {
     draft.currentVideoId = videoId
   })
 
-  await storage.set({
-    [STORAGE_KEYS.state]: nextState
-  })
+  await setStorageData({ state: nextState })
 }
 
 async function handleUpdatePinnedOpponent(videoId?: string) {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    console.warn("chrome.storage.local is unavailable.")
-    return
-  }
-
-  const data = await storage.get([STORAGE_KEYS.state, STORAGE_KEYS.videos])
-  const state = (data[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
-  const videos = (data[STORAGE_KEYS.videos] as NcVideos) ?? {}
+  const { state, videos } = await getStorageData(["state", "videos"])
   const nextPinned = videoId && videos[videoId] ? videoId : undefined
 
-  await storage.set({
-    [STORAGE_KEYS.state]: {
+  await setStorageData({
+    state: {
       ...state,
       pinnedOpponentVideoId: nextPinned
     }
@@ -393,21 +376,13 @@ async function handleUpdatePinnedOpponent(videoId?: string) {
 }
 
 async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
-  const result = await chrome.storage.local.get([
-    STORAGE_KEYS.events,
-    STORAGE_KEYS.state,
-    STORAGE_KEYS.settings,
-    STORAGE_KEYS.ratings,
-    STORAGE_KEYS.videos
+  const { events, state, settings, ratings, videos } = await getStorageData([
+    "events",
+    "state",
+    "settings",
+    "ratings",
+    "videos"
   ])
-
-  const events =
-    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
-  const state = (result[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
-  const settings =
-    (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
-  const ratings = (result[STORAGE_KEYS.ratings] as NcRatings) ?? {}
-  const videos = (result[STORAGE_KEYS.videos] as NcVideos) ?? {}
 
   const targetEvent = payload.eventId
     ? events.items.find(
@@ -438,9 +413,9 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
     const nextRatings = rebuildRatingsFromEvents(updatedEvents.items, settings)
 
     try {
-      await chrome.storage.local.set({
-        [STORAGE_KEYS.events]: updatedEvents,
-        [STORAGE_KEYS.ratings]: nextRatings
+      await setStorageData({
+        events: updatedEvents,
+        ratings: nextRatings
       })
       await markEventPersistent(targetEvent.id)
       await removeRetryEntry(targetEvent.id)
@@ -503,10 +478,10 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
   })
 
   try {
-    await chrome.storage.local.set({
-      [STORAGE_KEYS.events]: updatedEvents,
-      [STORAGE_KEYS.state]: updatedState,
-      [STORAGE_KEYS.ratings]: nextRatings
+    await setStorageData({
+      events: updatedEvents,
+      state: updatedState,
+      ratings: nextRatings
     })
     await markEventPersistent(eventId)
     await removeRetryEntry(eventId)
@@ -519,23 +494,11 @@ async function handleRecordEvent(payload: RecordEventMessage["payload"]) {
 }
 
 async function handleDeleteEvent(eventId: number) {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    console.warn("chrome.storage.local is unavailable.")
-    return false
-  }
-
-  const result = await storage.get([
-    STORAGE_KEYS.events,
-    STORAGE_KEYS.settings,
-    STORAGE_KEYS.ratings,
-    STORAGE_KEYS.meta
+  const { events, settings, meta } = await getStorageData([
+    "events",
+    "settings",
+    "meta"
   ])
-  const events =
-    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
-  const settings =
-    (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
-  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
 
   const index = events.items.findIndex((event) => event.id === eventId)
   if (index === -1) {
@@ -551,31 +514,17 @@ async function handleDeleteEvent(eventId: number) {
   })
   const nextRatings = rebuildRatingsFromEvents(updatedEvents.items, settings)
 
-  await storage.set({
-    [STORAGE_KEYS.events]: updatedEvents,
-    [STORAGE_KEYS.ratings]: nextRatings,
-    [STORAGE_KEYS.meta]: meta
+  await setStorageData({
+    events: updatedEvents,
+    ratings: nextRatings,
+    meta
   })
 
   return true
 }
 
 async function handleRestoreEvent(eventId: number) {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    console.warn("chrome.storage.local is unavailable.")
-    return false
-  }
-
-  const result = await storage.get([
-    STORAGE_KEYS.events,
-    STORAGE_KEYS.settings,
-    STORAGE_KEYS.ratings
-  ])
-  const events =
-    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
-  const settings =
-    (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
+  const { events, settings } = await getStorageData(["events", "settings"])
 
   const index = events.items.findIndex((event) => event.id === eventId)
   if (index === -1) {
@@ -591,31 +540,20 @@ async function handleRestoreEvent(eventId: number) {
   })
   const nextRatings = rebuildRatingsFromEvents(updatedEvents.items, settings)
 
-  await storage.set({
-    [STORAGE_KEYS.events]: updatedEvents,
-    [STORAGE_KEYS.ratings]: nextRatings
+  await setStorageData({
+    events: updatedEvents,
+    ratings: nextRatings
   })
 
   return true
 }
 
 async function handlePurgeEvent(eventId: number) {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    console.warn("chrome.storage.local is unavailable.")
-    return false
-  }
-
-  const result = await storage.get([
-    STORAGE_KEYS.events,
-    STORAGE_KEYS.settings,
-    STORAGE_KEYS.meta
+  const { events, settings, meta } = await getStorageData([
+    "events",
+    "settings",
+    "meta"
   ])
-  const events =
-    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
-  const settings =
-    (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
-  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
 
   const index = events.items.findIndex((event) => event.id === eventId)
   if (index === -1) {
@@ -632,31 +570,24 @@ async function handlePurgeEvent(eventId: number) {
   }
   const nextRatings = rebuildRatingsFromEvents(updatedEvents.items, settings)
 
-  await storage.set({
-    [STORAGE_KEYS.events]: updatedEvents,
-    [STORAGE_KEYS.ratings]: nextRatings,
-    [STORAGE_KEYS.meta]: meta
+  await setStorageData({
+    events: updatedEvents,
+    ratings: nextRatings,
+    meta
   })
 
   return true
 }
 
 async function handleToggleOverlay(enabled: boolean) {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    console.warn("chrome.storage.local is unavailable.")
-    return
-  }
-  const data = await storage.get(STORAGE_KEYS.settings)
-  const settings =
-    (data[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
+  const { settings } = await getStorageData(["settings"])
 
   if (settings.overlayAndCaptureEnabled === enabled) {
     return
   }
 
-  await storage.set({
-    [STORAGE_KEYS.settings]: {
+  await setStorageData({
+    settings: {
       ...settings,
       overlayAndCaptureEnabled: enabled
     }
@@ -664,9 +595,36 @@ async function handleToggleOverlay(enabled: boolean) {
 }
 
 async function readStateSnapshot() {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    console.warn("chrome.storage.local is unavailable.")
+  try {
+    const data = await readAllStorage()
+    const settings = normalizeSettings(data.settings)
+    const state = data.state
+    const videos = data.videos
+    const events = data.events
+    const ratings = data.ratings
+    const meta = data.meta
+    const authors = data.authors
+
+    let normalizedState = state
+    if (state.pinnedOpponentVideoId && !videos[state.pinnedOpponentVideoId]) {
+      normalizedState = {
+        ...state,
+        pinnedOpponentVideoId: undefined
+      }
+      await setStorageData({ state: normalizedState })
+    }
+
+    return {
+      settings,
+      state: normalizedState,
+      events,
+      ratings,
+      meta,
+      videos,
+      authors
+    }
+  } catch (error) {
+    console.warn("Failed to read state snapshot:", error)
     return {
       settings: DEFAULT_SETTINGS,
       state: DEFAULT_STATE,
@@ -677,76 +635,22 @@ async function readStateSnapshot() {
       authors: {}
     }
   }
-  const result = await storage.get([
-    STORAGE_KEYS.settings,
-    STORAGE_KEYS.state,
-    STORAGE_KEYS.events,
-    STORAGE_KEYS.ratings,
-    STORAGE_KEYS.meta,
-    STORAGE_KEYS.videos,
-    STORAGE_KEYS.authors
-  ])
-  const settings = normalizeSettings(
-    (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
-  )
-  const state = (result[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
-  const videos = (result[STORAGE_KEYS.videos] as NcVideos) ?? {}
-  const events =
-    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
-  const ratings = (result[STORAGE_KEYS.ratings] as NcRatings) ?? {}
-  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
-  const authors = (result[STORAGE_KEYS.authors] as NcAuthors) ?? {}
-
-  let normalizedState = state
-  if (state.pinnedOpponentVideoId && !videos[state.pinnedOpponentVideoId]) {
-    normalizedState = {
-      ...state,
-      pinnedOpponentVideoId: undefined
-    }
-    await storage.set({
-      [STORAGE_KEYS.state]: normalizedState
-    })
-  }
-
-  return {
-    settings,
-    state: normalizedState,
-    events,
-    ratings,
-    meta,
-    videos,
-    authors
-  }
 }
 
 async function handleUpdateSettings(partial: Partial<NcSettings>) {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    console.warn("chrome.storage.local is unavailable.")
-    return
-  }
-
-  const result = await storage.get([
-    STORAGE_KEYS.settings,
-    STORAGE_KEYS.events,
-    STORAGE_KEYS.state,
-    STORAGE_KEYS.videos
-  ])
-
-  const currentSettings =
-    (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
+  const {
+    settings: currentSettings,
+    events,
+    state,
+    videos
+  } = await getStorageData(["settings", "events", "state", "videos"])
   const nextSettings = normalizeSettings({ ...currentSettings, ...partial })
-  const videos = (result[STORAGE_KEYS.videos] as NcVideos) ?? {}
-
-  const updates: Partial<StorageShape> = {
-    [STORAGE_KEYS.settings]: nextSettings
+  const updates: Parameters<typeof setStorageData>[0] = {
+    settings: nextSettings
   }
 
   if (nextSettings.recentWindowSize !== currentSettings.recentWindowSize) {
-    const events =
-      (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
-    const state = (result[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
-    updates[STORAGE_KEYS.state] = {
+    updates.state = {
       ...state,
       recentWindow: rebuildRecentWindowFromEvents(
         events.items,
@@ -761,25 +665,14 @@ async function handleUpdateSettings(partial: Partial<NcSettings>) {
     nextSettings.glicko.rd !== currentSettings.glicko.rd ||
     nextSettings.glicko.volatility !== currentSettings.glicko.volatility
   ) {
-    const events =
-      (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
-    updates[STORAGE_KEYS.ratings] = rebuildRatingsFromEvents(
-      events.items,
-      nextSettings
-    )
+    updates.ratings = rebuildRatingsFromEvents(events.items, nextSettings)
   }
 
-  await storage.set(updates)
+  await setStorageData(updates)
 }
 
 async function handleMetaAction(payload: MetaActionMessage["payload"]) {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    console.warn("chrome.storage.local is unavailable.")
-    return
-  }
-  const result = await storage.get(STORAGE_KEYS.meta)
-  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const { meta } = await getStorageData(["meta"])
 
   if (payload.action === "cleanup") {
     await performCleanup()
@@ -787,8 +680,8 @@ async function handleMetaAction(payload: MetaActionMessage["payload"]) {
   }
 
   if (payload.action === "clearRetry") {
-    await storage.set({
-      [STORAGE_KEYS.meta]: {
+    await setStorageData({
+      meta: {
         ...meta,
         retryQueue: [],
         failedWrites: payload.clearFailed ? [] : meta.failedWrites
@@ -798,28 +691,26 @@ async function handleMetaAction(payload: MetaActionMessage["payload"]) {
 }
 
 async function handleRebuildRatings() {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    console.warn("chrome.storage.local is unavailable.")
-    return
-  }
-
-  const result = await storage.get([STORAGE_KEYS.events, STORAGE_KEYS.settings])
-  const settings =
-    (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
-  const events =
-    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
+  const { settings, events } = await getStorageData(["events", "settings"])
   const nextRatings = rebuildRatingsFromEvents(events.items, settings)
 
-  await storage.set({
-    [STORAGE_KEYS.ratings]: nextRatings
-  })
+  await setStorageData({ ratings: nextRatings })
 }
 
 async function handleExportData() {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    console.warn("chrome.storage.local is unavailable.")
+  try {
+    const data = await readAllStorage()
+    return {
+      [STORAGE_KEYS.settings]: data.settings,
+      [STORAGE_KEYS.state]: data.state,
+      [STORAGE_KEYS.videos]: data.videos,
+      [STORAGE_KEYS.authors]: data.authors,
+      [STORAGE_KEYS.events]: data.events,
+      [STORAGE_KEYS.ratings]: data.ratings,
+      [STORAGE_KEYS.meta]: data.meta
+    }
+  } catch (error) {
+    console.warn("chrome.storage.local is unavailable.", error)
     return {
       [STORAGE_KEYS.settings]: DEFAULT_SETTINGS,
       [STORAGE_KEYS.state]: DEFAULT_STATE,
@@ -830,29 +721,9 @@ async function handleExportData() {
       [STORAGE_KEYS.meta]: DEFAULT_META
     }
   }
-
-  const result = await storage.get(Object.values(STORAGE_KEYS))
-  return {
-    [STORAGE_KEYS.settings]:
-      (result[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS,
-    [STORAGE_KEYS.state]:
-      (result[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE,
-    [STORAGE_KEYS.videos]: (result[STORAGE_KEYS.videos] as NcVideos) ?? {},
-    [STORAGE_KEYS.authors]: (result[STORAGE_KEYS.authors] as NcAuthors) ?? {},
-    [STORAGE_KEYS.events]:
-      (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET,
-    [STORAGE_KEYS.ratings]: (result[STORAGE_KEYS.ratings] as NcRatings) ?? {},
-    [STORAGE_KEYS.meta]: (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
-  }
 }
 
 async function handleImportData(data: Partial<StorageShape>) {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    console.warn("chrome.storage.local is unavailable.")
-    return
-  }
-
   const nextSettings = normalizeSettings(
     (data[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
   )
@@ -892,14 +763,14 @@ async function handleImportData(data: Partial<StorageShape>) {
     nextSettings
   )
 
-  await storage.set({
-    [STORAGE_KEYS.settings]: nextSettings,
-    [STORAGE_KEYS.state]: rebuiltState,
-    [STORAGE_KEYS.events]: normalizedEvents,
-    [STORAGE_KEYS.meta]: normalizedMeta,
-    [STORAGE_KEYS.videos]: nextVideos,
-    [STORAGE_KEYS.authors]: nextAuthors,
-    [STORAGE_KEYS.ratings]: nextRatings
+  await setStorageData({
+    settings: nextSettings,
+    state: rebuiltState,
+    events: normalizedEvents,
+    meta: normalizedMeta,
+    videos: nextVideos,
+    authors: nextAuthors,
+    ratings: nextRatings
   })
 }
 
@@ -985,13 +856,7 @@ function insertVideoIntoRecentWindow(
 }
 
 async function markEventPersistent(eventId: number) {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    return false
-  }
-  const result = await storage.get(STORAGE_KEYS.events)
-  const events =
-    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
+  const { events } = await getStorageData(["events"])
   const index = events.items.findIndex((event) => event.id === eventId)
   if (index === -1) {
     return true
@@ -999,43 +864,32 @@ async function markEventPersistent(eventId: number) {
   if (events.items[index].persistent) {
     return true
   }
-  events.items[index] = {
-    ...events.items[index],
-    persistent: true
-  }
-  await storage.set({
-    [STORAGE_KEYS.events]: events
+
+  const updatedEvents = produce(events, (draft) => {
+    draft.items[index] = { ...draft.items[index], persistent: true }
   })
+  await setStorageData({ events: updatedEvents })
   return true
 }
 
 async function queueEventRetry(eventId: number) {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    return
-  }
-  const result = await storage.get(STORAGE_KEYS.meta)
-  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const { meta } = await getStorageData(["meta"])
   if (meta.retryQueue.some((entry) => entry.eventId === eventId)) {
     return
   }
-  meta.retryQueue.push({
-    eventId,
-    retryCount: 0,
-    lastAttempt: Date.now()
+
+  const updatedMeta = produce(meta, (draft) => {
+    draft.retryQueue.push({
+      eventId,
+      retryCount: 0,
+      lastAttempt: Date.now()
+    })
   })
-  await storage.set({
-    [STORAGE_KEYS.meta]: meta
-  })
+  await setStorageData({ meta: updatedMeta })
 }
 
 async function removeRetryEntry(eventId: number) {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    return
-  }
-  const result = await storage.get(STORAGE_KEYS.meta)
-  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const { meta } = await getStorageData(["meta"])
   const nextQueue = meta.retryQueue.filter((entry) => entry.eventId !== eventId)
   const nextFailed = meta.failedWrites.filter((id) => id !== eventId)
   if (
@@ -1044,8 +898,8 @@ async function removeRetryEntry(eventId: number) {
   ) {
     return
   }
-  await storage.set({
-    [STORAGE_KEYS.meta]: {
+  await setStorageData({
+    meta: {
       ...meta,
       retryQueue: nextQueue,
       failedWrites: nextFailed
@@ -1054,14 +908,10 @@ async function removeRetryEntry(eventId: number) {
 }
 
 async function processRetryQueue() {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    return
-  }
-  const result = await storage.get([STORAGE_KEYS.meta, STORAGE_KEYS.events])
-  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const { meta } = await getStorageData(["meta"])
   const queue = [...meta.retryQueue]
   const remaining = []
+  const failedWrites = new Set(meta.failedWrites)
   const now = Date.now()
 
   for (const entry of queue) {
@@ -1080,9 +930,7 @@ async function processRetryQueue() {
     } catch (error) {
       console.error("Retry failed", error)
       if (entry.retryCount + 1 >= RETRY_DELAYS.length) {
-        meta.failedWrites = Array.from(
-          new Set([...meta.failedWrites, entry.eventId])
-        )
+        failedWrites.add(entry.eventId)
       } else {
         remaining.push({
           ...entry,
@@ -1093,34 +941,23 @@ async function processRetryQueue() {
     }
   }
 
-  await storage.set({
-    [STORAGE_KEYS.meta]: {
-      ...meta,
-      retryQueue: remaining
-    }
+  const updatedMeta = produce(meta, (draft) => {
+    draft.retryQueue = remaining
+    draft.failedWrites = Array.from(failedWrites)
   })
+  await setStorageData({ meta: updatedMeta })
 }
 
 async function performCleanup() {
-  const storage = chrome?.storage?.local
-  if (!storage) {
-    return
-  }
-  const result = await storage.get([
-    STORAGE_KEYS.events,
-    STORAGE_KEYS.videos,
-    STORAGE_KEYS.authors,
-    STORAGE_KEYS.ratings,
-    STORAGE_KEYS.meta,
-    STORAGE_KEYS.state
-  ])
-  const events =
-    (result[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
-  const videos = (result[STORAGE_KEYS.videos] as NcVideos) ?? {}
-  const authors = (result[STORAGE_KEYS.authors] as NcAuthors) ?? {}
-  const ratings = (result[STORAGE_KEYS.ratings] as NcRatings) ?? {}
-  const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
-  const state = (result[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
+  const { events, videos, authors, ratings, meta, state } =
+    await getStorageData([
+      "events",
+      "videos",
+      "authors",
+      "ratings",
+      "meta",
+      "state"
+    ])
 
   const referencedVideos = new Set<string>()
   const referencedAuthors = new Set<string>()
@@ -1165,11 +1002,11 @@ async function performCleanup() {
     )
   )
 
-  await storage.set({
-    [STORAGE_KEYS.videos]: cleanedVideos,
-    [STORAGE_KEYS.ratings]: cleanedRatings,
-    [STORAGE_KEYS.authors]: cleanedAuthors,
-    [STORAGE_KEYS.meta]: {
+  await setStorageData({
+    videos: cleanedVideos,
+    ratings: cleanedRatings,
+    authors: cleanedAuthors,
+    meta: {
       ...meta,
       lastCleanupAt: Date.now()
     }
