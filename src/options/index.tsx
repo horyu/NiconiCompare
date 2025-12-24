@@ -199,6 +199,13 @@ export default function OptionsPage() {
     return map
   }, [snapshot])
 
+  const lastCleanupLabel = useMemo(() => {
+    if (!snapshot?.meta?.lastCleanupAt) {
+      return "未実行"
+    }
+    return new Date(snapshot.meta.lastCleanupAt).toLocaleString()
+  }, [snapshot])
+
   const verdictCountsByVideo = useMemo(() => {
     const map = new Map<
       string,
@@ -568,14 +575,6 @@ export default function OptionsPage() {
     } finally {
       setEventBusyId(null)
     }
-  }
-
-  const handleAckCleanup = async () => {
-    await chrome.runtime.sendMessage({
-      type: MESSAGE_TYPES.metaAction,
-      payload: { action: "ackCleanup" }
-    })
-    await refreshState(true)
   }
 
   const handleClearRetry = async (clearFailed = false) => {
@@ -1273,16 +1272,8 @@ export default function OptionsPage() {
               <div className="flex flex-col gap-3">
                 <h3 className="text-sm font-semibold">クリーンアップ</h3>
                 <div className="text-sm text-slate-600">
-                  needsCleanup: {snapshot.meta.needsCleanup ? "要対応" : "OK"}
+                  最終実行: {lastCleanupLabel}
                 </div>
-                {snapshot.meta.needsCleanup && (
-                  <button
-                    type="button"
-                    className="px-3 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100"
-                    onClick={handleAckCleanup}>
-                    クリーンアップ完了にする
-                  </button>
-                )}
                 <button
                   type="button"
                   className="px-3 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100"

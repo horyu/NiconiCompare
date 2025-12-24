@@ -112,7 +112,6 @@ type UpdateSettingsMessage = {
 type MetaActionMessage = {
   type: typeof MESSAGE_TYPES.metaAction
   payload:
-    | { action: "ackCleanup" }
     | { action: "clearRetry"; clearFailed?: boolean }
     | { action: "cleanup" }
 }
@@ -555,7 +554,7 @@ async function handleDeleteEvent(eventId: number) {
   await storage.set({
     [STORAGE_KEYS.events]: updatedEvents,
     [STORAGE_KEYS.ratings]: nextRatings,
-    [STORAGE_KEYS.meta]: { ...meta, needsCleanup: true }
+    [STORAGE_KEYS.meta]: meta
   })
 
   return true
@@ -636,7 +635,7 @@ async function handlePurgeEvent(eventId: number) {
   await storage.set({
     [STORAGE_KEYS.events]: updatedEvents,
     [STORAGE_KEYS.ratings]: nextRatings,
-    [STORAGE_KEYS.meta]: { ...meta, needsCleanup: true }
+    [STORAGE_KEYS.meta]: meta
   })
 
   return true
@@ -782,16 +781,6 @@ async function handleMetaAction(payload: MetaActionMessage["payload"]) {
   const result = await storage.get(STORAGE_KEYS.meta)
   const meta = (result[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
 
-  if (payload.action === "ackCleanup") {
-    await storage.set({
-      [STORAGE_KEYS.meta]: {
-        ...meta,
-        needsCleanup: false
-      }
-    })
-    return
-  }
-
   if (payload.action === "cleanup") {
     await performCleanup()
     return
@@ -888,12 +877,7 @@ async function handleImportData(data: Partial<StorageShape>) {
     items: eventItems,
     nextId: Math.max(nextEvents.nextId ?? 0, maxEventId + 1, 1)
   }
-  const normalizedMeta: NcMeta = {
-    ...nextMeta,
-    needsCleanup:
-      nextMeta.needsCleanup ||
-      normalizedEvents.items.some((event) => event.disabled)
-  }
+  const normalizedMeta: NcMeta = nextMeta
 
   const rebuiltState: NcState = {
     ...nextState,
@@ -1179,7 +1163,6 @@ async function performCleanup() {
     [STORAGE_KEYS.authors]: cleanedAuthors,
     [STORAGE_KEYS.meta]: {
       ...meta,
-      needsCleanup: false,
       lastCleanupAt: Date.now()
     }
   })

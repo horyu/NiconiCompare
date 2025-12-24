@@ -69,7 +69,6 @@ export type RetryQueueItem = {
 export type NcMeta = {
   lastReplayEventId: number
   schemaVersion: string
-  needsCleanup: boolean
   lastCleanupAt: number
   retryQueue: RetryQueueItem[]
   failedWrites: number[]
