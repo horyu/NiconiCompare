@@ -10,7 +10,11 @@ import {
 
 import "../style.css"
 
-import { MAX_RECENT_WINDOW_SIZE, MESSAGE_TYPES } from "../lib/constants"
+import {
+  DEFAULT_SETTINGS,
+  MAX_RECENT_WINDOW_SIZE,
+  MESSAGE_TYPES
+} from "../lib/constants"
 import type {
   CompareEvent,
   NcAuthors,
@@ -361,8 +365,31 @@ export default function OptionsPage() {
       setSettingsForm((prev) => ({ ...prev, [field]: event.target.value }))
     }
 
-  const handleSettingsSubmit = async (event: FormEvent) => {
-    event.preventDefault()
+  const applySettingsToForm = (settings: NcSettings) => {
+    setSettingsForm({
+      recentWindowSize: String(settings.recentWindowSize),
+      overlayAutoCloseMs: String(settings.overlayAutoCloseMs),
+      glickoRating: String(settings.glicko.rating),
+      glickoRd: String(settings.glicko.rd),
+      glickoVolatility: String(settings.glicko.volatility)
+    })
+  }
+
+  const hasUnsavedSettings = useMemo(() => {
+    if (!snapshot) return false
+    return (
+      settingsForm.recentWindowSize !==
+        String(snapshot.settings.recentWindowSize) ||
+      settingsForm.overlayAutoCloseMs !==
+        String(snapshot.settings.overlayAutoCloseMs) ||
+      settingsForm.glickoRating !== String(snapshot.settings.glicko.rating) ||
+      settingsForm.glickoRd !== String(snapshot.settings.glicko.rd) ||
+      settingsForm.glickoVolatility !==
+        String(snapshot.settings.glicko.volatility)
+    )
+  }, [settingsForm, snapshot])
+
+  const saveSettings = async () => {
     setSavingSettings(true)
     try {
       const payload: Partial<NcSettings> = {
@@ -383,24 +410,35 @@ export default function OptionsPage() {
       }
       await refreshState(true)
       showToast("success", "設定を更新しました。")
+      return true
     } catch (error) {
       console.error(error)
       showToast("error", "設定の更新に失敗しました。")
       if (snapshot) {
-        setSettingsForm({
-          recentWindowSize: String(snapshot.settings.recentWindowSize),
-          overlayAutoCloseMs: String(snapshot.settings.overlayAutoCloseMs),
-          glickoRating: String(snapshot.settings.glicko.rating),
-          glickoRd: String(snapshot.settings.glicko.rd),
-          glickoVolatility: String(snapshot.settings.glicko.volatility)
-        })
+        applySettingsToForm(snapshot.settings)
       }
+      return false
     } finally {
       setSavingSettings(false)
     }
   }
 
+  const handleSettingsSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    await saveSettings()
+  }
+
+  const handleDiscardSettings = () => {
+    if (!snapshot) return
+    applySettingsToForm(snapshot.settings)
+  }
+
+  const handleResetSettings = () => {
+    applySettingsToForm(DEFAULT_SETTINGS)
+  }
+
   const handleRebuildRatings = async () => {
+    if (hasUnsavedSettings) return
     setRebuildingRatings(true)
     try {
       const response = await chrome.runtime.sendMessage({
@@ -1155,8 +1193,30 @@ export default function OptionsPage() {
                 </button>
                 <button
                   type="button"
+                  onClick={handleDiscardSettings}
+                  disabled={!hasUnsavedSettings || savingSettings || !snapshot}
+                  title={
+                    hasUnsavedSettings
+                      ? "保存せずに変更を破棄します。"
+                      : "変更がありません。"
+                  }
+                  className="px-4 py-2 rounded-md border border-slate-200 text-sm disabled:opacity-50">
+                  変更を破棄
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResetSettings}
+                  disabled={savingSettings}
+                  className="px-4 py-2 rounded-md border border-slate-200 text-sm disabled:opacity-50">
+                  デフォルト設定に戻す
+                </button>
+                <button
+                  type="button"
                   onClick={handleRebuildRatings}
-                  disabled={rebuildingRatings}
+                  disabled={rebuildingRatings || hasUnsavedSettings}
+                  title={
+                    hasUnsavedSettings ? "保存してから再計算してください。" : ""
+                  }
                   className="px-4 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100 disabled:opacity-50">
                   レーティング再計算
                 </button>
