@@ -83,6 +83,10 @@ src/
 ├── contents/     # Content Script
 ├── popup/        # Popup UI
 ├── options/      # Options UI
+│   ├── tabs/       # タブコンポーネント (Videos, Events, Settings, Data)
+│   ├── hooks/      # カスタムhooks (useOptionsData)
+│   ├── components/ # 共通コンポーネント (EventVideoLabel, Pagination)
+│   └── utils/      # ユーティリティ (sessionStorage)
 ├── components/   # 共有コンポーネント
 └── lib/          # ユーティリティ
 ```
