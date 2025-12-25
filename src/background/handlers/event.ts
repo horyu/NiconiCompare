@@ -1,5 +1,6 @@
 import { produce } from "immer"
 
+import { handleBackgroundError } from "../../lib/error-handler"
 import { updatePairRatings } from "../../lib/glicko"
 import type {
   CompareEvent,
@@ -197,7 +198,7 @@ async function persistEventChanges(
     await removeRetryEntry(eventId)
     return eventId
   } catch (error) {
-    console.error("Failed to persist event", error)
+    handleBackgroundError(error, "handleRecordEvent.persistEventChanges")
     await queueEventRetry(eventId)
     throw error
   }

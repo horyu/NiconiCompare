@@ -5,6 +5,7 @@ import {
   DEFAULT_STATE,
   MESSAGE_TYPES
 } from "../lib/constants"
+import { handleBackgroundError } from "../lib/error-handler"
 import type {
   AuthorProfile,
   NcSettings,
@@ -37,7 +38,7 @@ import { processRetryQueue } from "./services/retry"
 import { getRawStorageData, setStorageData } from "./services/storage"
 
 processRetryQueue().catch((error) =>
-  console.error("Retry queue processing failed", error)
+  handleBackgroundError(error, "processRetryQueue.initial")
 )
 
 if (chrome?.alarms) {
@@ -46,12 +47,12 @@ if (chrome?.alarms) {
   chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === "nc.processRetry") {
       processRetryQueue().catch((error) =>
-        console.error("Retry queue processing failed", error)
+        handleBackgroundError(error, "processRetryQueue.alarm")
       )
     }
     if (alarm.name === "nc.autoCleanup") {
       runAutoCleanupIfNeeded().catch((error) =>
-        console.error("Failed to run auto cleanup", error)
+        handleBackgroundError(error, "autoCleanup.alarm")
       )
     }
   })
@@ -161,18 +162,18 @@ type Message =
 
 chrome.runtime.onInstalled.addListener(() => {
   ensureDefaults().catch((error) =>
-    console.error("Failed to init defaults", error)
+    handleBackgroundError(error, "ensureDefaults.onInstalled")
   )
   runAutoCleanupIfNeeded().catch((error) =>
-    console.error("Failed to run auto cleanup", error)
+    handleBackgroundError(error, "autoCleanup.onInstalled")
   )
 })
 
 ensureDefaults().catch((error) =>
-  console.error("Failed to init defaults", error)
+  handleBackgroundError(error, "ensureDefaults.startup")
 )
 runAutoCleanupIfNeeded().catch((error) =>
-  console.error("Failed to run auto cleanup", error)
+  handleBackgroundError(error, "autoCleanup.startup")
 )
 
 chrome.runtime.onMessage.addListener(
@@ -250,7 +251,7 @@ chrome.runtime.onMessage.addListener(
             sendResponse({ ok: false, error: "Unknown message" })
         }
       } catch (error) {
-        console.error("background message error", error)
+        handleBackgroundError(error, "backgroundMessage")
         sendResponse({
           ok: false,
           error: error instanceof Error ? error.message : "Unexpected error"

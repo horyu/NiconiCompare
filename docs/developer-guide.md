@@ -98,6 +98,7 @@ src/
 ### 2.3 コーディング規約
 
 TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関数/変数), snake_case (storage キー)
+- エラーハンドリングは `src/lib/error-handler.ts` を使用し、`console.error` の直書きは避ける
 
 ### 2.4 コード品質チェック
 

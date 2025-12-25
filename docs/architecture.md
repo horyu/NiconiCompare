@@ -426,6 +426,15 @@ async function saveCompareEvent(event: CompareEvent) {
 
 **方針**: Storage 書き込みリトライ、JSON-LD 取得失敗時の扱い、Service Worker 停止対策の詳細は `docs/spec.md` と実装を正とする。
 
+**共通ユーティリティ**: `src/lib/error-handler.ts`
+- Background: `handleBackgroundError(error, context)` でログを統一
+- UI: `handleUIError(error, context, showToast?, userMessage?)` でログ + 通知
+- `NcError`: UI でユーザー向けメッセージを保持する例外（`userMessage` を表示）
+
+**コンテキスト文字列**:
+- 例: `options:events:purge`, `dom-observer:parse-ld-json`
+- ログの追跡性を上げるため、呼び出し元の機能を短く付与する
+
 ---
 
 ## 9. パフォーマンスベンチマーク

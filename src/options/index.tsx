@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react"
 import "../style.css"
 
 import { MESSAGE_TYPES } from "../lib/constants"
+import { handleUIError, NcError } from "../lib/error-handler"
 import { useOptionsData } from "./hooks/useOptionsData"
 import { DataTab } from "./tabs/DataTab"
 import { EventsTab } from "./tabs/EventsTab"
@@ -73,12 +74,15 @@ export default function OptionsPage() {
         payload: { showEventThumbnails: checked }
       })
       if (!response?.ok) {
-        throw new Error(response?.error ?? "update failed")
+        throw new NcError(
+          response?.error ?? "update failed",
+          "options:toggle-event-thumbnails",
+          "設定の更新に失敗しました。"
+        )
       }
       await refreshState(true)
     } catch (error) {
-      console.error(error)
-      showToast("error", "設定の更新に失敗しました。")
+      handleUIError(error, "options:toggle-event-thumbnails", showToast)
       setEventShowThumbnails(snapshot?.settings.showEventThumbnails ?? true)
     }
   }

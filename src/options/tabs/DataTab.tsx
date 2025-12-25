@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
+import { handleUIError, NcError } from "../../lib/error-handler"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 
 type DataTabProps = {
@@ -58,13 +59,16 @@ export const DataTab = ({
         type: MESSAGE_TYPES.deleteAllData
       })
       if (!response?.ok) {
-        throw new Error(response?.error ?? "delete all failed")
+        throw new NcError(
+          response?.error ?? "delete all failed",
+          "options:data:delete-all",
+          "全データの削除に失敗しました。"
+        )
       }
       await refreshState(true)
       showToast("success", "全データを削除しました。")
     } catch (error) {
-      console.error(error)
-      showToast("error", "全データの削除に失敗しました。")
+      handleUIError(error, "options:data:delete-all", showToast)
     } finally {
       setDeletingAll(false)
     }
@@ -77,7 +81,11 @@ export const DataTab = ({
         type: MESSAGE_TYPES.exportData
       })
       if (!response?.ok) {
-        throw new Error(response?.error ?? "export failed")
+        throw new NcError(
+          response?.error ?? "export failed",
+          "options:data:export",
+          "エクスポートに失敗しました。"
+        )
       }
       const data = JSON.stringify(response.data, null, 2)
       const blob = new Blob([data], { type: "application/json" })
@@ -96,8 +104,7 @@ export const DataTab = ({
       URL.revokeObjectURL(url)
       showToast("success", "エクスポートしました。")
     } catch (error) {
-      console.error(error)
-      showToast("error", "エクスポートに失敗しました。")
+      handleUIError(error, "options:data:export", showToast)
     } finally {
       setExporting(false)
     }
@@ -124,7 +131,11 @@ export const DataTab = ({
         payload: { data }
       })
       if (!response?.ok) {
-        throw new Error(response?.error ?? "import failed")
+        throw new NcError(
+          response?.error ?? "import failed",
+          "options:data:import",
+          "インポートに失敗しました。"
+        )
       }
       if (importFileRef.current) {
         importFileRef.current.value = ""
@@ -133,8 +144,7 @@ export const DataTab = ({
       await refreshState(true)
       showToast("success", "インポートしました。")
     } catch (error) {
-      console.error(error)
-      showToast("error", "インポートに失敗しました。")
+      handleUIError(error, "options:data:import", showToast)
     } finally {
       setImporting(false)
     }

@@ -1,5 +1,6 @@
 import { produce } from "immer"
 
+import { handleBackgroundError } from "../../lib/error-handler"
 import { getStorageData, setStorageData } from "./storage"
 
 const RETRY_DELAYS = [1000, 3000, 5000]
@@ -77,7 +78,7 @@ export async function processRetryQueue() {
       }
       await removeRetryEntry(entry.eventId)
     } catch (error) {
-      console.error("Retry failed", error)
+      handleBackgroundError(error, "processRetryQueue.retry")
       if (entry.retryCount + 1 >= RETRY_DELAYS.length) {
         failedWrites.add(entry.eventId)
       } else {

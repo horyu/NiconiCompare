@@ -11,6 +11,7 @@ import {
   MAX_RECENT_WINDOW_SIZE,
   MESSAGE_TYPES
 } from "../../lib/constants"
+import { handleUIError, NcError } from "../../lib/error-handler"
 import type { NcSettings } from "../../lib/types"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 
@@ -91,14 +92,17 @@ export const SettingsTab = ({
         payload
       })
       if (!response?.ok) {
-        throw new Error(response?.error ?? "update failed")
+        throw new NcError(
+          response?.error ?? "update failed",
+          "options:settings:update",
+          "設定の更新に失敗しました。"
+        )
       }
       await refreshState(true)
       showToast("success", "設定を更新しました。")
       return true
     } catch (error) {
-      console.error(error)
-      showToast("error", "設定の更新に失敗しました。")
+      handleUIError(error, "options:settings:update", showToast)
       applySettingsToForm(snapshot.settings)
       return false
     } finally {
@@ -127,13 +131,16 @@ export const SettingsTab = ({
         type: MESSAGE_TYPES.rebuildRatings
       })
       if (!response?.ok) {
-        throw new Error(response?.error ?? "rebuild failed")
+        throw new NcError(
+          response?.error ?? "rebuild failed",
+          "options:settings:rebuild",
+          "再計算に失敗しました。"
+        )
       }
       await refreshState(true)
       showToast("success", "レーティングを再計算しました。")
     } catch (error) {
-      console.error(error)
-      showToast("error", "再計算に失敗しました。")
+      handleUIError(error, "options:settings:rebuild", showToast)
     } finally {
       setRebuildingRatings(false)
     }

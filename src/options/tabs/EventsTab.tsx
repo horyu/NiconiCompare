@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
+import { handleUIError, NcError } from "../../lib/error-handler"
 import type { CompareEvent, Verdict } from "../../lib/types"
 import { EventVideoLabel } from "../components/EventVideoLabel"
 import { Pagination } from "../components/Pagination"
@@ -131,13 +132,16 @@ export const EventsTab = ({
         }
       })
       if (!response?.ok) {
-        throw new Error(response?.error ?? "update failed")
+        throw new NcError(
+          response?.error ?? "update failed",
+          "options:events:update",
+          "イベント更新に失敗しました。"
+        )
       }
       await refreshState(true)
       showToast("success", "イベントを更新しました。")
     } catch (error) {
-      console.error(error)
-      showToast("error", "イベント更新に失敗しました。")
+      handleUIError(error, "options:events:update", showToast)
     } finally {
       setEventBusyId(null)
     }
@@ -151,13 +155,16 @@ export const EventsTab = ({
         payload: { eventId }
       })
       if (!response?.ok) {
-        throw new Error(response?.error ?? "delete failed")
+        throw new NcError(
+          response?.error ?? "delete failed",
+          "options:events:disable",
+          "イベントの無効化に失敗しました。"
+        )
       }
       await refreshState(true)
       showToast("success", "イベントを無効化しました。")
     } catch (error) {
-      console.error(error)
-      showToast("error", "イベントの無効化に失敗しました。")
+      handleUIError(error, "options:events:disable", showToast)
     } finally {
       setEventBusyId(null)
     }
@@ -171,13 +178,16 @@ export const EventsTab = ({
         payload: { eventId }
       })
       if (!response?.ok) {
-        throw new Error(response?.error ?? "restore failed")
+        throw new NcError(
+          response?.error ?? "restore failed",
+          "options:events:restore",
+          "イベントの有効化に失敗しました。"
+        )
       }
       await refreshState(true)
       showToast("success", "イベントを有効化しました。")
     } catch (error) {
-      console.error(error)
-      showToast("error", "イベントの有効化に失敗しました。")
+      handleUIError(error, "options:events:restore", showToast)
     } finally {
       setEventBusyId(null)
     }
@@ -195,13 +205,16 @@ export const EventsTab = ({
         payload: { eventId }
       })
       if (!response?.ok) {
-        throw new Error(response?.error ?? "purge failed")
+        throw new NcError(
+          response?.error ?? "purge failed",
+          "options:events:purge",
+          "イベントの削除に失敗しました。"
+        )
       }
       await refreshState(true)
       showToast("success", "イベントを削除しました。")
     } catch (error) {
-      console.error(error)
-      showToast("error", "イベントの削除に失敗しました。")
+      handleUIError(error, "options:events:purge", showToast)
     } finally {
       setEventBusyId(null)
     }

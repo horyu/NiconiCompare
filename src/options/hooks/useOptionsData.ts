@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
+import { handleUIError } from "../../lib/error-handler"
 import type {
   NcAuthors,
   NcEventsBucket,
@@ -54,7 +55,7 @@ export const useOptionsData = (): UseOptionsDataResult => {
       const bytes = await chrome.storage.local.getBytesInUse()
       setBytesInUse(bytes)
     } catch (error) {
-      console.error("Failed to get bytes in use:", error)
+      handleUIError(error, "options:bytes-in-use")
       setBytesInUse(null)
     }
 
