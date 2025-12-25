@@ -184,6 +184,9 @@ export const DataTab = ({
               type="button"
               onClick={handleImport}
               disabled={importing || !importFileName}
+              title={
+                !importFileName ? "ファイルを選択してください。" : undefined
+              }
               className="px-3 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100 disabled:opacity-50">
               JSON インポート
             </button>
