@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
 import { handleUIError, NcError } from "../../lib/error-handler"
@@ -23,12 +23,9 @@ export const DataTab = ({
   const [importFileName, setImportFileName] = useState("")
   const importFileRef = useRef<HTMLInputElement | null>(null)
 
-  const lastCleanupLabel = useMemo(() => {
-    if (!snapshot.meta?.lastCleanupAt) {
-      return "未実行"
-    }
-    return new Date(snapshot.meta.lastCleanupAt).toLocaleString()
-  }, [snapshot])
+  const lastCleanupLabel = snapshot.meta?.lastCleanupAt
+    ? new Date(snapshot.meta.lastCleanupAt).toLocaleString()
+    : "未実行"
 
   const handleClearRetry = async (clearFailed = false) => {
     await chrome.runtime.sendMessage({

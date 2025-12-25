@@ -192,10 +192,8 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
     verdictCountsByVideo
   ])
 
-  const pagedVideos = useMemo(() => {
-    const start = (videoPage - 1) * VIDEO_PAGE_SIZE
-    return filteredVideos.slice(start, start + VIDEO_PAGE_SIZE)
-  }, [filteredVideos, videoPage])
+  const start = (videoPage - 1) * VIDEO_PAGE_SIZE
+  const pagedVideos = filteredVideos.slice(start, start + VIDEO_PAGE_SIZE)
 
   const videoTotalPages = Math.max(
     1,

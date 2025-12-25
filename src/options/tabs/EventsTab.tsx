@@ -103,10 +103,8 @@ export const EventsTab = ({
     return events.sort((a, b) => b.id - a.id)
   }, [snapshot, eventIncludeDeleted, eventSearch, eventVerdict])
 
-  const pagedEvents = useMemo(() => {
-    const start = (eventPage - 1) * EVENT_PAGE_SIZE
-    return filteredEvents.slice(start, start + EVENT_PAGE_SIZE)
-  }, [eventPage, filteredEvents])
+  const start = (eventPage - 1) * EVENT_PAGE_SIZE
+  const pagedEvents = filteredEvents.slice(start, start + EVENT_PAGE_SIZE)
 
   const eventTotalPages = Math.max(
     1,

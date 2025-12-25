@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useState,
-  type ChangeEvent,
-  type FormEvent
-} from "react"
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
 
 import {
   DEFAULT_SETTINGS,
@@ -62,18 +56,15 @@ export const SettingsTab = ({
     })
   }
 
-  const hasUnsavedSettings = useMemo(() => {
-    return (
-      settingsForm.recentWindowSize !==
-        String(snapshot.settings.recentWindowSize) ||
-      settingsForm.overlayAutoCloseMs !==
-        String(snapshot.settings.overlayAutoCloseMs) ||
-      settingsForm.glickoRating !== String(snapshot.settings.glicko.rating) ||
-      settingsForm.glickoRd !== String(snapshot.settings.glicko.rd) ||
-      settingsForm.glickoVolatility !==
-        String(snapshot.settings.glicko.volatility)
-    )
-  }, [settingsForm, snapshot])
+  const hasUnsavedSettings =
+    settingsForm.recentWindowSize !==
+      String(snapshot.settings.recentWindowSize) ||
+    settingsForm.overlayAutoCloseMs !==
+      String(snapshot.settings.overlayAutoCloseMs) ||
+    settingsForm.glickoRating !== String(snapshot.settings.glicko.rating) ||
+    settingsForm.glickoRd !== String(snapshot.settings.glicko.rd) ||
+    settingsForm.glickoVolatility !==
+      String(snapshot.settings.glicko.volatility)
 
   const saveSettings = async () => {
     setSavingSettings(true)
