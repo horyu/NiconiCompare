@@ -60,6 +60,8 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 | **Options**        | 詳細設定、データ操作、エクスポート/インポート  | React 18.2.0, TypeScript            |
 | **Storage**        | 永続化層                                       | chrome.storage.local (Key-Value)  |
 
+Service Worker の内部構成は `background/handlers`（メッセージ単位の処理）、`background/services`（Storage/リトライ/クリーンアップ）、`background/utils`（正規化・集約ロジック）に分離している。
+
 ---
 
 ## 2. データフロー

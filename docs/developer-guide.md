@@ -79,7 +79,9 @@ Chrome: `chrome://extensions/` → デベロッパーモード → `build/chrome
 ```
 src/
 ├── background/   # Service Worker
-│   └── services/ # Background helpers
+│   ├── handlers/ # Message handlers
+│   ├── services/ # Background services
+│   └── utils/    # Background helpers
 ├── contents/     # Content Script
 ├── popup/        # Popup UI
 ├── options/      # Options UI
