@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
+import { sendNcMessage } from "../../lib/messages"
 import type { Verdict } from "../../lib/types"
 
 type UseVerdictSubmissionParams = {
@@ -30,7 +31,7 @@ export function useVerdictSubmission({
           return
         }
 
-        const response = await chrome.runtime.sendMessage({
+        const response = await sendNcMessage({
           type: MESSAGE_TYPES.deleteEvent,
           payload: { eventId: lastEventId }
         })
@@ -38,7 +39,7 @@ export function useVerdictSubmission({
         setLastVerdict(undefined)
         setLastEventId(undefined)
 
-        if (response?.ok) {
+        if (response.ok) {
           await refreshState()
         }
         return
@@ -46,7 +47,7 @@ export function useVerdictSubmission({
 
       if (!opponentVideoId || !currentVideoId) return
 
-      const response = await chrome.runtime.sendMessage({
+      const response = await sendNcMessage({
         type: MESSAGE_TYPES.recordEvent,
         payload: {
           currentVideoId,
@@ -56,7 +57,7 @@ export function useVerdictSubmission({
         }
       })
 
-      if (response?.ok) {
+      if (response.ok) {
         setLastVerdict(verdict)
         setLastEventId(response.eventId)
         await refreshState()

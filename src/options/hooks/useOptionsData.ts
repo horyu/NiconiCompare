@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
 import { handleUIError } from "../../lib/error-handler"
+import { sendNcMessage } from "../../lib/messages"
 import type {
   NcAuthors,
   NcEventsBucket,
@@ -41,11 +42,11 @@ export const useOptionsData = (): UseOptionsDataResult => {
       setLoading(true)
       setError(undefined)
     }
-    const response = await chrome.runtime.sendMessage({
+    const response = await sendNcMessage({
       type: MESSAGE_TYPES.requestState
     })
-    if (!response?.ok) {
-      setError(response?.error ?? "状態取得に失敗しました。")
+    if (!response.ok) {
+      setError(response.error ?? "状態取得に失敗しました。")
       setLoading(false)
       return
     }

@@ -6,13 +6,7 @@ import {
   MESSAGE_TYPES
 } from "../lib/constants"
 import { handleBackgroundError } from "../lib/error-handler"
-import type {
-  AuthorProfile,
-  NcSettings,
-  StorageShape,
-  Verdict,
-  VideoSnapshot
-} from "../lib/types"
+import type { Message } from "../lib/messages"
 import {
   handleDeleteAllData,
   handleExportData,
@@ -57,108 +51,6 @@ if (chrome?.alarms) {
     }
   })
 }
-type RegisterSnapshotMessage = {
-  type: typeof MESSAGE_TYPES.registerSnapshot
-  payload: { video: VideoSnapshot; author: AuthorProfile }
-}
-
-type UpdateCurrentVideoMessage = {
-  type: typeof MESSAGE_TYPES.updateCurrentVideo
-  payload: { videoId: string }
-}
-
-type UpdatePinnedOpponentMessage = {
-  type: typeof MESSAGE_TYPES.updatePinnedOpponent
-  payload: { videoId?: string }
-}
-
-type RecordEventMessage = {
-  type: typeof MESSAGE_TYPES.recordEvent
-  payload: {
-    currentVideoId: string
-    opponentVideoId: string
-    verdict: Verdict
-    eventId?: number
-  }
-}
-
-type DeleteEventMessage = {
-  type: typeof MESSAGE_TYPES.deleteEvent
-  payload: {
-    eventId: number
-  }
-}
-
-type RestoreEventMessage = {
-  type: typeof MESSAGE_TYPES.restoreEvent
-  payload: {
-    eventId: number
-  }
-}
-
-type PurgeEventMessage = {
-  type: typeof MESSAGE_TYPES.purgeEvent
-  payload: {
-    eventId: number
-  }
-}
-
-type DeleteAllDataMessage = {
-  type: typeof MESSAGE_TYPES.deleteAllData
-}
-
-type ToggleOverlayMessage = {
-  type: typeof MESSAGE_TYPES.toggleOverlay
-  payload: { enabled: boolean }
-}
-
-type UpdateSettingsMessage = {
-  type: typeof MESSAGE_TYPES.updateSettings
-  payload: Partial<NcSettings>
-}
-
-type MetaActionMessage = {
-  type: typeof MESSAGE_TYPES.metaAction
-  payload:
-    | { action: "clearRetry"; clearFailed?: boolean }
-    | { action: "cleanup" }
-}
-
-type RebuildRatingsMessage = {
-  type: typeof MESSAGE_TYPES.rebuildRatings
-}
-
-type ExportDataMessage = {
-  type: typeof MESSAGE_TYPES.exportData
-}
-
-type ImportDataMessage = {
-  type: typeof MESSAGE_TYPES.importData
-  payload: {
-    data: Partial<StorageShape>
-  }
-}
-
-type RequestStateMessage = {
-  type: typeof MESSAGE_TYPES.requestState
-}
-
-type Message =
-  | RegisterSnapshotMessage
-  | UpdateCurrentVideoMessage
-  | UpdatePinnedOpponentMessage
-  | RecordEventMessage
-  | DeleteEventMessage
-  | RestoreEventMessage
-  | PurgeEventMessage
-  | DeleteAllDataMessage
-  | ToggleOverlayMessage
-  | UpdateSettingsMessage
-  | MetaActionMessage
-  | RebuildRatingsMessage
-  | ExportDataMessage
-  | ImportDataMessage
-  | RequestStateMessage
 
 chrome.runtime.onInstalled.addListener(() => {
   ensureDefaults().catch((error) =>

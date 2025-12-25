@@ -6,6 +6,7 @@ import {
   MESSAGE_TYPES
 } from "../../lib/constants"
 import { handleUIError, NcError } from "../../lib/error-handler"
+import { sendNcMessage } from "../../lib/messages"
 import type { NcSettings } from "../../lib/types"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 
@@ -78,13 +79,13 @@ export const SettingsTab = ({
           volatility: Number(settingsForm.glickoVolatility)
         }
       }
-      const response = await chrome.runtime.sendMessage({
+      const response = await sendNcMessage({
         type: MESSAGE_TYPES.updateSettings,
         payload
       })
-      if (!response?.ok) {
+      if (!response.ok) {
         throw new NcError(
-          response?.error ?? "update failed",
+          response.error ?? "update failed",
           "options:settings:update",
           "設定の更新に失敗しました。"
         )
@@ -118,12 +119,12 @@ export const SettingsTab = ({
     if (hasUnsavedSettings) return
     setRebuildingRatings(true)
     try {
-      const response = await chrome.runtime.sendMessage({
+      const response = await sendNcMessage({
         type: MESSAGE_TYPES.rebuildRatings
       })
-      if (!response?.ok) {
+      if (!response.ok) {
         throw new NcError(
-          response?.error ?? "rebuild failed",
+          response.error ?? "rebuild failed",
           "options:settings:rebuild",
           "再計算に失敗しました。"
         )

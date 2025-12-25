@@ -3,6 +3,7 @@ import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useCallback, useState } from "react"
 
 import { MESSAGE_TYPES } from "../lib/constants"
+import { sendNcMessage } from "../lib/messages"
 import type { AuthorProfile, VideoSnapshot } from "../lib/types"
 import { OpponentSelector } from "./components/OpponentSelector"
 import { VerdictButtons } from "./components/VerdictButtons"
@@ -75,12 +76,12 @@ export default function Overlay() {
 
       setCurrentVideoId(videoData.video.videoId)
 
-      await chrome.runtime.sendMessage({
+      await sendNcMessage({
         type: MESSAGE_TYPES.registerSnapshot,
         payload: { video: videoData.video, author: videoData.author }
       })
 
-      await chrome.runtime.sendMessage({
+      await sendNcMessage({
         type: MESSAGE_TYPES.updateCurrentVideo,
         payload: { videoId: videoData.video.videoId }
       })
@@ -110,12 +111,12 @@ export default function Overlay() {
     }
 
     const nextPinned = pinnedOpponentVideoId ? undefined : opponentVideoId
-    const response = await chrome.runtime.sendMessage({
+    const response = await sendNcMessage({
       type: MESSAGE_TYPES.updatePinnedOpponent,
       payload: { videoId: nextPinned }
     })
 
-    if (response?.ok) {
+    if (response.ok) {
       setPinnedOpponentVideoId(nextPinned)
       await refreshState()
     }

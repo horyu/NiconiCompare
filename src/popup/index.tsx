@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import "../style.css"
 
 import { MESSAGE_TYPES } from "../lib/constants"
+import { sendNcMessage } from "../lib/messages"
 import type { NcEventsBucket, NcMeta, NcSettings, NcVideos } from "../lib/types"
 
 type PopupSnapshot = {
@@ -23,11 +24,11 @@ export default function Popup() {
 
   const refreshState = async () => {
     setLoading(true)
-    const response = await chrome.runtime.sendMessage({
+    const response = await sendNcMessage({
       type: MESSAGE_TYPES.requestState
     })
-    if (!response?.ok) {
-      setError(response?.error ?? "状態取得に失敗しました")
+    if (!response.ok) {
+      setError(response.error ?? "状態取得に失敗しました")
       setLoading(false)
       return
     }
@@ -37,7 +38,7 @@ export default function Popup() {
 
   const toggleOverlay = async (enabled: boolean) => {
     setError(undefined)
-    await chrome.runtime.sendMessage({
+    await sendNcMessage({
       type: MESSAGE_TYPES.toggleOverlay,
       payload: { enabled }
     })

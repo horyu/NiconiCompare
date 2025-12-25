@@ -25,7 +25,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 │  - JSON-LD パース → VideoSnapshot 生成                       │
 │  - 比較カードUI (React)                                      │
 └────────────────┬────────────────────────────────────────────┘
-                 │ chrome.runtime.sendMessage
+                 │ sendNcMessage (src/lib/messages.ts)
                  ▼
 ┌─────────────────────────────────────────────────────────────┐
 │         Service Worker (background/)                        │
@@ -61,6 +61,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 | **Storage**        | 永続化層                                       | chrome.storage.local (Key-Value)  |
 
 Service Worker の内部構成は `background/handlers`（メッセージ単位の処理）、`background/services`（Storage/リトライ/クリーンアップ）、`background/utils`（正規化・集約ロジック）に分離している。
+メッセージ送信は `sendNcMessage` を介して型をチェックする。
 
 ---
 

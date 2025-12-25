@@ -5,6 +5,7 @@ import {
   MESSAGE_TYPES,
   STORAGE_KEYS
 } from "../../lib/constants"
+import { sendNcMessage } from "../../lib/messages"
 import type { NcSettings, NcState, VideoSnapshot } from "../../lib/types"
 
 type StateResponse = {
@@ -55,11 +56,11 @@ export function useOverlayState() {
   }, [])
 
   const refreshState = useCallback(async () => {
-    const response = await chrome.runtime.sendMessage({
+    const response = await sendNcMessage({
       type: MESSAGE_TYPES.requestState
     })
 
-    if (!response?.ok) {
+    if (!response.ok) {
       return
     }
 

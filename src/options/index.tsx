@@ -4,6 +4,7 @@ import "../style.css"
 
 import { MESSAGE_TYPES } from "../lib/constants"
 import { handleUIError, NcError } from "../lib/error-handler"
+import { sendNcMessage } from "../lib/messages"
 import { useOptionsData } from "./hooks/useOptionsData"
 import { DataTab } from "./tabs/DataTab"
 import { EventsTab } from "./tabs/EventsTab"
@@ -69,13 +70,13 @@ export default function OptionsPage() {
   const handleToggleEventThumbnails = async (checked: boolean) => {
     setEventShowThumbnails(checked)
     try {
-      const response = await chrome.runtime.sendMessage({
+      const response = await sendNcMessage({
         type: MESSAGE_TYPES.updateSettings,
         payload: { showEventThumbnails: checked }
       })
-      if (!response?.ok) {
+      if (!response.ok) {
         throw new NcError(
-          response?.error ?? "update failed",
+          response.error ?? "update failed",
           "options:toggle-event-thumbnails",
           "設定の更新に失敗しました。"
         )

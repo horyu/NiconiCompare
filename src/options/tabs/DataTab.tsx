@@ -2,6 +2,7 @@ import { useRef, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
 import { handleUIError, NcError } from "../../lib/error-handler"
+import { sendNcMessage } from "../../lib/messages"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 
 type DataTabProps = {
@@ -28,7 +29,7 @@ export const DataTab = ({
     : "未実行"
 
   const handleClearRetry = async (clearFailed = false) => {
-    await chrome.runtime.sendMessage({
+    await sendNcMessage({
       type: MESSAGE_TYPES.metaAction,
       payload: { action: "clearRetry", clearFailed }
     })
@@ -36,7 +37,7 @@ export const DataTab = ({
   }
 
   const handleCleanup = async () => {
-    await chrome.runtime.sendMessage({
+    await sendNcMessage({
       type: MESSAGE_TYPES.metaAction,
       payload: { action: "cleanup" }
     })
@@ -52,12 +53,12 @@ export const DataTab = ({
     }
     setDeletingAll(true)
     try {
-      const response = await chrome.runtime.sendMessage({
+      const response = await sendNcMessage({
         type: MESSAGE_TYPES.deleteAllData
       })
-      if (!response?.ok) {
+      if (!response.ok) {
         throw new NcError(
-          response?.error ?? "delete all failed",
+          response.error ?? "delete all failed",
           "options:data:delete-all",
           "全データの削除に失敗しました。"
         )
@@ -74,12 +75,12 @@ export const DataTab = ({
   const handleExport = async () => {
     setExporting(true)
     try {
-      const response = await chrome.runtime.sendMessage({
+      const response = await sendNcMessage({
         type: MESSAGE_TYPES.exportData
       })
-      if (!response?.ok) {
+      if (!response.ok) {
         throw new NcError(
-          response?.error ?? "export failed",
+          response.error ?? "export failed",
           "options:data:export",
           "エクスポートに失敗しました。"
         )
@@ -123,13 +124,13 @@ export const DataTab = ({
     try {
       const text = await file.text()
       const data = JSON.parse(text) as Record<string, unknown>
-      const response = await chrome.runtime.sendMessage({
+      const response = await sendNcMessage({
         type: MESSAGE_TYPES.importData,
         payload: { data }
       })
-      if (!response?.ok) {
+      if (!response.ok) {
         throw new NcError(
-          response?.error ?? "import failed",
+          response.error ?? "import failed",
           "options:data:import",
           "インポートに失敗しました。"
         )

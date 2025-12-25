@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
 import { handleUIError, NcError } from "../../lib/error-handler"
+import { sendNcMessage } from "../../lib/messages"
 import type { CompareEvent, Verdict } from "../../lib/types"
 import { EventVideoLabel } from "../components/EventVideoLabel"
 import { Pagination } from "../components/Pagination"
@@ -120,7 +121,7 @@ export const EventsTab = ({
     }
     setEventBusyId(target.id)
     try {
-      const response = await chrome.runtime.sendMessage({
+      const response = await sendNcMessage({
         type: MESSAGE_TYPES.recordEvent,
         payload: {
           currentVideoId: target.currentVideoId,
@@ -129,9 +130,9 @@ export const EventsTab = ({
           eventId: target.id
         }
       })
-      if (!response?.ok) {
+      if (!response.ok) {
         throw new NcError(
-          response?.error ?? "update failed",
+          response.error ?? "update failed",
           "options:events:update",
           "イベント更新に失敗しました。"
         )
@@ -148,13 +149,13 @@ export const EventsTab = ({
   const handleDeleteEvent = async (eventId: number) => {
     setEventBusyId(eventId)
     try {
-      const response = await chrome.runtime.sendMessage({
+      const response = await sendNcMessage({
         type: MESSAGE_TYPES.deleteEvent,
         payload: { eventId }
       })
-      if (!response?.ok) {
+      if (!response.ok) {
         throw new NcError(
-          response?.error ?? "delete failed",
+          response.error ?? "delete failed",
           "options:events:disable",
           "イベントの無効化に失敗しました。"
         )
@@ -171,13 +172,13 @@ export const EventsTab = ({
   const handleRestoreEvent = async (eventId: number) => {
     setEventBusyId(eventId)
     try {
-      const response = await chrome.runtime.sendMessage({
+      const response = await sendNcMessage({
         type: MESSAGE_TYPES.restoreEvent,
         payload: { eventId }
       })
-      if (!response?.ok) {
+      if (!response.ok) {
         throw new NcError(
-          response?.error ?? "restore failed",
+          response.error ?? "restore failed",
           "options:events:restore",
           "イベントの有効化に失敗しました。"
         )
@@ -198,13 +199,13 @@ export const EventsTab = ({
     if (!confirmed) return
     setEventBusyId(eventId)
     try {
-      const response = await chrome.runtime.sendMessage({
+      const response = await sendNcMessage({
         type: MESSAGE_TYPES.purgeEvent,
         payload: { eventId }
       })
-      if (!response?.ok) {
+      if (!response.ok) {
         throw new NcError(
-          response?.error ?? "purge failed",
+          response.error ?? "purge failed",
           "options:events:purge",
           "イベントの削除に失敗しました。"
         )
