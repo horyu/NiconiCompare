@@ -33,7 +33,7 @@ export function OpponentSelector({
   return (
     <div className="w-full flex items-center gap-1">
       <label htmlFor="nc-select" className="relative flex-1 flex items-center">
-        <span className="px-1.5 pr-6 rounded border border-white/30 bg-[#1f1f1f] text-[14px] overflow-hidden text-ellipsis whitespace-nowrap pointer-events-none w-full">
+        <span className="px-1.5 pr-6 rounded border border-white/30 bg-black/50 text-[14px] overflow-hidden text-ellipsis whitespace-nowrap pointer-events-none w-full">
           {opponentVideoId
             ? opponentVideoId
             : hasSelectableCandidates
@@ -41,7 +41,7 @@ export function OpponentSelector({
               : "比較対象がありません"}
         </span>
         <span className="absolute right-2 text-[10px] opacity-70 pointer-events-none">
-          ▼
+          <span className="select-none">▼</span>
         </span>
         <select
           id="nc-select"
@@ -69,8 +69,8 @@ export function OpponentSelector({
         onClick={onTogglePinned}
         disabled={!opponentVideoId}
         title={isPinned ? "固定解除" : "比較対象を固定"}
-        className="px-1.5 py-1 rounded border border-white/30 bg-[#1f1f1f] text-[12px] leading-none disabled:opacity-40">
-        <span className="inline-block filter grayscale">
+        className="px-1.5 py-1 rounded border border-white/30 bg-black/50 text-[12px] leading-none disabled:opacity-40">
+        <span className="inline-block relative -top-px select-none filter grayscale">
           {isPinned ? "🔒" : "🔓"}
         </span>
       </button>
