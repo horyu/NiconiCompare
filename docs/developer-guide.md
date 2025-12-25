@@ -83,6 +83,8 @@ src/
 │   ├── services/ # Background services
 │   └── utils/    # Background helpers
 ├── contents/     # Content Script
+│   ├── components/ # Overlay components
+│   └── hooks/      # Overlay hooks
 ├── popup/        # Popup UI
 ├── options/      # Options UI
 │   ├── tabs/       # タブコンポーネント (Videos, Events, Settings, Data)
