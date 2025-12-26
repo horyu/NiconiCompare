@@ -90,16 +90,18 @@ const withPopupData =
       }
     } as unknown as typeof chrome
 
-    return (
-      <div className="bg-white p-4 rounded-lg border border-slate-200 max-w-[360px]">
-        <Story />
-      </div>
-    )
+    return <Story />
   }
+
+const withPopupFrame = (Story: () => JSX.Element) => (
+  <div className="bg-white p-4 rounded-lg border border-slate-200 max-w-[360px]">
+    <Story />
+  </div>
+)
 
 const meta: Meta<typeof Popup> = {
   component: Popup,
-  decorators: [withPopupData()]
+  decorators: [withPopupData(), withPopupFrame]
 }
 
 export default meta
