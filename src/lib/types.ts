@@ -34,6 +34,7 @@ export type RatingSnapshot = {
 
 export type NcSettings = {
   recentWindowSize: number
+  popupRecentCount: number
   overlayAndCaptureEnabled: boolean
   overlayAutoCloseMs: number
   showEventThumbnails: boolean

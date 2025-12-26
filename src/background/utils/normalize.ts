@@ -1,4 +1,8 @@
-import { DEFAULT_SETTINGS, MAX_RECENT_WINDOW_SIZE } from "../../lib/constants"
+import {
+  DEFAULT_SETTINGS,
+  MAX_POPUP_RECENT_COUNT,
+  MAX_RECENT_WINDOW_SIZE
+} from "../../lib/constants"
 import type { NcSettings } from "../../lib/types"
 
 export function normalizeSettings(settings: NcSettings): NcSettings {
@@ -7,6 +11,10 @@ export function normalizeSettings(settings: NcSettings): NcSettings {
     recentWindowSize: Math.min(
       MAX_RECENT_WINDOW_SIZE,
       Math.max(1, Math.floor(settings.recentWindowSize || 5))
+    ),
+    popupRecentCount: Math.min(
+      MAX_POPUP_RECENT_COUNT,
+      Math.max(1, Math.floor(settings.popupRecentCount || 5))
     ),
     overlayAutoCloseMs: Math.min(
       5000,

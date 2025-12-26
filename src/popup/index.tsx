@@ -62,7 +62,10 @@ export default function Popup() {
     )
   }
 
-  const lastEvents = buildRecentEvents(snapshot.events)
+  const lastEvents = buildRecentEvents(
+    snapshot.events,
+    snapshot.settings.popupRecentCount
+  )
   return (
     <main className="w-80 p-4 flex flex-col gap-4 font-sans">
       <header className="flex items-center justify-between">
@@ -117,11 +120,11 @@ export default function Popup() {
   )
 }
 
-function buildRecentEvents(events: NcEventsBucket) {
+function buildRecentEvents(events: NcEventsBucket, limit: number) {
   return [...events.items]
     .filter((event) => !event.disabled)
     .sort((a, b) => b.id - a.id)
-    .slice(0, 5)
+    .slice(0, Math.max(1, limit))
 }
 
 function labelVerdict(verdict: string) {

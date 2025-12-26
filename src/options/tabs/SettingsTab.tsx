@@ -2,6 +2,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
 
 import {
   DEFAULT_SETTINGS,
+  MAX_POPUP_RECENT_COUNT,
   MAX_RECENT_WINDOW_SIZE,
   MESSAGE_TYPES
 } from "../../lib/constants"
@@ -23,6 +24,7 @@ export const SettingsTab = ({
 }: SettingsTabProps) => {
   const [settingsForm, setSettingsForm] = useState({
     recentWindowSize: "5",
+    popupRecentCount: "5",
     overlayAutoCloseMs: "2000",
     glickoRating: "1500",
     glickoRd: "350",
@@ -34,6 +36,7 @@ export const SettingsTab = ({
   useEffect(() => {
     setSettingsForm({
       recentWindowSize: String(snapshot.settings.recentWindowSize),
+      popupRecentCount: String(snapshot.settings.popupRecentCount),
       overlayAutoCloseMs: String(snapshot.settings.overlayAutoCloseMs),
       glickoRating: String(snapshot.settings.glicko.rating),
       glickoRd: String(snapshot.settings.glicko.rd),
@@ -50,6 +53,7 @@ export const SettingsTab = ({
   const applySettingsToForm = (settings: NcSettings) => {
     setSettingsForm({
       recentWindowSize: String(settings.recentWindowSize),
+      popupRecentCount: String(settings.popupRecentCount),
       overlayAutoCloseMs: String(settings.overlayAutoCloseMs),
       glickoRating: String(settings.glicko.rating),
       glickoRd: String(settings.glicko.rd),
@@ -60,6 +64,8 @@ export const SettingsTab = ({
   const hasUnsavedSettings =
     settingsForm.recentWindowSize !==
       String(snapshot.settings.recentWindowSize) ||
+    settingsForm.popupRecentCount !==
+      String(snapshot.settings.popupRecentCount) ||
     settingsForm.overlayAutoCloseMs !==
       String(snapshot.settings.overlayAutoCloseMs) ||
     settingsForm.glickoRating !== String(snapshot.settings.glicko.rating) ||
@@ -72,6 +78,7 @@ export const SettingsTab = ({
     try {
       const payload: Partial<NcSettings> = {
         recentWindowSize: Number(settingsForm.recentWindowSize),
+        popupRecentCount: Number(settingsForm.popupRecentCount),
         overlayAutoCloseMs: Number(settingsForm.overlayAutoCloseMs),
         glicko: {
           rating: Number(settingsForm.glickoRating),
@@ -141,17 +148,30 @@ export const SettingsTab = ({
   return (
     <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-6">
       <header>
-        <h2 className="text-lg font-semibold">オーバーレイ / Glicko 設定</h2>
+        <h2 className="text-lg font-semibold">
+          オーバーレイ / ポップアップ / Glicko 設定
+        </h2>
       </header>
       <form className="grid grid-cols-2 gap-4" onSubmit={handleSettingsSubmit}>
         <label className="text-sm flex flex-col gap-1">
-          比較候補数 (1-{MAX_RECENT_WINDOW_SIZE})
+          オーバーレイ: 比較候補数 (1-{MAX_RECENT_WINDOW_SIZE})
           <input
             type="number"
             min={1}
             max={MAX_RECENT_WINDOW_SIZE}
             value={settingsForm.recentWindowSize}
             onChange={handleSettingsChange("recentWindowSize")}
+            className="border border-slate-200 rounded-md px-2 py-1"
+          />
+        </label>
+        <label className="text-sm flex flex-col gap-1">
+          ポップアップ: 表示する直近評価数 (1-{MAX_POPUP_RECENT_COUNT})
+          <input
+            type="number"
+            min={1}
+            max={MAX_POPUP_RECENT_COUNT}
+            value={settingsForm.popupRecentCount}
+            onChange={handleSettingsChange("popupRecentCount")}
             className="border border-slate-200 rounded-md px-2 py-1"
           />
         </label>

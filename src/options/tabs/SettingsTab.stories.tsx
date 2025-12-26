@@ -28,6 +28,7 @@ const baseSnapshot: OptionsSnapshot = {
 
 const modifiedSettings = {
   recentWindowSize: 8,
+  popupRecentCount: 8,
   overlayAutoCloseMs: 1500,
   glicko: {
     rating: 1400,

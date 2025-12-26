@@ -12,6 +12,7 @@ export const STORAGE_KEYS = {
 
 export const DEFAULT_SETTINGS: NcSettings = {
   recentWindowSize: 5,
+  popupRecentCount: 5,
   overlayAndCaptureEnabled: true,
   overlayAutoCloseMs: 2000,
   showEventThumbnails: true,
@@ -23,6 +24,7 @@ export const DEFAULT_SETTINGS: NcSettings = {
 }
 
 export const MAX_RECENT_WINDOW_SIZE = 50
+export const MAX_POPUP_RECENT_COUNT = 20
 
 export const DEFAULT_STATE: NcState = {
   currentVideoId: undefined,
