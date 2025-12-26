@@ -4,6 +4,13 @@ import { VerdictButtons } from "./VerdictButtons"
 
 const meta: Meta<typeof VerdictButtons> = {
   component: VerdictButtons,
+  decorators: [
+    (Story) => (
+      <div className="bg-black/75 text-white text-sm p-3 rounded-lg shadow-lg max-w-[320px]">
+        <Story />
+      </div>
+    )
+  ],
   args: {
     canSubmit: true,
     lastVerdict: undefined,

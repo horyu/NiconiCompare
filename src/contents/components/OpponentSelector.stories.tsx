@@ -24,6 +24,13 @@ const videoSnapshots: Record<string, VideoSnapshot> = {
 
 const meta: Meta<typeof OpponentSelector> = {
   component: OpponentSelector,
+  decorators: [
+    (Story) => (
+      <div className="bg-black/75 text-white text-sm p-3 rounded-lg shadow-lg max-w-[320px]">
+        <Story />
+      </div>
+    )
+  ],
   args: {
     hasSelectableCandidates: true,
     isPinned: false,
@@ -46,5 +53,11 @@ export const NoCandidates: Story = {
     hasSelectableCandidates: false,
     opponentVideoId: undefined,
     selectableWindow: []
+  }
+}
+
+export const Pinned: Story = {
+  args: {
+    isPinned: true
   }
 }
