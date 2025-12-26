@@ -69,9 +69,7 @@ export type UpdateSettingsMessage = {
 
 export type MetaActionMessage = {
   type: typeof MESSAGE_TYPES.metaAction
-  payload:
-    | { action: "clearRetry"; clearFailed?: boolean }
-    | { action: "cleanup" }
+  payload: { action: "cleanup" }
 }
 
 export type RebuildRatingsMessage = {

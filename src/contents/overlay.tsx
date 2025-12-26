@@ -11,7 +11,10 @@ import { VideoComparison } from "./components/VideoComparison"
 import { useAutoClose } from "./hooks/useAutoClose"
 import { useOpponentSelection } from "./hooks/useOpponentSelection"
 import { useOverlayState } from "./hooks/useOverlayState"
-import { useVerdictSubmission } from "./hooks/useVerdictSubmission"
+import {
+  RETRY_MESSAGE,
+  useVerdictSubmission
+} from "./hooks/useVerdictSubmission"
 import { useVideoObserver } from "./hooks/useVideoObserver"
 
 export const config: PlasmoCSConfig = {
@@ -63,7 +66,8 @@ export default function Overlay() {
   const { lastVerdict, submitVerdict } = useVerdictSubmission({
     currentVideoId,
     opponentVideoId,
-    refreshState
+    refreshState,
+    onStatusMessage: setStatusMessage
   })
 
   const handleVideoChange = useCallback(
@@ -136,7 +140,9 @@ export default function Overlay() {
       ? "比較不可: 再生中と同じ動画が固定されています"
       : undefined
   const displayStatus = statusMessage ?? pinnedSameMessage
-  const canSubmit = currentVideoId && opponentVideoId && !displayStatus
+  const isBlockingStatus =
+    displayStatus !== undefined && displayStatus !== RETRY_MESSAGE
+  const canSubmit = currentVideoId && opponentVideoId && !isBlockingStatus
   return (
     <div
       className="fixed top-0 right-0 z-[2147483647] bg-black/75 text-white p-3 rounded-lg shadow-lg max-w-[320px] flex flex-col gap-2"

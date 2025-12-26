@@ -28,22 +28,11 @@ import {
   handleUpdatePinnedOpponent
 } from "./handlers/video"
 import { runAutoCleanupIfNeeded } from "./services/cleanup"
-import { processRetryQueue } from "./services/retry"
 import { getRawStorageData, setStorageData } from "./services/storage"
 
-processRetryQueue().catch((error) =>
-  handleBackgroundError(error, "processRetryQueue.initial")
-)
-
 if (chrome?.alarms) {
-  chrome.alarms.create("nc.processRetry", { periodInMinutes: 1 })
   chrome.alarms.create("nc.autoCleanup", { periodInMinutes: 60 * 24 })
   chrome.alarms.onAlarm.addListener((alarm) => {
-    if (alarm.name === "nc.processRetry") {
-      processRetryQueue().catch((error) =>
-        handleBackgroundError(error, "processRetryQueue.alarm")
-      )
-    }
     if (alarm.name === "nc.autoCleanup") {
       runAutoCleanupIfNeeded().catch((error) =>
         handleBackgroundError(error, "autoCleanup.alarm")

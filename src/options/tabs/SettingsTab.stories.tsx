@@ -22,9 +22,7 @@ const baseSnapshot: OptionsSnapshot = {
   meta: {
     lastReplayEventId: 0,
     schemaVersion: "1.0.0",
-    lastCleanupAt: 0,
-    retryQueue: [],
-    failedWrites: []
+    lastCleanupAt: 0
   }
 }
 

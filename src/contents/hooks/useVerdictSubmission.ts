@@ -4,16 +4,20 @@ import { MESSAGE_TYPES } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
 import type { Verdict } from "../../lib/types"
 
+export const RETRY_MESSAGE = "保存に失敗しました。再度お試しください。"
+
 type UseVerdictSubmissionParams = {
   currentVideoId?: string
   opponentVideoId?: string
   refreshState: () => Promise<void>
+  onStatusMessage?: (message?: string) => void
 }
 
 export function useVerdictSubmission({
   currentVideoId,
   opponentVideoId,
-  refreshState
+  refreshState,
+  onStatusMessage
 }: UseVerdictSubmissionParams) {
   const [lastVerdict, setLastVerdict] = useState<Verdict>()
   const [lastEventId, setLastEventId] = useState<number>()
@@ -31,39 +35,60 @@ export function useVerdictSubmission({
           return
         }
 
-        const response = await sendNcMessage({
-          type: MESSAGE_TYPES.deleteEvent,
-          payload: { eventId: lastEventId }
-        })
+        try {
+          const response = await sendNcMessage({
+            type: MESSAGE_TYPES.deleteEvent,
+            payload: { eventId: lastEventId }
+          })
 
-        setLastVerdict(undefined)
-        setLastEventId(undefined)
+          setLastVerdict(undefined)
+          setLastEventId(undefined)
 
-        if (response.ok) {
-          await refreshState()
+          if (response.ok) {
+            onStatusMessage?.(undefined)
+            await refreshState()
+          } else {
+            onStatusMessage?.(RETRY_MESSAGE)
+          }
+        } catch {
+          onStatusMessage?.(RETRY_MESSAGE)
         }
         return
       }
 
       if (!opponentVideoId || !currentVideoId) return
 
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.recordEvent,
-        payload: {
-          currentVideoId,
-          opponentVideoId,
-          verdict,
-          eventId: lastEventId
-        }
-      })
+      try {
+        const response = await sendNcMessage({
+          type: MESSAGE_TYPES.recordEvent,
+          payload: {
+            currentVideoId,
+            opponentVideoId,
+            verdict,
+            eventId: lastEventId
+          }
+        })
 
-      if (response.ok) {
-        setLastVerdict(verdict)
-        setLastEventId(response.eventId)
-        await refreshState()
+        if (response.ok) {
+          onStatusMessage?.(undefined)
+          setLastVerdict(verdict)
+          setLastEventId(response.eventId)
+          await refreshState()
+        } else {
+          onStatusMessage?.(RETRY_MESSAGE)
+        }
+      } catch {
+        onStatusMessage?.(RETRY_MESSAGE)
       }
     },
-    [currentVideoId, lastEventId, lastVerdict, opponentVideoId, refreshState]
+    [
+      currentVideoId,
+      lastEventId,
+      lastVerdict,
+      onStatusMessage,
+      opponentVideoId,
+      refreshState
+    ]
   )
 
   return {

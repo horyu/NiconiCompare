@@ -57,25 +57,6 @@ export const WithStorageUsage: Story = {
   }
 }
 
-export const StorageIssues: Story = {
-  args: {
-    snapshot: {
-      ...baseSnapshot,
-      meta: {
-        ...baseSnapshot.meta,
-        retryQueue: [
-          {
-            eventId: 3,
-            retryCount: 2,
-            lastAttempt: Date.now()
-          }
-        ],
-        failedWrites: [1, 2]
-      }
-    }
-  }
-}
-
 export const CleanupCompleted: Story = {
   args: {
     snapshot: {

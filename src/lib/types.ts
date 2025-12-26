@@ -22,7 +22,6 @@ export type CompareEvent = {
   opponentVideoId: string
   verdict: Verdict
   disabled: boolean
-  persistent?: boolean
 }
 
 export type RatingSnapshot = {
@@ -60,18 +59,10 @@ export type NcRatings = Record<string, RatingSnapshot>
 export type NcVideos = Record<string, VideoSnapshot>
 export type NcAuthors = Record<string, AuthorProfile>
 
-export type RetryQueueItem = {
-  eventId: number
-  retryCount: number
-  lastAttempt: number
-}
-
 export type NcMeta = {
   lastReplayEventId: number
   schemaVersion: string
   lastCleanupAt: number
-  retryQueue: RetryQueueItem[]
-  failedWrites: number[]
 }
 
 export type StorageShape = {

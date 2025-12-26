@@ -28,14 +28,6 @@ export const DataTab = ({
     ? new Date(snapshot.meta.lastCleanupAt).toLocaleString()
     : "未実行"
 
-  const handleClearRetry = async (clearFailed = false) => {
-    await sendNcMessage({
-      type: MESSAGE_TYPES.metaAction,
-      payload: { action: "clearRetry", clearFailed }
-    })
-    await refreshState(true)
-  }
-
   const handleCleanup = async () => {
     await sendNcMessage({
       type: MESSAGE_TYPES.metaAction,
@@ -208,32 +200,6 @@ export const DataTab = ({
       </div>
 
       <div className="grid grid-cols-2 gap-6">
-        <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold">Storage 状態</h3>
-          <div className="text-sm text-slate-600">
-            保存再試行（イベント書き込み）: {snapshot.meta.retryQueue.length} 件
-          </div>
-          {snapshot.meta.retryQueue.length > 0 && (
-            <button
-              type="button"
-              onClick={() => handleClearRetry()}
-              className="px-3 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100">
-              保存再試行回数をクリア
-            </button>
-          )}
-          <div className="text-sm text-slate-600">
-            保存失敗（イベント書き込み）: {snapshot.meta.failedWrites.length} 件
-          </div>
-          {snapshot.meta.failedWrites.length > 0 && (
-            <button
-              type="button"
-              onClick={() => handleClearRetry(true)}
-              className="px-3 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100">
-              保存失敗もクリア
-            </button>
-          )}
-        </div>
-
         <div className="flex flex-col gap-3">
           <h3 className="text-sm font-semibold text-rose-700">全データ削除</h3>
           <p className="text-sm text-slate-600">

@@ -11,11 +11,6 @@ import type {
   NcVideos,
   Verdict
 } from "../../lib/types"
-import {
-  markEventPersistent,
-  queueEventRetry,
-  removeRetryEntry
-} from "../services/retry"
 import { getStorageData, setStorageData } from "../services/storage"
 import {
   getOrCreateRatingSnapshot,
@@ -122,8 +117,7 @@ function buildNewEvent(
     currentVideoId: payload.currentVideoId,
     opponentVideoId: payload.opponentVideoId,
     verdict: payload.verdict,
-    disabled: false,
-    persistent: false
+    disabled: false
   }
 }
 
@@ -194,12 +188,9 @@ async function persistEventChanges(
 ): Promise<number> {
   try {
     await setStorageData(updates)
-    await markEventPersistent(eventId)
-    await removeRetryEntry(eventId)
     return eventId
   } catch (error) {
     handleBackgroundError(error, "handleRecordEvent.persistEventChanges")
-    await queueEventRetry(eventId)
     throw error
   }
 }

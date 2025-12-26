@@ -109,24 +109,6 @@ type Story = StoryObj<typeof Popup>
 
 export const Default: Story = {}
 
-export const StorageIssues: Story = {
-  decorators: [
-    withPopupData({
-      meta: {
-        ...DEFAULT_META,
-        retryQueue: [
-          {
-            eventId: 12,
-            retryCount: 2,
-            lastAttempt: Date.now()
-          }
-        ],
-        failedWrites: [9, 10]
-      }
-    })
-  ]
-}
-
 export const EmptyEvents: Story = {
   decorators: [
     withPopupData({

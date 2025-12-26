@@ -63,8 +63,6 @@ export default function Popup() {
   }
 
   const lastEvents = buildRecentEvents(snapshot.events)
-  const meta = snapshot.meta
-
   return (
     <main className="w-80 p-4 flex flex-col gap-4 font-sans">
       <header className="flex items-center justify-between">
@@ -110,18 +108,6 @@ export default function Popup() {
                 </li>
               )
             })}
-          </ul>
-        )}
-      </section>
-
-      <section>
-        <h3 className="text-sm mb-2">Storage 状態</h3>
-        {meta.retryQueue.length === 0 && meta.failedWrites.length === 0 ? (
-          <div className="text-[13px] text-slate-500">問題なし</div>
-        ) : (
-          <ul className="list-none p-0 m-0 flex flex-col gap-1 text-[13px]">
-            <li>保存再試行（イベント書き込み）: {meta.retryQueue.length} 件</li>
-            <li>保存失敗（イベント書き込み）: {meta.failedWrites.length} 件</li>
           </ul>
         )}
       </section>
