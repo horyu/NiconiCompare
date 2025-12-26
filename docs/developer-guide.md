@@ -60,6 +60,8 @@ pnpm fix              # ESLint + Prettier 自動修正（並列実行）
   - ESLint 9.39+ (TypeScript/React/React Hooks plugins)
   - Prettier 3.2+ (コードフォーマッター)
   - npm-run-all (並列スクリプト実行)
+- **UI開発**:
+  - Storybook 10.1+ (React/Vite)
 - **テストフレームワーク**: 現状未セットアップ（Vitest, Playwright の導入は将来予定）
 
 ---
@@ -100,6 +102,7 @@ src/
 TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関数/変数), snake_case (storage キー)
 - エラーハンドリングは `src/lib/error-handler.ts` を使用し、`console.error` の直書きは避ける
 - background へのメッセージ送信は `sendNcMessage` を使用して型チェックする
+- UIコンポーネントを追加した場合や props が増えた場合は、Storybook の stories も更新する
 
 ### 2.4 コード品質チェック
 
@@ -125,6 +128,8 @@ pnpm eslint:check      # ESLint のみ（チェックのみ）
 pnpm types:check       # TypeScript 型チェックのみ
 pnpm format            # Prettier のみ（自動修正あり）
 pnpm format:check      # Prettier のみ（チェックのみ）
+pnpm storybook         # Storybook 開発サーバー
+pnpm storybook:build   # Storybook ビルド
 ```
 
 **開発フロー**:
@@ -143,6 +148,7 @@ pnpm test:e2e    # E2Eテスト (Playwright, ※未セットアップ)
 ```
 
 **現状**: テストフレームワーク（Vitest, Playwright）は未導入。将来的な実装予定。
+Storybook は UI プレビュー用途で導入済み。
 
 カバレッジ目標: 80%以上（テストセットアップ後）
 
