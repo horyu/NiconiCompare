@@ -300,7 +300,14 @@ export const EventsTab = ({
                 <div
                   key={event.id}
                   className="grid grid-cols-[40px_70px_1fr_1fr_90px_90px] gap-2 items-center px-3 py-2 text-sm">
-                  <div className="font-medium">#{event.id}</div>
+                  <div className="font-medium flex flex-col gap-1 items-center">
+                    <span>#{event.id}</span>
+                    {event.disabled && (
+                      <span className="text-[10px] px-2 py-[1px] rounded-full bg-slate-100 text-slate-500 border border-slate-200 w-fit">
+                        無効
+                      </span>
+                    )}
+                  </div>
                   <div className="text-xs text-slate-500">
                     {timestamp.toLocaleDateString()}
                     <br />
@@ -377,11 +384,6 @@ export const EventsTab = ({
                           削除
                         </button>
                       </>
-                    )}
-                    {event.disabled && (
-                      <span className="text-[10px] text-rose-500">
-                        無効化済み
-                      </span>
                     )}
                   </div>
                 </div>
