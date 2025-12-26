@@ -20,7 +20,7 @@ type Toast = {
 
 const TAB_LABELS: { key: TabKey; label: string }[] = [
   { key: "videos", label: "動画一覧" },
-  { key: "events", label: "イベント一覧" },
+  { key: "events", label: "評価一覧" },
   { key: "settings", label: "設定" },
   { key: "data", label: "データ操作" }
 ]

@@ -78,9 +78,9 @@ export default function Popup() {
       </header>
 
       <section>
-        <h3 className="text-sm mb-2">直近イベント</h3>
+        <h3 className="text-sm mb-2">直近の評価</h3>
         {lastEvents.length === 0 ? (
-          <p className="text-xs opacity-70">イベントなし</p>
+          <p className="text-xs opacity-70">評価なし</p>
         ) : (
           <ul className="list-none p-0 m-0 flex flex-col gap-1 text-[13px]">
             {lastEvents.map((event) => {

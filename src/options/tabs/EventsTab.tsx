@@ -134,11 +134,11 @@ export const EventsTab = ({
         throw new NcError(
           response.error ?? "update failed",
           "options:events:update",
-          "イベント更新に失敗しました。"
+          "評価の更新に失敗しました。"
         )
       }
       await refreshState(true)
-      showToast("success", "イベントを更新しました。")
+      showToast("success", "評価を更新しました。")
     } catch (error) {
       handleUIError(error, "options:events:update", showToast)
     } finally {
@@ -157,11 +157,11 @@ export const EventsTab = ({
         throw new NcError(
           response.error ?? "delete failed",
           "options:events:disable",
-          "イベントの無効化に失敗しました。"
+          "評価の無効化に失敗しました。"
         )
       }
       await refreshState(true)
-      showToast("success", "イベントを無効化しました。")
+      showToast("success", "評価を無効化しました。")
     } catch (error) {
       handleUIError(error, "options:events:disable", showToast)
     } finally {
@@ -180,11 +180,11 @@ export const EventsTab = ({
         throw new NcError(
           response.error ?? "restore failed",
           "options:events:restore",
-          "イベントの有効化に失敗しました。"
+          "評価の有効化に失敗しました。"
         )
       }
       await refreshState(true)
-      showToast("success", "イベントを有効化しました。")
+      showToast("success", "評価を有効化しました。")
     } catch (error) {
       handleUIError(error, "options:events:restore", showToast)
     } finally {
@@ -194,7 +194,7 @@ export const EventsTab = ({
 
   const handlePurgeEvent = async (eventId: number) => {
     const confirmed = confirm(
-      "無効化済みイベントを削除します。元に戻せません。続行しますか？"
+      "無効化済み評価を削除します。元に戻せません。続行しますか？"
     )
     if (!confirmed) return
     setEventBusyId(eventId)
@@ -207,11 +207,11 @@ export const EventsTab = ({
         throw new NcError(
           response.error ?? "purge failed",
           "options:events:purge",
-          "イベントの削除に失敗しました。"
+          "評価の削除に失敗しました。"
         )
       }
       await refreshState(true)
-      showToast("success", "イベントを削除しました。")
+      showToast("success", "評価を削除しました。")
     } catch (error) {
       handleUIError(error, "options:events:purge", showToast)
     } finally {
@@ -222,7 +222,7 @@ export const EventsTab = ({
   return (
     <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4">
       <header className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">評価イベント一覧</h2>
+        <h2 className="text-lg font-semibold">評価一覧</h2>
         <div className="text-sm text-slate-500">{filteredEvents.length} 件</div>
       </header>
 
@@ -284,7 +284,7 @@ export const EventsTab = ({
         <div className="divide-y divide-slate-100">
           {pagedEvents.length === 0 ? (
             <div className="px-3 py-4 text-sm text-slate-500">
-              表示できるイベントがありません。
+              表示できる評価がありません。
             </div>
           ) : (
             pagedEvents.map((event) => {
