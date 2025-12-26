@@ -62,7 +62,7 @@ pnpm fix              # ESLint + Prettier 自動修正（並列実行）
   - npm-run-all (並列スクリプト実行)
 - **UI開発**:
   - Storybook 10.1+ (React/Vite)
-- **テストフレームワーク**: 現状未セットアップ（Vitest, Playwright の導入は将来予定）
+- **テストフレームワーク**: 現状未セットアップ（Vitest の導入は将来予定）
 
 ---
 
@@ -144,10 +144,9 @@ pnpm storybook:build   # Storybook ビルド
 
 ```bash
 pnpm test        # 単体テスト (※未セットアップ)
-pnpm test:e2e    # E2Eテスト (Playwright, ※未セットアップ)
 ```
 
-**現状**: テストフレームワーク（Vitest, Playwright）は未導入。将来的な実装予定。
+**現状**: テストフレームワーク（Vitest）は未導入。将来的な実装予定。
 Storybook は UI プレビュー用途で導入済み。
 
 カバレッジ目標: 80%以上（テストセットアップ後）
