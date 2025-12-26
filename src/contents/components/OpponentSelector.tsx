@@ -38,7 +38,7 @@ export function OpponentSelector({
             ? opponentVideoId
             : hasSelectableCandidates
               ? "比較候補を選択してください"
-              : "比較対象がありません"}
+              : "比較候補なし"}
         </span>
         <span className="absolute right-2 text-[10px] opacity-70 pointer-events-none">
           <span className="select-none">▼</span>
@@ -46,12 +46,14 @@ export function OpponentSelector({
         <select
           id="nc-select"
           value={opponentVideoId ?? ""}
-          disabled={isPinned}
+          disabled={isPinned || !hasSelectableCandidates}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
           className={[
             "absolute inset-0 opacity-0 z-[5] text-black bg-white",
-            isPinned ? "cursor-not-allowed" : "cursor-pointer"
+            isPinned || !hasSelectableCandidates
+              ? "cursor-not-allowed"
+              : "cursor-pointer"
           ].join(" ")}>
           {!hasSelectableCandidates ? (
             <option value="">比較候補なし</option>
