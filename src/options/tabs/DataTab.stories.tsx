@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { useEffect, useRef } from "react"
 
 import {
   DEFAULT_EVENTS_BUCKET,
@@ -8,6 +9,30 @@ import {
 } from "../../lib/constants"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { DataTab } from "./DataTab"
+
+const withImportFileSelected = () => {
+  return (Story: () => JSX.Element) => {
+    const ref = useRef<HTMLDivElement>(null)
+    useEffect(() => {
+      const input = ref.current?.querySelector<HTMLInputElement>(
+        'input[type="file"][accept="application/json"]'
+      )
+      if (!input) return
+      const file = new File(["{}"], "dummy.json", {
+        type: "application/json"
+      })
+      const dataTransfer = new DataTransfer()
+      dataTransfer.items.add(file)
+      input.files = dataTransfer.files
+      input.dispatchEvent(new Event("change", { bubbles: true }))
+    }, [])
+    return (
+      <div ref={ref}>
+        <Story />
+      </div>
+    )
+  }
+}
 
 const baseSnapshot: OptionsSnapshot = {
   settings: { ...DEFAULT_SETTINGS },
@@ -55,6 +80,10 @@ export const WithStorageUsage: Story = {
   args: {
     bytesInUse: 1024 * 1024 * 1.5
   }
+}
+
+export const ImportFileSelected: Story = {
+  decorators: [withImportFileSelected()]
 }
 
 export const CleanupCompleted: Story = {
