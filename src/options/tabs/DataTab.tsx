@@ -218,7 +218,7 @@ export const DataTab = ({
               type="button"
               onClick={() => handleClearRetry()}
               className="px-3 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100">
-              保存再試行をクリア
+              保存再試行回数をクリア
             </button>
           )}
           <div className="text-sm text-slate-600">
