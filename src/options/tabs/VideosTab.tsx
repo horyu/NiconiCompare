@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import type { VideoSnapshot } from "../../lib/types"
+import { createWatchUrl } from "../../lib/url"
 import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
@@ -387,7 +388,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
                   key={video.videoId}
                   className="grid grid-cols-[90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 items-center px-3 py-2">
                   <a
-                    href={`https://www.nicovideo.jp/watch/${video.videoId}`}
+                    href={createWatchUrl(video.videoId)}
                     target="_blank"
                     rel="noreferrer"
                     className="w-20 h-12 bg-slate-200 rounded overflow-hidden block">
@@ -491,7 +492,7 @@ const buildExportRows = ({
     return {
       videoId: video.videoId,
       thumbnailUrl: video.thumbnailUrls?.[0] ?? "",
-      videoUrl: `https://www.nicovideo.jp/watch/${video.videoId}`,
+      videoUrl: createWatchUrl(video.videoId),
       title: video.title ?? "",
       author: author?.name ?? "",
       rating: rating ? String(Math.round(rating.rating)) : "",

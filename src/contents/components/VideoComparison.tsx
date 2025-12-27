@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 
 import type { VideoSnapshot } from "../../lib/types"
+import { createWatchUrl } from "../../lib/url"
 
 type VideoComparisonProps = {
   currentVideoId?: string
@@ -30,7 +31,7 @@ export function VideoComparison({
   }
 
   const opponentWatchUrl = opponentVideoId
-    ? `https://www.nicovideo.jp/watch/${opponentVideoId}`
+    ? createWatchUrl(opponentVideoId)
     : undefined
   const opponentTitle = opponentVideoId
     ? videoSnapshots[opponentVideoId]?.title ?? ""

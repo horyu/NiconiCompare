@@ -4,6 +4,7 @@ import { MESSAGE_TYPES } from "../../lib/constants"
 import { handleUIError, NcError } from "../../lib/error-handler"
 import { sendNcMessage } from "../../lib/messages"
 import type { CompareEvent, Verdict } from "../../lib/types"
+import { createWatchUrl } from "../../lib/url"
 import { EventVideoLabel } from "../components/EventVideoLabel"
 import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
@@ -495,11 +496,11 @@ const buildExportRows = ({
       occurredAt: new Date(event.timestamp).toLocaleString(),
       status: event.disabled ? "無効" : "有効",
       currentVideoId: event.currentVideoId,
-      currentVideoUrl: `https://www.nicovideo.jp/watch/${event.currentVideoId}`,
+      currentVideoUrl: createWatchUrl(event.currentVideoId),
       currentVideoTitle: currentVideo?.title ?? "",
       currentVideoAuthor: currentAuthor ?? "",
       opponentVideoId: event.opponentVideoId,
-      opponentVideoUrl: `https://www.nicovideo.jp/watch/${event.opponentVideoId}`,
+      opponentVideoUrl: createWatchUrl(event.opponentVideoId),
       opponentVideoTitle: opponentVideo?.title ?? "",
       opponentVideoAuthor: opponentAuthor ?? "",
       verdict:

@@ -5,6 +5,7 @@ import "../style.css"
 import { MESSAGE_TYPES } from "../lib/constants"
 import { sendNcMessage } from "../lib/messages"
 import type { NcEventsBucket, NcMeta, NcSettings, NcVideos } from "../lib/types"
+import { createWatchUrl } from "../lib/url"
 
 type PopupSnapshot = {
   settings: NcSettings
@@ -145,7 +146,7 @@ function renderVideoCard(
   videoId: string
 ) {
   const thumbnailUrl = video?.thumbnailUrls?.[0]
-  const watchUrl = `https://www.nicovideo.jp/watch/${videoId}`
+  const watchUrl = createWatchUrl(videoId)
   return (
     <a
       href={watchUrl}
