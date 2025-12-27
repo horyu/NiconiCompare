@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
+import type { VideoSnapshot } from "../../lib/types"
+import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
+import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
 import { readSessionState, writeSessionState } from "../utils/sessionStorage"
 
 type VideosTabProps = {
@@ -28,6 +31,7 @@ const DEFAULT_VIDEO_SESSION_STATE: VideoSessionState = {
 
 export const VideosTab = ({ snapshot }: VideosTabProps) => {
   const initialStateRef = useRef<VideoSessionState>()
+  const [exportMenuOpen, setExportMenuOpen] = useState(false)
   if (!initialStateRef.current) {
     initialStateRef.current = readSessionState(
       SESSION_KEY,
@@ -206,12 +210,68 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
   const hasMissingAuthorData =
     snapshot.events.items.length > 0 &&
     Object.keys(snapshot.authors).length === 0
+  const handleExport = (format: "csv" | "tsv", withBom: boolean) => {
+    const exportRows = buildExportRows({
+      videos: filteredVideos,
+      snapshot,
+      lastEventByVideo,
+      verdictCountsByVideo
+    })
+    const delimiter = format === "csv" ? "," : "\t"
+    const content = buildDelimitedText({
+      header: [
+        "動画ID",
+        "サムネURL",
+        "動画URL",
+        "タイトル",
+        "投稿者",
+        "Rating",
+        "RD",
+        "評価数",
+        "勝ち数",
+        "引き分け数",
+        "負け数",
+        "最終判定日時"
+      ],
+      rows: exportRows.map((row) => [
+        row.videoId,
+        row.thumbnailUrl,
+        row.videoUrl,
+        row.title,
+        row.author,
+        row.rating,
+        row.rd,
+        row.total,
+        row.wins,
+        row.draws,
+        row.losses,
+        row.lastVerdictAt
+      ]),
+      delimiter
+    })
+    downloadDelimitedFile({
+      content,
+      format,
+      withBom,
+      filenamePrefix: "NiconiCompareVideos"
+    })
+    setExportMenuOpen(false)
+  }
 
   return (
     <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4">
       <header className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">評価済み動画一覧</h2>
-        <div className="text-sm text-slate-500">{filteredVideos.length} 件</div>
+        <div className="flex items-center gap-3">
+          <div className="text-sm text-slate-500">
+            {filteredVideos.length} 件
+          </div>
+          <ExportMenu
+            open={exportMenuOpen}
+            onToggle={() => setExportMenuOpen((prev) => !prev)}
+            onExport={handleExport}
+          />
+        </div>
       </header>
 
       {(hasMissingVideoData || hasMissingAuthorData) && (
@@ -385,4 +445,62 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
       />
     </section>
   )
+}
+
+type ExportRow = {
+  videoId: string
+  thumbnailUrl: string
+  videoUrl: string
+  title: string
+  author: string
+  rating: string
+  rd: string
+  total: string
+  wins: string
+  draws: string
+  losses: string
+  lastVerdictAt: string
+}
+
+type ExportRowParams = {
+  videos: VideoSnapshot[]
+  snapshot: OptionsSnapshot
+  lastEventByVideo: Map<string, number>
+  verdictCountsByVideo: Map<
+    string,
+    { wins: number; draws: number; losses: number }
+  >
+}
+
+const buildExportRows = ({
+  videos,
+  snapshot,
+  lastEventByVideo,
+  verdictCountsByVideo
+}: ExportRowParams): ExportRow[] => {
+  return videos.map((video) => {
+    const rating = snapshot.ratings[video.videoId]
+    const author = snapshot.authors[video.authorUrl]
+    const counts = verdictCountsByVideo.get(video.videoId) ?? {
+      wins: 0,
+      draws: 0,
+      losses: 0
+    }
+    const total = counts.wins + counts.draws + counts.losses
+    const lastVerdict = lastEventByVideo.get(video.videoId)
+    return {
+      videoId: video.videoId,
+      thumbnailUrl: video.thumbnailUrls?.[0] ?? "",
+      videoUrl: `https://www.nicovideo.jp/watch/${video.videoId}`,
+      title: video.title ?? "",
+      author: author?.name ?? "",
+      rating: rating ? String(Math.round(rating.rating)) : "",
+      rd: rating ? String(Math.round(rating.rd)) : "",
+      total: total ? String(total) : "0",
+      wins: String(counts.wins),
+      draws: String(counts.draws),
+      losses: String(counts.losses),
+      lastVerdictAt: lastVerdict ? new Date(lastVerdict).toLocaleString() : ""
+    }
+  })
 }

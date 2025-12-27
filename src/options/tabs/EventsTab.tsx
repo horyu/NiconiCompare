@@ -5,8 +5,10 @@ import { handleUIError, NcError } from "../../lib/error-handler"
 import { sendNcMessage } from "../../lib/messages"
 import type { CompareEvent, Verdict } from "../../lib/types"
 import { EventVideoLabel } from "../components/EventVideoLabel"
+import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
+import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
 import { readSessionState, writeSessionState } from "../utils/sessionStorage"
 
 type EventsTabProps = {
@@ -41,6 +43,7 @@ export const EventsTab = ({
   showToast
 }: EventsTabProps) => {
   const initialStateRef = useRef<EventSessionState>()
+  const [exportMenuOpen, setExportMenuOpen] = useState(false)
   if (!initialStateRef.current) {
     initialStateRef.current = readSessionState(
       SESSION_KEY,
@@ -111,6 +114,49 @@ export const EventsTab = ({
     1,
     Math.ceil(filteredEvents.length / EVENT_PAGE_SIZE)
   )
+
+  const handleExport = (format: "csv" | "tsv", withBom: boolean) => {
+    const exportRows = buildExportRows({ events: filteredEvents, snapshot })
+    const delimiter = format === "csv" ? "," : "\t"
+    const content = buildDelimitedText({
+      header: [
+        "ID",
+        "日時",
+        "状態",
+        "基準動画ID",
+        "基準動画URL",
+        "基準動画タイトル",
+        "基準投稿者",
+        "比較動画ID",
+        "比較動画URL",
+        "比較動画タイトル",
+        "比較投稿者",
+        "評価"
+      ],
+      rows: exportRows.map((row) => [
+        row.id,
+        row.occurredAt,
+        row.status,
+        row.currentVideoId,
+        row.currentVideoUrl,
+        row.currentVideoTitle,
+        row.currentVideoAuthor,
+        row.opponentVideoId,
+        row.opponentVideoUrl,
+        row.opponentVideoTitle,
+        row.opponentVideoAuthor,
+        row.verdict
+      ]),
+      delimiter
+    })
+    downloadDelimitedFile({
+      content,
+      format,
+      withBom,
+      filenamePrefix: "NiconiCompareComparison"
+    })
+    setExportMenuOpen(false)
+  }
 
   const handleEventVerdictChange = async (
     target: CompareEvent,
@@ -223,7 +269,16 @@ export const EventsTab = ({
     <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4">
       <header className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">評価一覧</h2>
-        <div className="text-sm text-slate-500">{filteredEvents.length} 件</div>
+        <div className="flex items-center gap-3">
+          <div className="text-sm text-slate-500">
+            {filteredEvents.length} 件
+          </div>
+          <ExportMenu
+            open={exportMenuOpen}
+            onToggle={() => setExportMenuOpen((prev) => !prev)}
+            onExport={handleExport}
+          />
+        </div>
       </header>
 
       <div className="flex items-end gap-3 flex-nowrap">
@@ -400,4 +455,59 @@ export const EventsTab = ({
       />
     </section>
   )
+}
+
+type ExportRow = {
+  id: string
+  occurredAt: string
+  status: string
+  currentVideoId: string
+  currentVideoUrl: string
+  currentVideoTitle: string
+  currentVideoAuthor: string
+  opponentVideoId: string
+  opponentVideoUrl: string
+  opponentVideoTitle: string
+  opponentVideoAuthor: string
+  verdict: string
+}
+
+type ExportRowParams = {
+  events: CompareEvent[]
+  snapshot: OptionsSnapshot
+}
+
+const buildExportRows = ({
+  events,
+  snapshot
+}: ExportRowParams): ExportRow[] => {
+  return events.map((event) => {
+    const currentVideo = snapshot.videos[event.currentVideoId]
+    const opponentVideo = snapshot.videos[event.opponentVideoId]
+    const currentAuthor = currentVideo
+      ? snapshot.authors[currentVideo.authorUrl]?.name
+      : ""
+    const opponentAuthor = opponentVideo
+      ? snapshot.authors[opponentVideo.authorUrl]?.name
+      : ""
+    return {
+      id: String(event.id),
+      occurredAt: new Date(event.timestamp).toLocaleString(),
+      status: event.disabled ? "無効" : "有効",
+      currentVideoId: event.currentVideoId,
+      currentVideoUrl: `https://www.nicovideo.jp/watch/${event.currentVideoId}`,
+      currentVideoTitle: currentVideo?.title ?? "",
+      currentVideoAuthor: currentAuthor ?? "",
+      opponentVideoId: event.opponentVideoId,
+      opponentVideoUrl: `https://www.nicovideo.jp/watch/${event.opponentVideoId}`,
+      opponentVideoTitle: opponentVideo?.title ?? "",
+      opponentVideoAuthor: opponentAuthor ?? "",
+      verdict:
+        event.verdict === "better"
+          ? "勝ち"
+          : event.verdict === "same"
+            ? "引き分け"
+            : "負け"
+    }
+  })
 }
