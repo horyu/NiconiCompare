@@ -3,6 +3,7 @@ import { useMemo, useState } from "react"
 import { DEFAULT_CATEGORY_ID, MESSAGE_TYPES } from "../../lib/constants"
 import { handleUIError, NcError } from "../../lib/error-handler"
 import { sendNcMessage } from "../../lib/messages"
+import { CategorySelect } from "../components/CategorySelect"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 
 type CategoriesTabProps = {
@@ -28,8 +29,6 @@ export const CategoriesTab = ({
   showToast
 }: CategoriesTabProps) => {
   const [newCategoryName, setNewCategoryName] = useState("")
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editingName, setEditingName] = useState("")
   const [moveTargets, setMoveTargets] = useState<Record<string, string>>({})
 
   const orderedCategories = useMemo(() => {
@@ -63,15 +62,15 @@ export const CategoriesTab = ({
     }
   }
 
-  const handleUpdateName = async (categoryId: string) => {
-    if (!isValidCategoryName(editingName)) {
+  const handleUpdateName = async (categoryId: string, nextName: string) => {
+    if (!isValidCategoryName(nextName)) {
       showToast("error", "カテゴリ名は1〜50文字で入力してください。")
       return
     }
     try {
       const response = await sendNcMessage({
         type: MESSAGE_TYPES.updateCategoryName,
-        payload: { categoryId, name: editingName.trim() }
+        payload: { categoryId, name: nextName.trim() }
       })
       if (!response.ok) {
         throw new NcError(
@@ -80,8 +79,6 @@ export const CategoriesTab = ({
           "カテゴリ名の更新に失敗しました。"
         )
       }
-      setEditingId(null)
-      setEditingName("")
       await refreshState(true)
       showToast("success", "カテゴリ名を更新しました。")
     } catch (error) {
@@ -93,6 +90,19 @@ export const CategoriesTab = ({
     categoryId: string,
     moveToCategoryId?: string
   ) => {
+    const target = snapshot.categories.items[categoryId]
+    const targetName = target?.name ?? categoryId
+    const moveTargetName = moveToCategoryId
+      ? snapshot.categories.items[moveToCategoryId]?.name ?? moveToCategoryId
+      : null
+    const confirmed = window.confirm(
+      moveToCategoryId
+        ? `カテゴリ「${targetName}」に属する比較履歴を「${moveTargetName}」へ移動して削除します。レーティングは自動で再計算されます。よろしいですか？`
+        : `カテゴリ「${targetName}」に属する比較履歴とレーティング一覧を破棄して削除します。よろしいですか？`
+    )
+    if (!confirmed) {
+      return
+    }
     try {
       const response = await sendNcMessage({
         type: MESSAGE_TYPES.deleteCategory,
@@ -138,25 +148,6 @@ export const CategoriesTab = ({
     }
   }
 
-  const handleSetActive = async (categoryId: string) => {
-    try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.updateActiveCategory,
-        payload: { categoryId }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "update failed",
-          "options:categories:active",
-          "カテゴリの切り替えに失敗しました。"
-        )
-      }
-      await refreshState(true)
-    } catch (error) {
-      handleUIError(error, "options:categories:active", showToast)
-    }
-  }
-
   const handleMove = async (categoryId: string, direction: -1 | 1) => {
     const order = snapshot.categories.order
     const index = order.indexOf(categoryId)
@@ -185,7 +176,10 @@ export const CategoriesTab = ({
     }
   }
 
-  const categoryOptions = orderedCategories
+  const categoryOptions = orderedCategories.map((category) => ({
+    id: category.id,
+    name: category.name
+  }))
 
   return (
     <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4">
@@ -215,8 +209,9 @@ export const CategoriesTab = ({
       </div>
 
       <div className="border border-slate-200 rounded-lg overflow-hidden">
-        <div className="grid grid-cols-[2fr_100px_120px_1fr_140px] gap-2 bg-slate-100 text-xs font-semibold px-3 py-2">
+        <div className="grid grid-cols-[1fr_140px_100px_100px_100px_190px] gap-2 bg-slate-100 text-xs font-semibold px-3 py-2">
           <div>カテゴリ名</div>
+          <div>作成日時</div>
           <div>状態</div>
           <div>オーバーレイ</div>
           <div>並び替え</div>
@@ -230,23 +225,20 @@ export const CategoriesTab = ({
               snapshot.categories.overlayVisibleIds.includes(category.id)
             const moveTarget =
               moveTargets[category.id] ?? snapshot.categories.defaultId
+            const createdAt = new Date(category.createdAt)
             return (
               <div
                 key={category.id}
-                className="grid grid-cols-[2fr_100px_120px_1fr_140px] gap-2 items-center px-3 py-2 text-sm">
-                <div className="flex flex-col gap-1">
-                  {editingId === category.id ? (
-                    <input
-                      value={editingName}
-                      onChange={(event) => setEditingName(event.target.value)}
-                      className="border border-slate-200 rounded-md px-2 py-1"
-                    />
-                  ) : (
-                    <span className="font-medium text-slate-900">
-                      {category.name}
-                    </span>
-                  )}
+                className="grid grid-cols-[1fr_140px_100px_100px_100px_190px] gap-2 items-center px-3 py-2 text-sm">
+                <div className="flex flex-col gap-1 min-w-0">
+                  <span className="font-medium text-slate-900 break-words whitespace-normal">
+                    {category.name}
+                  </span>
                   <span className="text-xs text-slate-500">{category.id}</span>
+                </div>
+                <div className="text-xs text-slate-600">
+                  <div>{createdAt.toLocaleDateString()}</div>
+                  <div>{createdAt.toLocaleTimeString()}</div>
                 </div>
                 <div className="text-xs">
                   {isActive ? (
@@ -254,12 +246,9 @@ export const CategoriesTab = ({
                       アクティブ
                     </span>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleSetActive(category.id)}
-                      className="px-2 py-1 rounded border border-slate-200 hover:bg-slate-100">
-                      切替
-                    </button>
+                    <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-500">
+                      非アクティブ
+                    </span>
                   )}
                 </div>
                 <div className="text-xs">
@@ -294,55 +283,42 @@ export const CategoriesTab = ({
                   </button>
                 </div>
                 <div className="flex flex-col gap-2">
-                  {editingId === category.id ? (
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateName(category.id)}
-                        className="px-2 py-1 rounded border border-slate-200 text-xs hover:bg-slate-100">
-                        保存
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingId(null)
-                          setEditingName("")
-                        }}
-                        className="px-2 py-1 rounded border border-slate-200 text-xs hover:bg-slate-100">
-                        キャンセル
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingId(category.id)
-                        setEditingName(category.name)
-                      }}
-                      className="px-2 py-1 rounded border border-slate-200 text-xs hover:bg-slate-100">
-                      名称変更
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextName = window.prompt(
+                        "カテゴリ名を入力してください。",
+                        category.name
+                      )
+                      if (nextName === null) {
+                        return
+                      }
+                      const trimmed = nextName.trim()
+                      if (trimmed === category.name) {
+                        return
+                      }
+                      handleUpdateName(category.id, trimmed)
+                    }}
+                    className="px-2 py-1 rounded border border-slate-200 text-xs hover:bg-slate-100">
+                    名称変更
+                  </button>
                   {!isDefault && (
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center gap-2">
-                        <select
+                        <CategorySelect
                           value={moveTarget}
-                          onChange={(event) =>
+                          onChange={(value) =>
                             setMoveTargets((prev) => ({
                               ...prev,
-                              [category.id]: event.target.value
+                              [category.id]: value
                             }))
                           }
-                          className="border border-slate-200 rounded-md px-2 py-1 text-xs">
-                          {categoryOptions
-                            .filter((item) => item.id !== category.id)
-                            .map((item) => (
-                              <option key={item.id} value={item.id}>
-                                {item.name}
-                              </option>
-                            ))}
-                        </select>
+                          options={categoryOptions.filter(
+                            (item) => item.id !== category.id
+                          )}
+                          size="sm"
+                          className="w-[15ch] max-w-[15ch]"
+                        />
                         <button
                           type="button"
                           onClick={() =>

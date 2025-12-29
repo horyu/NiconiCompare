@@ -55,13 +55,17 @@ export function useAutoClose({
       return
     }
 
-    setShowControls(true)
+    if (!showControls) {
+      return
+    }
+
     scheduleAutoClose()
   }, [
     enabled,
     forceKeepOpen,
     isHovered,
     isReady,
+    showControls,
     clearAutoCloseTimer,
     scheduleAutoClose
   ])

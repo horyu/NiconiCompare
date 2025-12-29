@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import { MESSAGE_TYPES } from "../../lib/constants"
-import { handleUIError, NcError } from "../../lib/error-handler"
-import { sendNcMessage } from "../../lib/messages"
 import type { RatingSnapshot, VideoSnapshot } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
+import { CategorySelect } from "../components/CategorySelect"
 import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
@@ -37,11 +35,7 @@ const DEFAULT_VIDEO_SESSION_STATE: VideoSessionState = {
   page: 1
 }
 
-export const VideosTab = ({
-  snapshot,
-  refreshState,
-  showToast
-}: VideosTabProps) => {
+export const VideosTab = ({ snapshot }: VideosTabProps) => {
   const initialStateRef = useRef<VideoSessionState>()
   const [exportMenuOpen, setExportMenuOpen] = useState(false)
   if (!initialStateRef.current) {
@@ -300,25 +294,13 @@ export const VideosTab = ({
   const categoryOptions = snapshot.categories.order.filter(
     (id) => snapshot.categories.items[id]
   )
+  const categorySelectOptions = categoryOptions.map((id) => ({
+    id,
+    name: snapshot.categories.items[id]?.name ?? "カテゴリ"
+  }))
 
-  const handleCategoryChange = async (categoryId: string) => {
+  const handleCategoryChange = (categoryId: string) => {
     setVideoCategoryId(categoryId)
-    try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.updateActiveCategory,
-        payload: { categoryId }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "update failed",
-          "options:videos:category",
-          "カテゴリの更新に失敗しました。"
-        )
-      }
-      await refreshState(true)
-    } catch (error) {
-      handleUIError(error, "options:videos:category", showToast)
-    }
   }
 
   return (
@@ -385,17 +367,13 @@ export const VideosTab = ({
           </datalist>
         </label>
         <label className="text-sm flex flex-col gap-1">
-          カテゴリ
-          <select
+          Rating表示カテゴリ
+          <CategorySelect
             value={videoCategoryId}
-            onChange={(event) => handleCategoryChange(event.target.value)}
-            className="border border-slate-200 rounded-md px-2 py-1">
-            {categoryOptions.map((id) => (
-              <option key={id} value={id}>
-                {snapshot.categories.items[id]?.name ?? "カテゴリ"}
-              </option>
-            ))}
-          </select>
+            onChange={handleCategoryChange}
+            options={categorySelectOptions}
+            className="w-full max-w-full"
+          />
         </label>
         <label className="text-sm flex flex-col gap-1">
           ソート

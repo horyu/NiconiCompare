@@ -2,7 +2,7 @@ import styleText from "data-text:../style.css"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useCallback, useState } from "react"
 
-import { MESSAGE_TYPES } from "../lib/constants"
+import { DEFAULT_CATEGORIES, MESSAGE_TYPES } from "../lib/constants"
 import { handleUIError } from "../lib/error-handler"
 import { sendNcMessage } from "../lib/messages"
 import type { AuthorProfile, VideoSnapshot } from "../lib/types"
@@ -66,15 +66,18 @@ export default function Overlay() {
     isHovered,
     isReady
   })
-  const { lastVerdict, submitVerdict } = useVerdictSubmission({
+  const { lastVerdict, lastEventId, submitVerdict } = useVerdictSubmission({
     currentVideoId,
     opponentVideoId,
     refreshState,
     onStatusMessage: setStatusMessage
   })
-  const activeCategoryId = categories.items[overlaySettings.activeCategoryId]
+  const categoriesSafe = categories ?? DEFAULT_CATEGORIES
+  const activeCategoryId = categoriesSafe.items[
+    overlaySettings.activeCategoryId
+  ]
     ? overlaySettings.activeCategoryId
-    : categories.defaultId
+    : categoriesSafe.defaultId
 
   const handleCategoryChange = useCallback(
     async (categoryId: string) => {
@@ -87,13 +90,26 @@ export default function Overlay() {
           setStatusMessage("カテゴリの更新に失敗しました。")
           return
         }
+        if (lastEventId) {
+          const moveResponse = await sendNcMessage({
+            type: MESSAGE_TYPES.bulkMoveEvents,
+            payload: {
+              eventIds: [lastEventId],
+              targetCategoryId: categoryId
+            }
+          })
+          if (!moveResponse.ok) {
+            setStatusMessage("カテゴリの移動に失敗しました。")
+            return
+          }
+        }
         await refreshState()
       } catch (error) {
         handleUIError(error, "overlay:category-change")
         setStatusMessage("カテゴリの更新に失敗しました。")
       }
     },
-    [refreshState, setStatusMessage]
+    [lastEventId, refreshState, setStatusMessage]
   )
 
   const handleVideoChange = useCallback(
@@ -172,14 +188,20 @@ export default function Overlay() {
   return (
     <div
       className="fixed top-0 right-0 z-[2147483647] bg-black/75 text-white p-3 rounded-lg shadow-lg max-w-[320px] flex flex-col gap-2"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}>
+      onMouseEnter={() => {
+        setIsHovered(true)
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false)
+      }}>
       <div className="flex items-center justify-between gap-2">
-        <CategorySelector
-          activeCategoryId={activeCategoryId}
-          categories={categories}
-          onChange={handleCategoryChange}
-        />
+        {showControls && (
+          <CategorySelector
+            activeCategoryId={activeCategoryId}
+            categories={categories}
+            onChange={handleCategoryChange}
+          />
+        )}
         <strong className="text-right w-full">NiconiCompare</strong>
       </div>
 

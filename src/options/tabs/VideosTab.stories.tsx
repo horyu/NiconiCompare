@@ -137,6 +137,75 @@ const buildSnapshotWithVideos = (count: number): OptionsSnapshot => {
   }
 }
 
+const buildSnapshotForCategorySwitch = (): OptionsSnapshot => {
+  const videos: NcVideos = {}
+  const authors: NcAuthors = {}
+  const ratings: NcRatings = {
+    [DEFAULT_CATEGORY_ID]: {},
+    "11111111-1111-1111-1111-111111111111": {}
+  }
+  const events: CompareEvent[] = []
+
+  for (let index = 1; index <= 6; index += 1) {
+    const videoId = `sm${2000000 + index}`
+    const authorIndex = index % 2
+    const authorUrl = `https://www.nicovideo.jp/user/${authorIndex}`
+    const authorName = `投稿者 ${authorIndex}`
+    const title = `カテゴリ別動画 ${index}`
+    videos[videoId] = createVideo(videoId, title, authorUrl)
+    authors[authorUrl] = createAuthor(authorUrl, authorName)
+  }
+
+  for (let index = 1; index <= 6; index += 1) {
+    const videoId = `sm${2000000 + index}`
+    const categoryId =
+      index <= 3 ? DEFAULT_CATEGORY_ID : "11111111-1111-1111-1111-111111111111"
+    ratings[categoryId][videoId] = createRating(
+      videoId,
+      1500 + index * 10,
+      220 + index,
+      index
+    )
+    const opponentIndex = index === 6 ? 1 : index + 1
+    const opponentVideoId = `sm${2000000 + opponentIndex}`
+    const verdict = index % 2 === 0 ? "same" : "better"
+    events.push(createEvent(index, videoId, opponentVideoId, verdict))
+  }
+
+  return {
+    ...baseSnapshot,
+    videos,
+    authors,
+    ratings,
+    categories: {
+      ...DEFAULT_CATEGORIES,
+      items: {
+        ...DEFAULT_CATEGORIES.items,
+        "11111111-1111-1111-1111-111111111111": {
+          id: "11111111-1111-1111-1111-111111111111",
+          name: "作画",
+          createdAt: 1710000000000
+        },
+        "33333333-3333-3333-3333-333333333333": {
+          id: "33333333-3333-3333-3333-333333333333",
+          name: "12345678901234567890123456789012345678901234567890",
+          createdAt: 1710000200000
+        }
+      },
+      order: [
+        DEFAULT_CATEGORY_ID,
+        "11111111-1111-1111-1111-111111111111",
+        "33333333-3333-3333-3333-333333333333"
+      ],
+      overlayVisibleIds: [DEFAULT_CATEGORY_ID]
+    },
+    events: {
+      items: events,
+      nextId: events.length + 1
+    }
+  }
+}
+
 const withSessionState = (state: Partial<VideoSessionState>) => {
   return (Story: () => JSX.Element) => (
     <>
@@ -189,6 +258,13 @@ export const ManyVideos: Story = {
   decorators: [withSessionState({})],
   args: {
     snapshot: buildSnapshotWithVideos(120)
+  }
+}
+
+export const CategorySwitch: Story = {
+  decorators: [withSessionState({})],
+  args: {
+    snapshot: buildSnapshotForCategorySwitch()
   }
 }
 

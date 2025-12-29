@@ -56,7 +56,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 | ------------------ | ---------------------------------------------- | ----------------------------------- |
 | **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得        | React 18.2.0, TypeScript, Tailwind CSS v4, Plasmo CSUI |
 | **Service Worker** | イベントログ管理、Glicko-2 計算、Storage I/O | TypeScript, chrome.storage API      |
-| **Popup**          | 直近イベント表示、overlayAndCaptureEnabled トグル | React 18.2.0, TypeScript            |
+| **Popup**          | アクティブカテゴリの直近イベント表示、overlayAndCaptureEnabled トグル | React 18.2.0, TypeScript            |
 | **Options**        | 詳細設定、データ操作、一覧エクスポート/インポート | React 18.2.0, TypeScript            |
 | **Storage**        | 永続化層                                       | chrome.storage.local (Key-Value)  |
 
@@ -283,7 +283,8 @@ Chrome Storage Local は、Key-Value 型のストレージ（JSON シリアラ�
 
 **nc_categories の主な用途**:
 - カテゴリ一覧、表示順、オーバーレイ表示対象の管理
-- `nc_settings.activeCategoryId` と連携し、比較/ランキングのカテゴリを切り替える
+- `nc_settings.activeCategoryId` と連携し、比較/ランキングのカテゴリを切り替える（切替はオーバーレイのみ）
+- オーバーレイで評価済み状態のままカテゴリを切り替えた場合、直近イベントを切替先カテゴリへ移動する
 
 ### 5.2 データ更新の不変性管理
 
@@ -372,7 +373,7 @@ async function saveCompareEvent(event: CompareEvent) {
 
 ### 6.2 Popup
 
-**役割**: 直近イベントの確認と overlayAndCaptureEnabled の切替。
+**役割**: アクティブカテゴリの直近イベントの確認と overlayAndCaptureEnabled の切替。
 
 **UI詳細**: `docs/spec.md §9.2` と `src/popup/index.tsx` を正とする。
 
