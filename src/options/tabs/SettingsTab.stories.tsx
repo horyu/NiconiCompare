@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useRef } from "react"
 
-import { DEFAULT_SETTINGS } from "../../lib/constants"
+import {
+  DEFAULT_CATEGORIES,
+  DEFAULT_META,
+  DEFAULT_SETTINGS
+} from "../../lib/constants"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { SettingsTab } from "./SettingsTab"
 
@@ -19,11 +23,8 @@ const baseSnapshot: OptionsSnapshot = {
     nextId: 1
   },
   ratings: {},
-  meta: {
-    lastReplayEventId: 0,
-    schemaVersion: "1.0.0",
-    lastCleanupAt: 0
-  }
+  meta: { ...DEFAULT_META },
+  categories: { ...DEFAULT_CATEGORIES }
 }
 
 const modifiedSettings = {

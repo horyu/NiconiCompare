@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useRef } from "react"
 
 import {
+  DEFAULT_CATEGORIES,
   DEFAULT_EVENTS_BUCKET,
   DEFAULT_META,
   DEFAULT_SETTINGS,
@@ -41,7 +42,8 @@ const baseSnapshot: OptionsSnapshot = {
   authors: {},
   events: { ...DEFAULT_EVENTS_BUCKET },
   ratings: {},
-  meta: { ...DEFAULT_META }
+  meta: { ...DEFAULT_META },
+  categories: { ...DEFAULT_CATEGORIES }
 }
 
 const meta: Meta<typeof DataTab> = {

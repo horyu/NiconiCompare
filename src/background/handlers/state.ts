@@ -1,4 +1,6 @@
+import { normalizeCategories } from "../../lib/categories"
 import {
+  DEFAULT_CATEGORIES,
   DEFAULT_EVENTS_BUCKET,
   DEFAULT_META,
   DEFAULT_SETTINGS,
@@ -17,6 +19,7 @@ export async function readStateSnapshot() {
     const ratings = data.ratings
     const meta = data.meta
     const authors = data.authors
+    const categories = normalizeCategories(data.categories)
 
     let normalizedState = state
     if (state.pinnedOpponentVideoId && !videos[state.pinnedOpponentVideoId]) {
@@ -34,7 +37,8 @@ export async function readStateSnapshot() {
       ratings,
       meta,
       videos,
-      authors
+      authors,
+      categories
     }
   } catch (error) {
     console.warn("Failed to read state snapshot:", error)
@@ -45,7 +49,8 @@ export async function readStateSnapshot() {
       ratings: {},
       meta: DEFAULT_META,
       videos: {},
-      authors: {}
+      authors: {},
+      categories: DEFAULT_CATEGORIES
     }
   }
 }

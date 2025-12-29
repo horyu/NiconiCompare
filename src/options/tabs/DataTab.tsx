@@ -38,7 +38,7 @@ export const DataTab = ({
 
   const handleDeleteAllData = async () => {
     const confirmed = confirm(
-      "全データを削除します。設定・評価履歴・レーティング・動画/投稿者データ・メタ情報を初期化します。続行しますか？"
+      "全データを削除します。設定・カテゴリ・評価履歴・レーティング・動画/投稿者データ・メタ情報を初期化します。続行しますか？"
     )
     if (!confirmed) {
       return
@@ -203,7 +203,7 @@ export const DataTab = ({
         <div className="flex flex-col gap-3">
           <h3 className="text-sm font-semibold text-rose-700">全データ削除</h3>
           <p className="text-sm text-slate-600">
-            設定・評価履歴・レーティング・動画/投稿者データ・メタ情報を初期化します。
+            設定・カテゴリ・評価履歴・レーティング・動画/投稿者データ・メタ情報を初期化します。
           </p>
           <button
             type="button"

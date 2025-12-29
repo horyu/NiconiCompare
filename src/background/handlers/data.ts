@@ -1,4 +1,6 @@
+import { normalizeCategories } from "../../lib/categories"
 import {
+  DEFAULT_CATEGORIES,
   DEFAULT_EVENTS_BUCKET,
   DEFAULT_META,
   DEFAULT_SETTINGS,
@@ -7,6 +9,7 @@ import {
 } from "../../lib/constants"
 import type {
   NcAuthors,
+  NcCategories,
   NcEventsBucket,
   NcMeta,
   NcSettings,
@@ -27,7 +30,8 @@ export async function handleDeleteAllData() {
     meta: DEFAULT_META,
     videos: {},
     authors: {},
-    ratings: {}
+    ratings: {},
+    categories: DEFAULT_CATEGORIES
   })
 }
 
@@ -41,7 +45,8 @@ export async function handleExportData() {
       [STORAGE_KEYS.authors]: data.authors,
       [STORAGE_KEYS.events]: data.events,
       [STORAGE_KEYS.ratings]: data.ratings,
-      [STORAGE_KEYS.meta]: data.meta
+      [STORAGE_KEYS.meta]: data.meta,
+      [STORAGE_KEYS.categories]: data.categories
     }
   } catch (error) {
     console.warn("chrome.storage.local is unavailable.", error)
@@ -52,7 +57,8 @@ export async function handleExportData() {
       [STORAGE_KEYS.authors]: {},
       [STORAGE_KEYS.events]: DEFAULT_EVENTS_BUCKET,
       [STORAGE_KEYS.ratings]: {},
-      [STORAGE_KEYS.meta]: DEFAULT_META
+      [STORAGE_KEYS.meta]: DEFAULT_META,
+      [STORAGE_KEYS.categories]: DEFAULT_CATEGORIES
     }
   }
 }
@@ -72,8 +78,16 @@ export async function handleImportData(data: Partial<StorageShape>) {
   }
   const nextVideos = (data[STORAGE_KEYS.videos] as NcVideos) ?? {}
   const nextAuthors = (data[STORAGE_KEYS.authors] as NcAuthors) ?? {}
+  const nextCategories = normalizeCategories(
+    (data[STORAGE_KEYS.categories] as NcCategories) ?? DEFAULT_CATEGORIES
+  )
 
-  const eventItems = Array.isArray(nextEvents.items) ? nextEvents.items : []
+  const eventItems = Array.isArray(nextEvents.items)
+    ? nextEvents.items.map((event) => ({
+        ...event,
+        categoryId: event.categoryId ?? nextCategories.defaultId
+      }))
+    : []
   const maxEventId = eventItems.reduce(
     (max, event) => Math.max(max, event.id),
     0
@@ -92,18 +106,23 @@ export async function handleImportData(data: Partial<StorageShape>) {
       nextVideos
     )
   }
+  const normalizedSettings: NcSettings = {
+    ...nextSettings,
+    activeCategoryId: nextSettings.activeCategoryId || nextCategories.defaultId
+  }
   const nextRatings = rebuildRatingsFromEvents(
     normalizedEvents.items,
-    nextSettings
+    normalizedSettings
   )
 
   await setStorageData({
-    settings: nextSettings,
+    settings: normalizedSettings,
     state: rebuiltState,
     events: normalizedEvents,
     meta: normalizedMeta,
     videos: nextVideos,
     authors: nextAuthors,
-    ratings: nextRatings
+    ratings: nextRatings,
+    categories: nextCategories
   })
 }

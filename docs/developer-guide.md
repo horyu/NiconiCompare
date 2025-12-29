@@ -97,6 +97,12 @@ src/
 └── lib/          # ユーティリティ
 ```
 
+### 2.2.1 カテゴリ機能のデータ概要
+
+- `nc_categories` にカテゴリ一覧・表示順・オーバーレイ表示対象を保持
+- `nc_settings.activeCategoryId` が現在の比較カテゴリ
+- `CompareEvent.categoryId` と `nc_ratings[categoryId]` でカテゴリ単位の履歴/レーティングを分離
+
 ### 2.3 コーディング規約
 
 TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関数/変数), snake_case (storage キー)

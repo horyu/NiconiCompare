@@ -4,7 +4,13 @@ import "../style.css"
 
 import { MESSAGE_TYPES } from "../lib/constants"
 import { sendNcMessage } from "../lib/messages"
-import type { NcEventsBucket, NcMeta, NcSettings, NcVideos } from "../lib/types"
+import type {
+  NcCategories,
+  NcEventsBucket,
+  NcMeta,
+  NcSettings,
+  NcVideos
+} from "../lib/types"
 import { createWatchUrl } from "../lib/url"
 
 type PopupSnapshot = {
@@ -12,6 +18,7 @@ type PopupSnapshot = {
   events: NcEventsBucket
   meta: NcMeta
   videos: NcVideos
+  categories: NcCategories
 }
 
 export default function Popup() {
@@ -63,9 +70,18 @@ export default function Popup() {
     )
   }
 
+  const activeCategoryId = snapshot.categories.items[
+    snapshot.settings.activeCategoryId
+  ]
+    ? snapshot.settings.activeCategoryId
+    : snapshot.categories.defaultId
+  const activeCategoryName =
+    snapshot.categories.items[activeCategoryId]?.name ?? "カテゴリ"
   const lastEvents = buildRecentEvents(
     snapshot.events,
-    snapshot.settings.popupRecentCount
+    snapshot.settings.popupRecentCount,
+    activeCategoryId,
+    snapshot.categories.defaultId
   )
   return (
     <main className="w-80 p-4 flex flex-col gap-4 font-sans">
@@ -82,7 +98,11 @@ export default function Popup() {
       </header>
 
       <section>
-        <h3 className="text-sm mb-2">直近の評価</h3>
+        <h3 className="text-sm mb-2 truncate">
+          <span className="block max-w-full truncate">
+            直近の評価（{activeCategoryName}）
+          </span>
+        </h3>
         {lastEvents.length === 0 ? (
           <p className="text-xs opacity-70">評価なし</p>
         ) : (
@@ -121,9 +141,15 @@ export default function Popup() {
   )
 }
 
-function buildRecentEvents(events: NcEventsBucket, limit: number) {
+function buildRecentEvents(
+  events: NcEventsBucket,
+  limit: number,
+  categoryId: string,
+  defaultCategoryId: string
+) {
   return [...events.items]
     .filter((event) => !event.disabled)
+    .filter((event) => (event.categoryId ?? defaultCategoryId) === categoryId)
     .sort((a, b) => b.id - a.id)
     .slice(0, Math.max(1, limit))
 }

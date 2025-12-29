@@ -93,6 +93,7 @@ export function useVerdictSubmission({
 
   return {
     lastVerdict,
+    lastEventId,
     submitVerdict
   }
 }

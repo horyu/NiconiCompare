@@ -1,3 +1,4 @@
+import { DEFAULT_CATEGORY_ID } from "../../lib/constants"
 import { updatePairRatings } from "../../lib/glicko"
 import type {
   CompareEvent,
@@ -7,11 +8,11 @@ import type {
 } from "../../lib/types"
 
 export function getOrCreateRatingSnapshot(
-  ratings: NcRatings,
+  ratingsByVideo: Record<string, RatingSnapshot>,
   videoId: string,
   settings: NcSettings
 ): RatingSnapshot {
-  const existing = ratings[videoId]
+  const existing = ratingsByVideo[videoId]
   if (existing) {
     return existing
   }
@@ -34,13 +35,18 @@ export function rebuildRatingsFromEvents(
     .sort((a, b) => a.id - b.id)
 
   for (const event of orderedEvents) {
+    const categoryId = event.categoryId ?? DEFAULT_CATEGORY_ID
+    if (!nextRatings[categoryId]) {
+      nextRatings[categoryId] = {}
+    }
+    const categoryRatings = nextRatings[categoryId]
     const leftRating = getOrCreateRatingSnapshot(
-      nextRatings,
+      categoryRatings,
       event.currentVideoId,
       settings
     )
     const rightRating = getOrCreateRatingSnapshot(
-      nextRatings,
+      categoryRatings,
       event.opponentVideoId,
       settings
     )
@@ -51,8 +57,8 @@ export function rebuildRatingsFromEvents(
       verdict: event.verdict,
       eventId: event.id
     })
-    nextRatings[left.videoId] = left
-    nextRatings[right.videoId] = right
+    categoryRatings[left.videoId] = left
+    categoryRatings[right.videoId] = right
   }
 
   return nextRatings

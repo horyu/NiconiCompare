@@ -87,6 +87,58 @@ export type ImportDataMessage = {
   }
 }
 
+export type CreateCategoryMessage = {
+  type: typeof MESSAGE_TYPES.createCategory
+  payload: {
+    name: string
+  }
+}
+
+export type UpdateCategoryNameMessage = {
+  type: typeof MESSAGE_TYPES.updateCategoryName
+  payload: {
+    categoryId: string
+    name: string
+  }
+}
+
+export type DeleteCategoryMessage = {
+  type: typeof MESSAGE_TYPES.deleteCategory
+  payload: {
+    categoryId: string
+    moveToCategoryId?: string
+  }
+}
+
+export type ReorderCategoriesMessage = {
+  type: typeof MESSAGE_TYPES.reorderCategories
+  payload: {
+    order: string[]
+  }
+}
+
+export type UpdateOverlayVisibleIdsMessage = {
+  type: typeof MESSAGE_TYPES.updateOverlayVisibleIds
+  payload: {
+    overlayVisibleIds: string[]
+  }
+}
+
+export type UpdateActiveCategoryMessage = {
+  type: typeof MESSAGE_TYPES.updateActiveCategory
+  payload: {
+    categoryId: string
+  }
+}
+
+export type BulkMoveEventsMessage = {
+  type: typeof MESSAGE_TYPES.bulkMoveEvents
+  payload: {
+    eventIds: number[]
+    targetCategoryId: string
+  }
+}
+
 export type RequestStateMessage = {
   type: typeof MESSAGE_TYPES.requestState
 }
@@ -106,6 +158,13 @@ export type Message =
   | RebuildRatingsMessage
   | ExportDataMessage
   | ImportDataMessage
+  | CreateCategoryMessage
+  | UpdateCategoryNameMessage
+  | DeleteCategoryMessage
+  | ReorderCategoriesMessage
+  | UpdateOverlayVisibleIdsMessage
+  | UpdateActiveCategoryMessage
+  | BulkMoveEventsMessage
   | RequestStateMessage
 
 export type BackgroundResponse<TData = unknown> =

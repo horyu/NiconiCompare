@@ -59,11 +59,11 @@
   - 「移動せず削除（破棄）」
   を明確に分ける。
 - オーバーレイに表示するカテゴリを選択できる。
-- カテゴリタブでアクティブカテゴリを切り替えた場合は `activeCategoryId` を更新する。
+- アクティブカテゴリの切替はオーバーレイのみで行う（カテゴリタブは表示のみ）。
 
 ### 6.2 Options: 評価一覧タブ
-- カテゴリフィルタ（アクティブカテゴリ切替）。
-- 初期表示は `activeCategoryId` を使用し、以降の選択状態は sessionStorage を使用する。
+- カテゴリフィルタ（表示用の選択。`activeCategoryId` は変更しない）。
+- 初期表示は `activeCategoryId` を使用し、以降の選択状態は sessionStorage を使用する（`activeCategoryId` は更新しない）。
 - 一括移動:
   - 「現在のフィルタ条件に一致する全件を移動」ボタンを用意。
   - 移動先カテゴリを選択。
@@ -71,13 +71,14 @@
 
 ### 6.3 Options: 動画一覧タブ
 - カテゴリは列としては表示しない。フィルターで選択するのみとする。
-- 初期表示は `activeCategoryId` を使用し、以降の選択状態は sessionStorage を使用する。
+- 初期表示は `activeCategoryId` を使用し、以降の選択状態は sessionStorage を使用する（`activeCategoryId` は更新しない）。
 - Rating/RD/評価数はアクティブカテゴリの集計を表示。
 
 ### 6.4 オーバーレイ
 - 展開時の「NiconiCompare」左側余白にカテゴリドロップダウンを表示。
 - カテゴリ切替後は以降の比較イベントに反映。
 - 切替時に `activeCategoryId` を即座に保存し、リロード後も状態を維持する。
+- 評価済み状態でカテゴリを切替した場合、直近の比較イベントを切替先カテゴリへ移動する。
 - ドロップダウンは長いカテゴリ名を見切る（省略表示）前提で設計する。
 
 ## 7. エクスポート
@@ -180,7 +181,7 @@
 ### Phase 7: Options - 評価一覧タブのカテゴリ対応
 1. `src/options/tabs/EventsTab.tsx` を修正
 2. カテゴリフィルタUIを追加 (ドロップダウン)
-3. `activeCategoryId` 切替機能
+3. `activeCategoryId` は更新しない
 4. 一括移動ボタンと移動先選択UI
 5. 確認ダイアログ (対象件数表示)
 6. フィルタリング処理を `categoryId` 考慮に変更
@@ -223,3 +224,20 @@
 1. `docs/architecture.md` にカテゴリ機能を追記
 2. `docs/developer-guide.md` にカテゴリ関連の開発ガイド追加
 3. README.md の機能説明にカテゴリを追加
+
+## 12. 実装状況
+
+以下は実装完了状況のサマリ。完了済みの Phase は ✅、未着手は ⬜︎ で示す。
+
+- ✅ Phase 1: 型定義とデータ層の準備
+- ✅ Phase 2: マイグレーション機能
+- ✅ Phase 3: Background - カテゴリ操作ハンドラ
+- ✅ Phase 4: Background - Rating計算のカテゴリ対応
+- ✅ Phase 5: Background - イベント操作のカテゴリ対応
+- ✅ Phase 6: Options - カテゴリタブ
+- ✅ Phase 7: Options - 評価一覧タブのカテゴリ対応
+- ✅ Phase 8: Options - 動画一覧タブのカテゴリ対応
+- ✅ Phase 9: オーバーレイのカテゴリ対応
+- ✅ Phase 10: エクスポート機能のカテゴリ対応
+- ✅ Phase 11: テストとデバッグ（`pnpm fix` / `pnpm lint` 実行済み）
+- ✅ Phase 12: ドキュメント更新（README / architecture / developer-guide 反映済み）

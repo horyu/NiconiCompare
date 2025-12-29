@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import type { VideoSnapshot } from "../../lib/types"
+import type { RatingSnapshot, VideoSnapshot } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
+import { CategorySelect } from "../components/CategorySelect"
 import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
@@ -10,11 +11,14 @@ import { readSessionState, writeSessionState } from "../utils/sessionStorage"
 
 type VideosTabProps = {
   snapshot: OptionsSnapshot
+  refreshState: (silent?: boolean) => Promise<void>
+  showToast: (tone: "success" | "error", text: string) => void
 }
 
 type VideoSessionState = {
   search: string
   author: string
+  categoryId: string
   sort: string
   order: "desc" | "asc"
   page: number
@@ -25,6 +29,7 @@ const SESSION_KEY = "nc_options_video_state"
 const DEFAULT_VIDEO_SESSION_STATE: VideoSessionState = {
   search: "",
   author: "all",
+  categoryId: "",
   sort: "rating",
   order: "desc",
   page: 1
@@ -42,6 +47,9 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
   const initialState = initialStateRef.current
   const [videoSearch, setVideoSearch] = useState(initialState.search)
   const [videoAuthor, setVideoAuthor] = useState(initialState.author)
+  const [videoCategoryId, setVideoCategoryId] = useState(
+    initialState.categoryId || snapshot.settings.activeCategoryId
+  )
   const [videoSort, setVideoSort] = useState(initialState.sort)
   const [videoSortOrder, setVideoSortOrder] = useState<"desc" | "asc">(
     initialState.order
@@ -55,17 +63,31 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
       return
     }
     setVideoPage(1)
-  }, [videoSearch, videoAuthor, videoSort, videoSortOrder])
+  }, [videoSearch, videoAuthor, videoSort, videoSortOrder, videoCategoryId])
 
   useEffect(() => {
     writeSessionState(SESSION_KEY, {
       search: videoSearch,
       author: videoAuthor,
+      categoryId: videoCategoryId,
       sort: videoSort,
       order: videoSortOrder,
       page: videoPage
     })
-  }, [videoSearch, videoAuthor, videoSort, videoSortOrder, videoPage])
+  }, [
+    videoSearch,
+    videoAuthor,
+    videoSort,
+    videoSortOrder,
+    videoPage,
+    videoCategoryId
+  ])
+
+  useEffect(() => {
+    if (!snapshot.categories.items[videoCategoryId]) {
+      setVideoCategoryId(snapshot.categories.defaultId)
+    }
+  }, [videoCategoryId, snapshot.categories])
 
   const authorOptions = useMemo(() => {
     return Object.values(snapshot.authors).sort((a, b) =>
@@ -77,6 +99,8 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
     const map = new Map<string, number>()
     for (const event of snapshot.events.items) {
       if (event.disabled) continue
+      const categoryId = event.categoryId ?? snapshot.categories.defaultId
+      if (categoryId !== videoCategoryId) continue
       map.set(
         event.currentVideoId,
         Math.max(map.get(event.currentVideoId) ?? 0, event.timestamp)
@@ -87,7 +111,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
       )
     }
     return map
-  }, [snapshot.events.items])
+  }, [snapshot.events.items, snapshot.categories.defaultId, videoCategoryId])
 
   const verdictCountsByVideo = useMemo(() => {
     const map = new Map<
@@ -107,6 +131,8 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
 
     for (const event of snapshot.events.items) {
       if (event.disabled) continue
+      const categoryId = event.categoryId ?? snapshot.categories.defaultId
+      if (categoryId !== videoCategoryId) continue
       const currentStats = ensure(event.currentVideoId)
       const opponentStats = ensure(event.opponentVideoId)
 
@@ -123,13 +149,14 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
     }
 
     return map
-  }, [snapshot.events.items])
+  }, [snapshot.events.items, snapshot.categories.defaultId, videoCategoryId])
 
   const filteredVideos = useMemo(() => {
     const normalizedSearch = videoSearch.trim().toLowerCase()
+    const ratingsByCategory = snapshot.ratings[videoCategoryId] ?? {}
 
     const videos = Object.values(snapshot.videos).filter((video) => {
-      const hasRating = Boolean(snapshot.ratings[video.videoId])
+      const hasRating = Boolean(ratingsByCategory[video.videoId])
       const matchesSearch =
         normalizedSearch.length === 0 ||
         video.videoId.toLowerCase().includes(normalizedSearch) ||
@@ -142,13 +169,13 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
 
     type VideoItem = (typeof videos)[number]
     const compareByRating = (left: VideoItem, right: VideoItem) =>
-      (snapshot.ratings[right.videoId]?.rating ?? 0) -
-      (snapshot.ratings[left.videoId]?.rating ?? 0)
+      (ratingsByCategory[right.videoId]?.rating ?? 0) -
+      (ratingsByCategory[left.videoId]?.rating ?? 0)
     const compareByTitle = (left: VideoItem, right: VideoItem) =>
       left.title.localeCompare(right.title)
     const compareByRd = (left: VideoItem, right: VideoItem) =>
-      (snapshot.ratings[right.videoId]?.rd ?? 0) -
-      (snapshot.ratings[left.videoId]?.rd ?? 0)
+      (ratingsByCategory[right.videoId]?.rd ?? 0) -
+      (ratingsByCategory[left.videoId]?.rd ?? 0)
     const compareByLastVerdict = (left: VideoItem, right: VideoItem) =>
       (lastEventByVideo.get(right.videoId) ?? 0) -
       (lastEventByVideo.get(left.videoId) ?? 0)
@@ -193,6 +220,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
     videoSearch,
     videoSort,
     videoSortOrder,
+    videoCategoryId,
     lastEventByVideo,
     verdictCountsByVideo
   ])
@@ -211,10 +239,12 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
   const hasMissingAuthorData =
     snapshot.events.items.length > 0 &&
     Object.keys(snapshot.authors).length === 0
+  const ratingsByCategory = snapshot.ratings[videoCategoryId] ?? {}
   const handleExport = (format: "csv" | "tsv", withBom: boolean) => {
     const exportRows = buildExportRows({
       videos: filteredVideos,
       snapshot,
+      ratingsByCategory,
       lastEventByVideo,
       verdictCountsByVideo
     })
@@ -254,9 +284,23 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
       content,
       format,
       withBom,
-      filenamePrefix: "NiconiCompareVideos"
+      filenamePrefix: "NiconiCompareVideos",
+      categoryName:
+        snapshot.categories.items[videoCategoryId]?.name ?? videoCategoryId
     })
     setExportMenuOpen(false)
+  }
+
+  const categoryOptions = snapshot.categories.order.filter(
+    (id) => snapshot.categories.items[id]
+  )
+  const categorySelectOptions = categoryOptions.map((id) => ({
+    id,
+    name: snapshot.categories.items[id]?.name ?? "カテゴリ"
+  }))
+
+  const handleCategoryChange = (categoryId: string) => {
+    setVideoCategoryId(categoryId)
   }
 
   return (
@@ -283,7 +327,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
         </div>
       )}
 
-      <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-3">
+      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3">
         <label className="text-sm flex flex-col gap-1">
           検索
           <input
@@ -321,6 +365,15 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
               <option key={author.authorUrl} value={author.name} />
             ))}
           </datalist>
+        </label>
+        <label className="text-sm flex flex-col gap-1">
+          Rating表示カテゴリ
+          <CategorySelect
+            value={videoCategoryId}
+            onChange={handleCategoryChange}
+            options={categorySelectOptions}
+            className="w-full max-w-full"
+          />
         </label>
         <label className="text-sm flex flex-col gap-1">
           ソート
@@ -374,7 +427,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
             </div>
           ) : (
             pagedVideos.map((video) => {
-              const rating = snapshot.ratings[video.videoId]
+              const rating = ratingsByCategory[video.videoId]
               const author = snapshot.authors[video.authorUrl]
               const verdictCounts = verdictCountsByVideo.get(video.videoId) ?? {
                 wins: 0,
@@ -466,6 +519,7 @@ type ExportRow = {
 type ExportRowParams = {
   videos: VideoSnapshot[]
   snapshot: OptionsSnapshot
+  ratingsByCategory: Record<string, RatingSnapshot>
   lastEventByVideo: Map<string, number>
   verdictCountsByVideo: Map<
     string,
@@ -476,11 +530,12 @@ type ExportRowParams = {
 const buildExportRows = ({
   videos,
   snapshot,
+  ratingsByCategory,
   lastEventByVideo,
   verdictCountsByVideo
 }: ExportRowParams): ExportRow[] => {
   return videos.map((video) => {
-    const rating = snapshot.ratings[video.videoId]
+    const rating = ratingsByCategory[video.videoId]
     const author = snapshot.authors[video.authorUrl]
     const counts = verdictCountsByVideo.get(video.videoId) ?? {
       wins: 0,

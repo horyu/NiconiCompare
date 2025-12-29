@@ -1,16 +1,23 @@
 import { useCallback, useEffect, useState } from "react"
 
+import { normalizeCategories } from "../../lib/categories"
 import {
   DEFAULT_SETTINGS,
   MESSAGE_TYPES,
   STORAGE_KEYS
 } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
-import type { NcSettings, NcState, VideoSnapshot } from "../../lib/types"
+import type {
+  NcCategories,
+  NcSettings,
+  NcState,
+  VideoSnapshot
+} from "../../lib/types"
 
 type StateResponse = {
   settings: NcSettings
   state: NcState
+  categories: NcCategories
 }
 
 export function useOverlayState() {
@@ -24,6 +31,9 @@ export function useOverlayState() {
     Record<string, VideoSnapshot>
   >({})
   const [statusMessage, setStatusMessage] = useState<string>()
+  const [categories, setCategories] = useState<NcCategories>(
+    normalizeCategories()
+  )
 
   useEffect(() => {
     if (!chrome.storage?.onChanged) return
@@ -42,6 +52,12 @@ export function useOverlayState() {
 
       if (changes[STORAGE_KEYS.videos]?.newValue) {
         setVideoSnapshots(changes[STORAGE_KEYS.videos].newValue ?? {})
+      }
+
+      if (changes[STORAGE_KEYS.categories]?.newValue) {
+        setCategories(
+          normalizeCategories(changes[STORAGE_KEYS.categories].newValue)
+        )
       }
     }
 
@@ -69,6 +85,7 @@ export function useOverlayState() {
     setRecentWindow(data.state.recentWindow)
     setCurrentVideoId(data.state.currentVideoId)
     setPinnedOpponentVideoId(data.state.pinnedOpponentVideoId)
+    setCategories(normalizeCategories(data.categories))
     await loadVideoSnapshots()
     setIsReady(true)
 
@@ -94,6 +111,7 @@ export function useOverlayState() {
     setPinnedOpponentVideoId,
     setStatusMessage,
     statusMessage,
-    videoSnapshots
+    videoSnapshots,
+    categories
   }
 }

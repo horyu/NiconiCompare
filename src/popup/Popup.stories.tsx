@@ -1,7 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { DEFAULT_META, DEFAULT_SETTINGS } from "../lib/constants"
-import type { NcEventsBucket, NcMeta, NcVideos } from "../lib/types"
+import {
+  DEFAULT_CATEGORIES,
+  DEFAULT_CATEGORY_ID,
+  DEFAULT_META,
+  DEFAULT_SETTINGS
+} from "../lib/constants"
+import type {
+  NcCategories,
+  NcEventsBucket,
+  NcMeta,
+  NcVideos
+} from "../lib/types"
 import Popup from "./index"
 
 type PopupData = {
@@ -9,6 +19,7 @@ type PopupData = {
   events: NcEventsBucket
   meta: NcMeta
   videos: NcVideos
+  categories: NcCategories
 }
 
 const baseData: PopupData = {
@@ -22,7 +33,8 @@ const baseData: PopupData = {
         currentVideoId: "sm1111111",
         opponentVideoId: "sm2222222",
         verdict: "better",
-        disabled: false
+        disabled: false,
+        categoryId: DEFAULT_CATEGORY_ID
       },
       {
         id: 2,
@@ -30,11 +42,13 @@ const baseData: PopupData = {
         currentVideoId: "sm3333333",
         opponentVideoId: "sm4444444",
         verdict: "same",
-        disabled: false
+        disabled: false,
+        categoryId: DEFAULT_CATEGORY_ID
       }
     ]
   },
   meta: { ...DEFAULT_META },
+  categories: { ...DEFAULT_CATEGORIES },
   videos: {
     sm1111111: {
       videoId: "sm1111111",
@@ -78,7 +92,8 @@ const withPopupData =
       settings: { ...baseData.settings, ...overrides.settings },
       events: overrides.events ?? baseData.events,
       meta: { ...baseData.meta, ...overrides.meta },
-      videos: overrides.videos ?? baseData.videos
+      videos: overrides.videos ?? baseData.videos,
+      categories: overrides.categories ?? baseData.categories
     }
 
     globalThis.chrome = {

@@ -5,6 +5,7 @@ import { handleUIError, NcError } from "../../lib/error-handler"
 import { sendNcMessage } from "../../lib/messages"
 import type { CompareEvent, Verdict } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
+import { CategorySelect } from "../components/CategorySelect"
 import { EventVideoLabel } from "../components/EventVideoLabel"
 import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
@@ -24,6 +25,8 @@ type EventSessionState = {
   search: string
   verdict: string
   includeDeleted: boolean
+  categoryId: string
+  showCategoryOps: boolean
   page: number
 }
 
@@ -33,6 +36,8 @@ const DEFAULT_EVENT_SESSION_STATE: EventSessionState = {
   search: "",
   verdict: "all",
   includeDeleted: false,
+  categoryId: "",
+  showCategoryOps: false,
   page: 1
 }
 
@@ -57,9 +62,28 @@ export const EventsTab = ({
   const [eventIncludeDeleted, setEventIncludeDeleted] = useState(
     initialState.includeDeleted
   )
+  const [showCategoryOps, setShowCategoryOps] = useState(
+    initialState.showCategoryOps
+  )
+  const [eventCategoryId, setEventCategoryId] = useState(
+    initialState.categoryId || snapshot.settings.activeCategoryId
+  )
   const [eventPage, setEventPage] = useState(initialState.page)
   const shouldResetPageRef = useRef(false)
   const [eventBusyId, setEventBusyId] = useState<number | null>(null)
+  const [moveTargets, setMoveTargets] = useState<Record<number, string>>({})
+  const [bulkMoveTargetId, setBulkMoveTargetId] = useState(
+    snapshot.categories.defaultId
+  )
+  const categoryOptions = snapshot.categories.order
+    .filter((id) => snapshot.categories.items[id])
+    .map((id) => ({
+      id,
+      name: snapshot.categories.items[id]?.name ?? "カテゴリ"
+    }))
+  const bulkMoveTargets = categoryOptions.filter(
+    (option) => option.id !== eventCategoryId
+  )
 
   useEffect(() => {
     if (!shouldResetPageRef.current) {
@@ -67,16 +91,40 @@ export const EventsTab = ({
       return
     }
     setEventPage(1)
-  }, [eventSearch, eventVerdict, eventIncludeDeleted])
+  }, [eventSearch, eventVerdict, eventIncludeDeleted, eventCategoryId])
 
   useEffect(() => {
     writeSessionState(SESSION_KEY, {
       search: eventSearch,
       verdict: eventVerdict,
       includeDeleted: eventIncludeDeleted,
+      showCategoryOps,
+      categoryId: eventCategoryId,
       page: eventPage
     })
-  }, [eventSearch, eventVerdict, eventIncludeDeleted, eventPage])
+  }, [
+    eventSearch,
+    eventVerdict,
+    eventIncludeDeleted,
+    showCategoryOps,
+    eventPage,
+    eventCategoryId
+  ])
+
+  useEffect(() => {
+    if (!snapshot.categories.items[eventCategoryId]) {
+      setEventCategoryId(snapshot.categories.defaultId)
+    }
+  }, [eventCategoryId, snapshot.categories])
+
+  useEffect(() => {
+    if (bulkMoveTargets.length === 0) {
+      return
+    }
+    if (!bulkMoveTargets.some((option) => option.id === bulkMoveTargetId)) {
+      setBulkMoveTargetId(bulkMoveTargets[0].id)
+    }
+  }, [bulkMoveTargetId, bulkMoveTargets])
 
   const filteredEvents = useMemo(() => {
     const normalizedSearch = eventSearch.trim().toLowerCase()
@@ -85,6 +133,10 @@ export const EventsTab = ({
         return false
       }
       if (eventVerdict !== "all" && event.verdict !== eventVerdict) {
+        return false
+      }
+      const categoryId = event.categoryId ?? snapshot.categories.defaultId
+      if (categoryId !== eventCategoryId) {
         return false
       }
       if (normalizedSearch.length === 0) {
@@ -106,7 +158,13 @@ export const EventsTab = ({
       return idMatch || text.toLowerCase().includes(normalizedSearch)
     })
     return events.sort((a, b) => b.id - a.id)
-  }, [snapshot, eventIncludeDeleted, eventSearch, eventVerdict])
+  }, [
+    snapshot,
+    eventIncludeDeleted,
+    eventSearch,
+    eventVerdict,
+    eventCategoryId
+  ])
 
   const start = (eventPage - 1) * EVENT_PAGE_SIZE
   const pagedEvents = filteredEvents.slice(start, start + EVENT_PAGE_SIZE)
@@ -154,9 +212,81 @@ export const EventsTab = ({
       content,
       format,
       withBom,
-      filenamePrefix: "NiconiCompareComparison"
+      filenamePrefix: "NiconiCompareComparison",
+      categoryName:
+        snapshot.categories.items[eventCategoryId]?.name ?? eventCategoryId
     })
     setExportMenuOpen(false)
+  }
+
+  const handleCategoryChange = (categoryId: string) => {
+    setEventCategoryId(categoryId)
+  }
+
+  const handleBulkMove = async (targetCategoryId: string) => {
+    if (!targetCategoryId) {
+      return
+    }
+    const count = filteredEvents.length
+    const targetName = snapshot.categories.items[targetCategoryId]?.name ?? ""
+    const includeLabel = eventIncludeDeleted
+      ? "無効化済みを含む"
+      : "無効化済みは除外"
+    const confirmed = confirm(
+      `検索条件に一致する ${count} 件（${includeLabel}）を [${targetName}] カテゴリに移動します。よろしいですか？`
+    )
+    if (!confirmed) {
+      return
+    }
+    try {
+      const response = await sendNcMessage({
+        type: MESSAGE_TYPES.bulkMoveEvents,
+        payload: {
+          eventIds: filteredEvents.map((event) => event.id),
+          targetCategoryId
+        }
+      })
+      if (!response.ok) {
+        throw new NcError(
+          response.error ?? "bulk move failed",
+          "options:events:bulk-move",
+          "一括移動に失敗しました。"
+        )
+      }
+      await refreshState(true)
+      showToast("success", "カテゴリを一括移動しました。")
+    } catch (error) {
+      handleUIError(error, "options:events:bulk-move", showToast)
+    }
+  }
+
+  const handleMoveEvent = async (eventId: number, targetCategoryId: string) => {
+    if (!targetCategoryId) {
+      return
+    }
+    setEventBusyId(eventId)
+    try {
+      const response = await sendNcMessage({
+        type: MESSAGE_TYPES.bulkMoveEvents,
+        payload: {
+          eventIds: [eventId],
+          targetCategoryId
+        }
+      })
+      if (!response.ok) {
+        throw new NcError(
+          response.error ?? "move failed",
+          "options:events:move",
+          "カテゴリの移動に失敗しました。"
+        )
+      }
+      await refreshState(true)
+      showToast("success", "カテゴリを移動しました。")
+    } catch (error) {
+      handleUIError(error, "options:events:move", showToast)
+    } finally {
+      setEventBusyId(null)
+    }
   }
 
   const handleEventVerdictChange = async (
@@ -304,6 +434,15 @@ export const EventsTab = ({
             <option value="worse">負け</option>
           </select>
         </label>
+        <label className="text-sm flex flex-col gap-1 min-w-[140px]">
+          カテゴリ
+          <CategorySelect
+            value={eventCategoryId}
+            onChange={handleCategoryChange}
+            options={categoryOptions}
+            className="w-[15ch] max-w-[15ch]"
+          />
+        </label>
         <label className="text-sm flex items-center gap-2 mb-1">
           <input
             type="checkbox"
@@ -315,12 +454,41 @@ export const EventsTab = ({
         <label className="text-sm flex items-center gap-2 mb-1">
           <input
             type="checkbox"
+            checked={showCategoryOps}
+            onChange={(event) => setShowCategoryOps(event.target.checked)}
+          />
+          カテゴリ操作
+        </label>
+        <label className="text-sm flex items-center gap-2 mb-1">
+          <input
+            type="checkbox"
             checked={eventShowThumbnails}
             onChange={(event) => onToggleEventThumbnails(event.target.checked)}
           />
           サムネ表示
         </label>
       </div>
+
+      {showCategoryOps && (
+        <div className="flex items-center gap-2 text-sm">
+          <span>一括移動:</span>
+          <CategorySelect
+            value={bulkMoveTargetId}
+            onChange={setBulkMoveTargetId}
+            options={bulkMoveTargets}
+            className="w-[15ch] max-w-[15ch]"
+          />
+          <button
+            type="button"
+            onClick={() => handleBulkMove(bulkMoveTargetId)}
+            disabled={
+              filteredEvents.length === 0 || bulkMoveTargets.length === 0
+            }
+            className="px-3 py-1 rounded border border-slate-200 text-xs hover:bg-slate-100 disabled:opacity-50">
+            現在の条件で移動
+          </button>
+        </div>
+      )}
 
       <Pagination
         current={eventPage}
@@ -329,12 +497,18 @@ export const EventsTab = ({
       />
 
       <div className="border border-slate-200 rounded-lg overflow-hidden">
-        <div className="grid grid-cols-[40px_70px_1fr_1fr_90px_90px] gap-2 bg-slate-100 text-xs font-semibold px-3 py-2">
+        <div
+          className={`grid ${
+            showCategoryOps
+              ? "grid-cols-[40px_70px_1fr_1fr_90px_160px_90px]"
+              : "grid-cols-[40px_70px_1fr_1fr_90px_90px]"
+          } gap-2 bg-slate-100 text-xs font-semibold px-3 py-2`}>
           <div>ID</div>
           <div>日時</div>
           <div>基準</div>
           <div>比較対象</div>
           <div>評価</div>
+          {showCategoryOps && <div>カテゴリ</div>}
           <div>操作</div>
         </div>
         <div className="divide-y divide-slate-100">
@@ -347,6 +521,13 @@ export const EventsTab = ({
               const currentVideo = snapshot.videos[event.currentVideoId]
               const opponentVideo = snapshot.videos[event.opponentVideoId]
               const timestamp = new Date(event.timestamp)
+              const rowCategoryId =
+                event.categoryId ?? snapshot.categories.defaultId
+              const rowMoveTargets = categoryOptions.filter(
+                (option) => option.id !== rowCategoryId
+              )
+              const rowMoveTargetId =
+                moveTargets[event.id] ?? rowMoveTargets[0]?.id ?? ""
               const isBusy = eventBusyId === event.id
               const currentIsWinner =
                 !event.disabled && event.verdict === "better"
@@ -355,7 +536,11 @@ export const EventsTab = ({
               return (
                 <div
                   key={event.id}
-                  className="grid grid-cols-[40px_70px_1fr_1fr_90px_90px] gap-2 items-center px-3 py-2 text-sm">
+                  className={`grid ${
+                    showCategoryOps
+                      ? "grid-cols-[40px_70px_1fr_1fr_90px_160px_90px]"
+                      : "grid-cols-[40px_70px_1fr_1fr_90px_90px]"
+                  } gap-2 items-center px-3 py-2 text-sm`}>
                   <div className="font-medium flex flex-col gap-1 items-center">
                     <span>#{event.id}</span>
                     {event.disabled && (
@@ -414,6 +599,39 @@ export const EventsTab = ({
                     <option value="same">引き分け</option>
                     <option value="worse">負け</option>
                   </select>
+                  {showCategoryOps && (
+                    <div className="flex items-center gap-2">
+                      {rowMoveTargets.length === 0 ? (
+                        <span className="text-xs text-slate-400">
+                          移動先なし
+                        </span>
+                      ) : (
+                        <>
+                          <CategorySelect
+                            value={rowMoveTargetId}
+                            onChange={(value) =>
+                              setMoveTargets((prev) => ({
+                                ...prev,
+                                [event.id]: value
+                              }))
+                            }
+                            options={rowMoveTargets}
+                            size="sm"
+                            className="w-[15ch] max-w-[15ch]"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleMoveEvent(event.id, rowMoveTargetId)
+                            }
+                            disabled={!rowMoveTargetId || isBusy}
+                            className="px-2 py-1 rounded border border-slate-200 text-xs hover:bg-slate-100 disabled:opacity-50">
+                            移動
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
                   <div className="flex flex-col gap-2">
                     {!event.disabled ? (
                       <button

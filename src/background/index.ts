@@ -1,4 +1,6 @@
+import { normalizeCategories } from "../lib/categories"
 import {
+  DEFAULT_CATEGORIES,
   DEFAULT_EVENTS_BUCKET,
   DEFAULT_META,
   DEFAULT_SETTINGS,
@@ -7,6 +9,16 @@ import {
 } from "../lib/constants"
 import { handleBackgroundError } from "../lib/error-handler"
 import type { Message } from "../lib/messages"
+import type { NcCategories, NcSettings } from "../lib/types"
+import {
+  handleBulkMoveEvents,
+  handleCreateCategory,
+  handleDeleteCategory,
+  handleReorderCategories,
+  handleUpdateActiveCategory,
+  handleUpdateCategoryName,
+  handleUpdateOverlayVisibleIds
+} from "./handlers/categories"
 import {
   handleDeleteAllData,
   handleExportData,
@@ -28,7 +40,9 @@ import {
   handleUpdatePinnedOpponent
 } from "./handlers/video"
 import { runAutoCleanupIfNeeded } from "./services/cleanup"
+import { runMigrationIfNeeded } from "./services/migration"
 import { getRawStorageData, setStorageData } from "./services/storage"
+import { normalizeSettings } from "./utils/normalize"
 
 if (chrome?.alarms) {
   chrome.alarms.create("nc.autoCleanup", { periodInMinutes: 60 * 24 })
@@ -42,20 +56,14 @@ if (chrome?.alarms) {
 }
 
 chrome.runtime.onInstalled.addListener(() => {
-  ensureDefaults().catch((error) =>
-    handleBackgroundError(error, "ensureDefaults.onInstalled")
-  )
-  runAutoCleanupIfNeeded().catch((error) =>
-    handleBackgroundError(error, "autoCleanup.onInstalled")
-  )
+  initializeBackground("onInstalled")
 })
 
-ensureDefaults().catch((error) =>
-  handleBackgroundError(error, "ensureDefaults.startup")
-)
-runAutoCleanupIfNeeded().catch((error) =>
-  handleBackgroundError(error, "autoCleanup.startup")
-)
+chrome.runtime.onStartup?.addListener(() => {
+  initializeBackground("onStartup")
+})
+
+initializeBackground("startup")
 
 chrome.runtime.onMessage.addListener(
   (message: Message, _sender, sendResponse) => {
@@ -123,6 +131,46 @@ chrome.runtime.onMessage.addListener(
             await handleImportData(message.payload.data)
             sendResponse({ ok: true })
             break
+          case MESSAGE_TYPES.createCategory: {
+            const categoryId = await handleCreateCategory(message.payload.name)
+            sendResponse({ ok: true, data: { categoryId } })
+            break
+          }
+          case MESSAGE_TYPES.updateCategoryName:
+            await handleUpdateCategoryName(
+              message.payload.categoryId,
+              message.payload.name
+            )
+            sendResponse({ ok: true })
+            break
+          case MESSAGE_TYPES.deleteCategory:
+            await handleDeleteCategory(
+              message.payload.categoryId,
+              message.payload.moveToCategoryId
+            )
+            sendResponse({ ok: true })
+            break
+          case MESSAGE_TYPES.reorderCategories:
+            await handleReorderCategories(message.payload.order)
+            sendResponse({ ok: true })
+            break
+          case MESSAGE_TYPES.updateOverlayVisibleIds:
+            await handleUpdateOverlayVisibleIds(
+              message.payload.overlayVisibleIds
+            )
+            sendResponse({ ok: true })
+            break
+          case MESSAGE_TYPES.updateActiveCategory:
+            await handleUpdateActiveCategory(message.payload.categoryId)
+            sendResponse({ ok: true })
+            break
+          case MESSAGE_TYPES.bulkMoveEvents:
+            await handleBulkMoveEvents(
+              message.payload.eventIds,
+              message.payload.targetCategoryId
+            )
+            sendResponse({ ok: true })
+            break
           case MESSAGE_TYPES.requestState: {
             const state = await readStateSnapshot()
             sendResponse({ ok: true, data: state })
@@ -151,12 +199,18 @@ async function ensureDefaults() {
     "meta",
     "videos",
     "authors",
-    "ratings"
+    "ratings",
+    "categories"
   ])
   const updates: Parameters<typeof setStorageData>[0] = {}
 
   if (!result.settings) {
     updates.settings = DEFAULT_SETTINGS
+  } else if (
+    !(result.settings as NcSettings).activeCategoryId ||
+    !(result.settings as NcSettings).glicko
+  ) {
+    updates.settings = normalizeSettings(result.settings as NcSettings)
   }
   if (!result.state) {
     updates.state = DEFAULT_STATE
@@ -176,8 +230,33 @@ async function ensureDefaults() {
   if (!result.ratings) {
     updates.ratings = {}
   }
+  if (!result.categories) {
+    updates.categories = DEFAULT_CATEGORIES
+  } else {
+    const normalizedCategories = normalizeCategories(
+      result.categories as NcCategories
+    )
+    if (
+      (result.categories as NcCategories).overlayVisibleIds?.length === 0 ||
+      !(result.categories as NcCategories).items?.[
+        normalizedCategories.defaultId
+      ]
+    ) {
+      updates.categories = normalizedCategories
+    }
+  }
 
   if (Object.keys(updates).length > 0) {
     await setStorageData(updates)
+  }
+}
+
+async function initializeBackground(context: string) {
+  try {
+    await runMigrationIfNeeded()
+    await ensureDefaults()
+    await runAutoCleanupIfNeeded()
+  } catch (error) {
+    handleBackgroundError(error, `initializeBackground.${context}`)
   }
 }

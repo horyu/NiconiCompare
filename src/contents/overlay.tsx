@@ -3,8 +3,10 @@ import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useCallback, useState } from "react"
 
 import { MESSAGE_TYPES } from "../lib/constants"
+import { handleUIError } from "../lib/error-handler"
 import { sendNcMessage } from "../lib/messages"
 import type { AuthorProfile, VideoSnapshot } from "../lib/types"
+import { CategorySelector } from "./components/CategorySelector"
 import { OpponentSelector } from "./components/OpponentSelector"
 import { VerdictButtons } from "./components/VerdictButtons"
 import { VideoComparison } from "./components/VideoComparison"
@@ -43,7 +45,8 @@ export default function Overlay() {
     setPinnedOpponentVideoId,
     setStatusMessage,
     statusMessage,
-    videoSnapshots
+    videoSnapshots,
+    categories
   } = useOverlayState()
   const {
     hasSelectableCandidates,
@@ -63,12 +66,48 @@ export default function Overlay() {
     isHovered,
     isReady
   })
-  const { lastVerdict, submitVerdict } = useVerdictSubmission({
+  const { lastVerdict, lastEventId, submitVerdict } = useVerdictSubmission({
     currentVideoId,
     opponentVideoId,
     refreshState,
     onStatusMessage: setStatusMessage
   })
+  const activeCategoryId = categories.items[overlaySettings.activeCategoryId]
+    ? overlaySettings.activeCategoryId
+    : categories.defaultId
+
+  const handleCategoryChange = useCallback(
+    async (categoryId: string) => {
+      try {
+        const response = await sendNcMessage({
+          type: MESSAGE_TYPES.updateActiveCategory,
+          payload: { categoryId }
+        })
+        if (!response.ok) {
+          setStatusMessage("カテゴリの更新に失敗しました。")
+          return
+        }
+        if (lastEventId) {
+          const moveResponse = await sendNcMessage({
+            type: MESSAGE_TYPES.bulkMoveEvents,
+            payload: {
+              eventIds: [lastEventId],
+              targetCategoryId: categoryId
+            }
+          })
+          if (!moveResponse.ok) {
+            setStatusMessage("カテゴリの移動に失敗しました。")
+            return
+          }
+        }
+        await refreshState()
+      } catch (error) {
+        handleUIError(error, "overlay:category-change")
+        setStatusMessage("カテゴリの更新に失敗しました。")
+      }
+    },
+    [lastEventId, refreshState, setStatusMessage]
+  )
 
   const handleVideoChange = useCallback(
     async (videoData: { video: VideoSnapshot; author: AuthorProfile }) => {
@@ -146,9 +185,22 @@ export default function Overlay() {
   return (
     <div
       className="fixed top-0 right-0 z-[2147483647] bg-black/75 text-white p-3 rounded-lg shadow-lg max-w-[320px] flex flex-col gap-2"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}>
-      <strong className="text-right w-full">NiconiCompare</strong>
+      onMouseEnter={() => {
+        setIsHovered(true)
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false)
+      }}>
+      <div className="flex items-center justify-between gap-2">
+        {showControls && (
+          <CategorySelector
+            activeCategoryId={activeCategoryId}
+            categories={categories}
+            onChange={handleCategoryChange}
+          />
+        )}
+        <strong className="text-right w-full">NiconiCompare</strong>
+      </div>
 
       {displayStatus && (
         <span className="text-xs opacity-80 text-right w-full">
