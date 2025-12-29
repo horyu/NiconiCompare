@@ -8,7 +8,6 @@ const sampleVideo: VideoSnapshot = {
   title: "テスト動画タイトル",
   authorUrl: "https://www.nicovideo.jp/user/1",
   thumbnailUrls: [],
-  lengthSeconds: 120,
   capturedAt: Date.now()
 }
 

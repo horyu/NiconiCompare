@@ -10,7 +10,6 @@ const videoSnapshots: Record<string, VideoSnapshot> = {
     title: "テスト動画 A",
     authorUrl: "https://www.nicovideo.jp/user/1",
     thumbnailUrls: [],
-    lengthSeconds: 120,
     capturedAt: Date.now()
   },
   sm2222222: {
@@ -18,7 +17,6 @@ const videoSnapshots: Record<string, VideoSnapshot> = {
     title: "テスト動画 B",
     authorUrl: "https://www.nicovideo.jp/user/2",
     thumbnailUrls: [],
-    lengthSeconds: 180,
     capturedAt: Date.now()
   }
 }

@@ -119,7 +119,6 @@ export function extractVideoDataFromLdJson(): VideoData | undefined {
           : videoObject.thumbnailUrl
             ? [videoObject.thumbnailUrl]
             : [],
-        lengthSeconds: Number(videoObject.duration ?? 0),
         capturedAt: Date.now()
       }
 

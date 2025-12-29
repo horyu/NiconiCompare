@@ -55,7 +55,6 @@ const createVideo = (videoId: string, title: string, authorUrl: string) => ({
   title,
   authorUrl,
   thumbnailUrls: [],
-  lengthSeconds: 180,
   capturedAt: 1710000000000
 })
 

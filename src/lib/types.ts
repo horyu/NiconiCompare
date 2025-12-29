@@ -5,7 +5,6 @@ export type VideoSnapshot = {
   title: string
   authorUrl: string
   thumbnailUrls: string[]
-  lengthSeconds: number
   capturedAt: number
 }
 

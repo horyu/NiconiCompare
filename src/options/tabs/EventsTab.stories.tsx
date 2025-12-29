@@ -98,7 +98,6 @@ const createVideo = (videoId: string, title: string): VideoSnapshot => ({
   title,
   authorUrl: `https://www.nicovideo.jp/user/${videoId}`,
   thumbnailUrls: [],
-  lengthSeconds: 120,
   capturedAt: 1710000000000
 })
 

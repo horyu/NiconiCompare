@@ -55,7 +55,6 @@ const baseData: PopupData = {
       title: "テスト動画 A",
       authorUrl: "https://www.nicovideo.jp/user/1",
       thumbnailUrls: [],
-      lengthSeconds: 120,
       capturedAt: Date.now()
     },
     sm2222222: {
@@ -63,7 +62,6 @@ const baseData: PopupData = {
       title: "テスト動画 B",
       authorUrl: "https://www.nicovideo.jp/user/2",
       thumbnailUrls: [],
-      lengthSeconds: 180,
       capturedAt: Date.now()
     },
     sm3333333: {
@@ -71,7 +69,6 @@ const baseData: PopupData = {
       title: "テスト動画 C",
       authorUrl: "https://www.nicovideo.jp/user/3",
       thumbnailUrls: [],
-      lengthSeconds: 200,
       capturedAt: Date.now()
     },
     sm4444444: {
@@ -79,7 +76,6 @@ const baseData: PopupData = {
       title: "テスト動画 D",
       authorUrl: "https://www.nicovideo.jp/user/4",
       thumbnailUrls: [],
-      lengthSeconds: 240,
       capturedAt: Date.now()
     }
   }
