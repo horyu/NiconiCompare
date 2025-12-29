@@ -6,6 +6,7 @@ import {
   DEFAULT_STATE,
   STORAGE_KEYS
 } from "../../lib/constants"
+import { handleBackgroundError } from "../../lib/error-handler"
 import type {
   NcAuthors,
   NcCategories,
@@ -113,4 +114,30 @@ export async function setStorageData(
 export async function readAllStorage(): Promise<StorageDataByKey> {
   const data = await getStorageData(ALL_STORAGE_KEYS)
   return data as StorageDataByKey
+}
+
+export async function withStorageUpdates<K extends StorageKey, TResult>({
+  keys,
+  context,
+  update
+}: {
+  keys: K[]
+  context: string
+  update: (
+    data: Pick<StorageDataByKey, K>
+  ) =>
+    | { updates: Partial<StorageDataByKey>; result?: TResult }
+    | Promise<{ updates: Partial<StorageDataByKey>; result?: TResult }>
+}): Promise<TResult | undefined> {
+  try {
+    const data = await getStorageData(keys)
+    const { updates, result } = await update(data)
+    if (Object.keys(updates).length > 0) {
+      await setStorageData(updates)
+    }
+    return result
+  } catch (error) {
+    handleBackgroundError(error, context)
+    throw error
+  }
 }

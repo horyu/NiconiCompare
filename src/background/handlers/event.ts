@@ -1,7 +1,6 @@
 import { produce } from "immer"
 
 import { DEFAULT_CATEGORY_ID } from "../../lib/constants"
-import { handleBackgroundError } from "../../lib/error-handler"
 import { updatePairRatings } from "../../lib/glicko"
 import type {
   CompareEvent,
@@ -12,7 +11,7 @@ import type {
   NcVideos,
   Verdict
 } from "../../lib/types"
-import { getStorageData, setStorageData } from "../services/storage"
+import { withStorageUpdates } from "../services/storage"
 import {
   getOrCreateRatingSnapshot,
   rebuildRatingsFromEvents
@@ -27,46 +26,60 @@ type RecordEventPayload = {
 }
 
 export async function handleRecordEvent(payload: RecordEventPayload) {
-  const { events, state, settings, ratings, videos } = await getStorageData([
-    "events",
-    "state",
-    "settings",
-    "ratings",
-    "videos"
-  ])
+  const result = await withStorageUpdates({
+    keys: ["events", "state", "settings", "ratings", "videos"],
+    context: "events:record",
+    update: ({ events, state, settings, ratings, videos }) => {
+      const targetEvent = findTargetEvent(events, payload)
+      if (targetEvent && isSamePairEvent(targetEvent, payload)) {
+        const updatedEvents = updateEventVerdict(
+          events,
+          targetEvent.id,
+          payload.verdict
+        )
+        const nextRatings = rebuildRatingsFromEvents(
+          updatedEvents.items,
+          settings
+        )
+        return {
+          updates: {
+            events: updatedEvents,
+            ratings: nextRatings
+          },
+          result: targetEvent.id
+        }
+      }
 
-  const targetEvent = findTargetEvent(events, payload)
-  if (targetEvent && isSamePairEvent(targetEvent, payload)) {
-    const updatedEvents = updateEventVerdict(
-      events,
-      targetEvent.id,
-      payload.verdict
-    )
-    const nextRatings = rebuildRatingsFromEvents(updatedEvents.items, settings)
-    return persistEventChanges(targetEvent.id, {
-      events: updatedEvents,
-      ratings: nextRatings
-    })
-  }
+      const eventId = events.nextId
+      const activeCategoryId = settings.activeCategoryId ?? DEFAULT_CATEGORY_ID
+      const newEvent = buildNewEvent(eventId, payload, activeCategoryId)
+      const updatedEvents = appendEvent(events, newEvent)
+      const nextRatings = updateRatingsForNewEvent(
+        ratings,
+        payload,
+        settings,
+        eventId,
+        activeCategoryId
+      )
+      const updatedState = updateStateForNewEvent(
+        state,
+        settings,
+        payload,
+        videos
+      )
 
-  const eventId = events.nextId
-  const activeCategoryId = settings.activeCategoryId ?? DEFAULT_CATEGORY_ID
-  const newEvent = buildNewEvent(eventId, payload, activeCategoryId)
-  const updatedEvents = appendEvent(events, newEvent)
-  const nextRatings = updateRatingsForNewEvent(
-    ratings,
-    payload,
-    settings,
-    eventId,
-    activeCategoryId
-  )
-  const updatedState = updateStateForNewEvent(state, settings, payload, videos)
-
-  return persistEventChanges(eventId, {
-    events: updatedEvents,
-    state: updatedState,
-    ratings: nextRatings
+      return {
+        updates: {
+          events: updatedEvents,
+          state: updatedState,
+          ratings: nextRatings
+        },
+        result: eventId
+      }
+    }
   })
+
+  return result
 }
 
 function findTargetEvent(
@@ -187,21 +200,4 @@ function updateStateForNewEvent(
       videos
     )
   })
-}
-
-async function persistEventChanges(
-  eventId: number,
-  updates: Partial<{
-    events: NcEventsBucket
-    state: NcState
-    ratings: NcRatings
-  }>
-): Promise<number> {
-  try {
-    await setStorageData(updates)
-    return eventId
-  } catch (error) {
-    handleBackgroundError(error, "handleRecordEvent.persistEventChanges")
-    throw error
-  }
 }

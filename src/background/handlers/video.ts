@@ -1,42 +1,48 @@
 import { produce } from "immer"
 
-import { getStorageData, setStorageData } from "../services/storage"
+import { withStorageUpdates } from "../services/storage"
 import { updateRecentWindow } from "../utils/recent-window"
 
 export async function handleUpdateCurrentVideo(videoId: string) {
-  const { state, settings, videos } = await getStorageData([
-    "state",
-    "settings",
-    "videos"
-  ])
+  await withStorageUpdates({
+    keys: ["state", "settings", "videos"],
+    context: "video:updateCurrent",
+    update: ({ state, settings, videos }) => {
+      if (state.currentVideoId === videoId) {
+        return { updates: {} }
+      }
 
-  if (state.currentVideoId === videoId) {
-    return
-  }
+      const nextState = produce(state, (draft) => {
+        if (state.currentVideoId && state.currentVideoId !== videoId) {
+          draft.recentWindow = updateRecentWindow(
+            draft.recentWindow,
+            settings.recentWindowSize,
+            [state.currentVideoId],
+            videos
+          )
+        }
+        draft.currentVideoId = videoId
+      })
 
-  const nextState = produce(state, (draft) => {
-    if (state.currentVideoId && state.currentVideoId !== videoId) {
-      draft.recentWindow = updateRecentWindow(
-        draft.recentWindow,
-        settings.recentWindowSize,
-        [state.currentVideoId],
-        videos
-      )
+      return { updates: { state: nextState } }
     }
-    draft.currentVideoId = videoId
   })
-
-  await setStorageData({ state: nextState })
 }
 
 export async function handleUpdatePinnedOpponent(videoId?: string) {
-  const { state, videos } = await getStorageData(["state", "videos"])
-  const nextPinned = videoId && videos[videoId] ? videoId : undefined
-
-  await setStorageData({
-    state: {
-      ...state,
-      pinnedOpponentVideoId: nextPinned
+  await withStorageUpdates({
+    keys: ["state", "videos"],
+    context: "video:updatePinned",
+    update: ({ state, videos }) => {
+      const nextPinned = videoId && videos[videoId] ? videoId : undefined
+      return {
+        updates: {
+          state: {
+            ...state,
+            pinnedOpponentVideoId: nextPinned
+          }
+        }
+      }
     }
   })
 }
