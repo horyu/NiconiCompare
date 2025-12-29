@@ -158,7 +158,6 @@ type CompareEvent = {
   verdict: "better" | "same" | "worse"; // currentVideo視点の評価
   disabled: boolean; // 無効化フラグ
   categoryId: string; // 比較カテゴリ
-  persistent?: boolean; // Storage書き込み完了フラグ
 };
 ```
 
@@ -229,13 +228,34 @@ function updateRatings(
   const outcome = verdict === "better" ? 1 : verdict === "worse" ? 0 : 0.5;
 
   // Glicko-2アルゴリズム適用
-  const [newCurrent, newOpponent] = glicko2.calculate(
-    currentVideo,
-    opponentVideo,
-    outcome
+  const leftResult = rate(
+    currentVideo.rating,
+    currentVideo.rd,
+    currentVideo.volatility,
+    [[opponentVideo.rating, opponentVideo.rd, outcome]],
+    { rating: 1500, tau: 0.5 }
   );
 
-  return { left: newLeft, right: newRight };
+  const rightResult = rate(
+    opponentVideo.rating,
+    opponentVideo.rd,
+    opponentVideo.volatility,
+    [[currentVideo.rating, currentVideo.rd, 1 - outcome]],
+    { rating: 1500, tau: 0.5 }
+  );
+
+  return {
+    left: {
+      rating: leftResult.rating,
+      rd: leftResult.rd,
+      volatility: leftResult.vol
+    },
+    right: {
+      rating: rightResult.rating,
+      rd: rightResult.rd,
+      volatility: rightResult.vol
+    }
+  };
 }
 ```
 
@@ -369,7 +389,7 @@ async function saveCompareEvent(event: CompareEvent) {
 
 **役割**: 比較UIの常駐、動画メタデータの抽出とService Workerへの転送、比較操作の受付。
 
-**仕様/実装詳細**: `docs/spec.md §9.1` と `src/contents/overlay.ts` / `docs/ui-overlay.md` を正とする。
+**仕様/実装詳細**: `docs/spec.md §9.1` と `src/contents/overlay.tsx` / `docs/ui-overlay.md` を正とする。
 
 ### 6.2 Popup
 

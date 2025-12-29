@@ -51,5 +51,5 @@ Copyright (C) 2025 horyu
 
 ---
 
-**Status**: v1.0.0 開発中  
+**Status**: v0.0.1 開発中  
 **Target Browser**: Chrome 109+ / Firefox 109+ (Manifest V3)
