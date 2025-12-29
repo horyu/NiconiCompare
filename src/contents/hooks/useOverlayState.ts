@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
+import { normalizeCategories } from "../../lib/categories"
 import {
-  DEFAULT_CATEGORIES,
   DEFAULT_SETTINGS,
   MESSAGE_TYPES,
   STORAGE_KEYS
@@ -31,7 +31,9 @@ export function useOverlayState() {
     Record<string, VideoSnapshot>
   >({})
   const [statusMessage, setStatusMessage] = useState<string>()
-  const [categories, setCategories] = useState<NcCategories>(DEFAULT_CATEGORIES)
+  const [categories, setCategories] = useState<NcCategories>(
+    normalizeCategories()
+  )
 
   useEffect(() => {
     if (!chrome.storage?.onChanged) return
@@ -54,7 +56,7 @@ export function useOverlayState() {
 
       if (changes[STORAGE_KEYS.categories]?.newValue) {
         setCategories(
-          changes[STORAGE_KEYS.categories].newValue ?? DEFAULT_CATEGORIES
+          normalizeCategories(changes[STORAGE_KEYS.categories].newValue)
         )
       }
     }
@@ -83,7 +85,7 @@ export function useOverlayState() {
     setRecentWindow(data.state.recentWindow)
     setCurrentVideoId(data.state.currentVideoId)
     setPinnedOpponentVideoId(data.state.pinnedOpponentVideoId)
-    setCategories(data.categories ?? DEFAULT_CATEGORIES)
+    setCategories(normalizeCategories(data.categories))
     await loadVideoSnapshots()
     setIsReady(true)
 

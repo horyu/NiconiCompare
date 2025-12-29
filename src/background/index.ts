@@ -1,3 +1,4 @@
+import { normalizeCategories } from "../lib/categories"
 import {
   DEFAULT_CATEGORIES,
   DEFAULT_EVENTS_BUCKET,
@@ -41,7 +42,6 @@ import {
 import { runAutoCleanupIfNeeded } from "./services/cleanup"
 import { runMigrationIfNeeded } from "./services/migration"
 import { getRawStorageData, setStorageData } from "./services/storage"
-import { normalizeCategories } from "./utils/categories"
 import { normalizeSettings } from "./utils/normalize"
 
 if (chrome?.alarms) {

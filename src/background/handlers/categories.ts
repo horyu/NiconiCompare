@@ -1,9 +1,9 @@
 import { produce } from "immer"
 
+import { normalizeCategories } from "../../lib/categories"
 import { DEFAULT_CATEGORY_ID } from "../../lib/constants"
 import { handleBackgroundError } from "../../lib/error-handler"
 import { getStorageData, setStorageData } from "../services/storage"
-import { normalizeCategories } from "../utils/categories"
 import { rebuildRatingsFromEvents } from "../utils/rating-helpers"
 
 export async function handleCreateCategory(name: string) {

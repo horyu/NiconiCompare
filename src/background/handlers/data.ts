@@ -1,3 +1,4 @@
+import { normalizeCategories } from "../../lib/categories"
 import {
   DEFAULT_CATEGORIES,
   DEFAULT_EVENTS_BUCKET,
@@ -17,7 +18,6 @@ import type {
   StorageShape
 } from "../../lib/types"
 import { readAllStorage, setStorageData } from "../services/storage"
-import { normalizeCategories } from "../utils/categories"
 import { normalizeSettings } from "../utils/normalize"
 import { rebuildRatingsFromEvents } from "../utils/rating-helpers"
 import { rebuildRecentWindowFromEvents } from "../utils/recent-window"

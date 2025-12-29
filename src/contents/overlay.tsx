@@ -2,7 +2,7 @@ import styleText from "data-text:../style.css"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useCallback, useState } from "react"
 
-import { DEFAULT_CATEGORIES, MESSAGE_TYPES } from "../lib/constants"
+import { MESSAGE_TYPES } from "../lib/constants"
 import { handleUIError } from "../lib/error-handler"
 import { sendNcMessage } from "../lib/messages"
 import type { AuthorProfile, VideoSnapshot } from "../lib/types"
@@ -72,12 +72,9 @@ export default function Overlay() {
     refreshState,
     onStatusMessage: setStatusMessage
   })
-  const categoriesSafe = categories ?? DEFAULT_CATEGORIES
-  const activeCategoryId = categoriesSafe.items[
-    overlaySettings.activeCategoryId
-  ]
+  const activeCategoryId = categories.items[overlaySettings.activeCategoryId]
     ? overlaySettings.activeCategoryId
-    : categoriesSafe.defaultId
+    : categories.defaultId
 
   const handleCategoryChange = useCallback(
     async (categoryId: string) => {

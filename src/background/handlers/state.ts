@@ -1,3 +1,4 @@
+import { normalizeCategories } from "../../lib/categories"
 import {
   DEFAULT_CATEGORIES,
   DEFAULT_EVENTS_BUCKET,
@@ -6,7 +7,6 @@ import {
   DEFAULT_STATE
 } from "../../lib/constants"
 import { readAllStorage, setStorageData } from "../services/storage"
-import { normalizeCategories } from "../utils/categories"
 import { normalizeSettings } from "../utils/normalize"
 
 export async function readStateSnapshot() {

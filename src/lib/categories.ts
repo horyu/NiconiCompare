@@ -1,5 +1,5 @@
-import { DEFAULT_CATEGORIES, DEFAULT_CATEGORY_ID } from "../../lib/constants"
-import type { NcCategories } from "../../lib/types"
+import { DEFAULT_CATEGORIES, DEFAULT_CATEGORY_ID } from "./constants"
+import type { NcCategories } from "./types"
 
 export function normalizeCategories(categories?: NcCategories): NcCategories {
   if (!categories) {
