@@ -3,6 +3,7 @@ import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useCallback, useState } from "react"
 
 import { MESSAGE_TYPES } from "../lib/constants"
+import { handleUIError } from "../lib/error-handler"
 import { sendNcMessage } from "../lib/messages"
 import type { AuthorProfile, VideoSnapshot } from "../lib/types"
 import { CategorySelector } from "./components/CategorySelector"
@@ -77,15 +78,22 @@ export default function Overlay() {
 
   const handleCategoryChange = useCallback(
     async (categoryId: string) => {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.updateActiveCategory,
-        payload: { categoryId }
-      })
-      if (response.ok) {
+      try {
+        const response = await sendNcMessage({
+          type: MESSAGE_TYPES.updateActiveCategory,
+          payload: { categoryId }
+        })
+        if (!response.ok) {
+          setStatusMessage("カテゴリの更新に失敗しました。")
+          return
+        }
         await refreshState()
+      } catch (error) {
+        handleUIError(error, "overlay:category-change")
+        setStatusMessage("カテゴリの更新に失敗しました。")
       }
     },
-    [refreshState]
+    [refreshState, setStatusMessage]
   )
 
   const handleVideoChange = useCallback(

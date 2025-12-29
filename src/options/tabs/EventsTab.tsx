@@ -231,8 +231,11 @@ export const EventsTab = ({
     }
     const count = filteredEvents.length
     const targetName = snapshot.categories.items[targetCategoryId]?.name ?? ""
+    const includeLabel = eventIncludeDeleted
+      ? "無効化済みを含む"
+      : "無効化済みは除外"
     const confirmed = confirm(
-      `検索条件に一致する ${count} 件を [${targetName}] カテゴリに移動します。よろしいですか？`
+      `検索条件に一致する ${count} 件（${includeLabel}）を [${targetName}] カテゴリに移動します。よろしいですか？`
     )
     if (!confirmed) {
       return
