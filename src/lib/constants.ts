@@ -63,7 +63,7 @@ export const DEFAULT_EVENTS_BUCKET: NcEventsBucket = {
 
 export const DEFAULT_META: NcMeta = {
   lastReplayEventId: 0,
-  schemaVersion: "1.1.0",
+  schemaVersion: "1.0.0",
   lastCleanupAt: 0
 }
 

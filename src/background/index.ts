@@ -40,7 +40,6 @@ import {
   handleUpdatePinnedOpponent
 } from "./handlers/video"
 import { runAutoCleanupIfNeeded } from "./services/cleanup"
-import { runMigrationIfNeeded } from "./services/migration"
 import { getRawStorageData, setStorageData } from "./services/storage"
 import { normalizeSettings } from "./utils/normalize"
 
@@ -253,7 +252,6 @@ async function ensureDefaults() {
 
 async function initializeBackground(context: string) {
   try {
-    await runMigrationIfNeeded()
     await ensureDefaults()
     await runAutoCleanupIfNeeded()
   } catch (error) {
