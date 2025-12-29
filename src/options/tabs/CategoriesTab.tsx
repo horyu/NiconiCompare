@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react"
 
 import { DEFAULT_CATEGORY_ID, MESSAGE_TYPES } from "../../lib/constants"
-import { handleUIError, NcError } from "../../lib/error-handler"
 import { sendNcMessage } from "../../lib/messages"
 import { CategorySelect } from "../components/CategorySelect"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
+import { runNcAction } from "../utils/nc-action"
 
 type CategoriesTabProps = {
   snapshot: OptionsSnapshot
@@ -42,23 +42,23 @@ export const CategoriesTab = ({
       showToast("error", "カテゴリ名は1〜50文字で入力してください。")
       return
     }
-    try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.createCategory,
-        payload: { name: newCategoryName.trim() }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "create failed",
-          "options:categories:create",
-          "カテゴリの追加に失敗しました。"
-        )
+    const response = await runNcAction(
+      () =>
+        sendNcMessage({
+          type: MESSAGE_TYPES.createCategory,
+          payload: { name: newCategoryName.trim() }
+        }),
+      {
+        context: "options:categories:create",
+        errorMessage: "カテゴリの追加に失敗しました。",
+        successMessage: "カテゴリを追加しました。",
+        showToast,
+        refreshState: () => refreshState(true),
+        onSuccess: () => setNewCategoryName("")
       }
-      setNewCategoryName("")
-      await refreshState(true)
-      showToast("success", "カテゴリを追加しました。")
-    } catch (error) {
-      handleUIError(error, "options:categories:create", showToast)
+    )
+    if (!response) {
+      return
     }
   }
 
@@ -67,22 +67,22 @@ export const CategoriesTab = ({
       showToast("error", "カテゴリ名は1〜50文字で入力してください。")
       return
     }
-    try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.updateCategoryName,
-        payload: { categoryId, name: nextName.trim() }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "update failed",
-          "options:categories:update",
-          "カテゴリ名の更新に失敗しました。"
-        )
+    const response = await runNcAction(
+      () =>
+        sendNcMessage({
+          type: MESSAGE_TYPES.updateCategoryName,
+          payload: { categoryId, name: nextName.trim() }
+        }),
+      {
+        context: "options:categories:update",
+        errorMessage: "カテゴリ名の更新に失敗しました。",
+        successMessage: "カテゴリ名を更新しました。",
+        showToast,
+        refreshState: () => refreshState(true)
       }
-      await refreshState(true)
-      showToast("success", "カテゴリ名を更新しました。")
-    } catch (error) {
-      handleUIError(error, "options:categories:update", showToast)
+    )
+    if (!response) {
+      return
     }
   }
 
@@ -103,22 +103,22 @@ export const CategoriesTab = ({
     if (!confirmed) {
       return
     }
-    try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.deleteCategory,
-        payload: { categoryId, moveToCategoryId }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "delete failed",
-          "options:categories:delete",
-          "カテゴリの削除に失敗しました。"
-        )
+    const response = await runNcAction(
+      () =>
+        sendNcMessage({
+          type: MESSAGE_TYPES.deleteCategory,
+          payload: { categoryId, moveToCategoryId }
+        }),
+      {
+        context: "options:categories:delete",
+        errorMessage: "カテゴリの削除に失敗しました。",
+        successMessage: "カテゴリを削除しました。",
+        showToast,
+        refreshState: () => refreshState(true)
       }
-      await refreshState(true)
-      showToast("success", "カテゴリを削除しました。")
-    } catch (error) {
-      handleUIError(error, "options:categories:delete", showToast)
+    )
+    if (!response) {
+      return
     }
   }
 
@@ -130,21 +130,21 @@ export const CategoriesTab = ({
     const next = checked
       ? Array.from(new Set([...current, categoryId]))
       : current.filter((id) => id !== categoryId)
-    try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.updateOverlayVisibleIds,
-        payload: { overlayVisibleIds: next }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "update failed",
-          "options:categories:overlay",
-          "オーバーレイ表示の更新に失敗しました。"
-        )
+    const response = await runNcAction(
+      () =>
+        sendNcMessage({
+          type: MESSAGE_TYPES.updateOverlayVisibleIds,
+          payload: { overlayVisibleIds: next }
+        }),
+      {
+        context: "options:categories:overlay",
+        errorMessage: "オーバーレイ表示の更新に失敗しました。",
+        showToast,
+        refreshState: () => refreshState(true)
       }
-      await refreshState(true)
-    } catch (error) {
-      handleUIError(error, "options:categories:overlay", showToast)
+    )
+    if (!response) {
+      return
     }
   }
 
@@ -158,21 +158,21 @@ export const CategoriesTab = ({
     const nextOrder = [...order]
     const [removed] = nextOrder.splice(index, 1)
     nextOrder.splice(targetIndex, 0, removed)
-    try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.reorderCategories,
-        payload: { order: nextOrder }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "reorder failed",
-          "options:categories:reorder",
-          "並び替えに失敗しました。"
-        )
+    const response = await runNcAction(
+      () =>
+        sendNcMessage({
+          type: MESSAGE_TYPES.reorderCategories,
+          payload: { order: nextOrder }
+        }),
+      {
+        context: "options:categories:reorder",
+        errorMessage: "並び替えに失敗しました。",
+        showToast,
+        refreshState: () => refreshState(true)
       }
-      await refreshState(true)
-    } catch (error) {
-      handleUIError(error, "options:categories:reorder", showToast)
+    )
+    if (!response) {
+      return
     }
   }
 

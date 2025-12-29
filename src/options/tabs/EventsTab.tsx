@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
-import { handleUIError, NcError } from "../../lib/error-handler"
 import { sendNcMessage } from "../../lib/messages"
 import type { CompareEvent, Verdict } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
@@ -13,6 +12,7 @@ import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { useSessionState } from "../hooks/useSessionState"
 import { buildCategoryOptions } from "../utils/categories"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
+import { runNcAction } from "../utils/nc-action"
 
 type EventsTabProps = {
   snapshot: OptionsSnapshot
@@ -217,25 +217,25 @@ export const EventsTab = ({
     if (!confirmed) {
       return
     }
-    try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.bulkMoveEvents,
-        payload: {
-          eventIds: filteredEvents.map((event) => event.id),
-          targetCategoryId
-        }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "bulk move failed",
-          "options:events:bulk-move",
-          "一括移動に失敗しました。"
-        )
+    const response = await runNcAction(
+      () =>
+        sendNcMessage({
+          type: MESSAGE_TYPES.bulkMoveEvents,
+          payload: {
+            eventIds: filteredEvents.map((event) => event.id),
+            targetCategoryId
+          }
+        }),
+      {
+        context: "options:events:bulk-move",
+        errorMessage: "一括移動に失敗しました。",
+        successMessage: "カテゴリを一括移動しました。",
+        showToast,
+        refreshState: () => refreshState(true)
       }
-      await refreshState(true)
-      showToast("success", "カテゴリを一括移動しました。")
-    } catch (error) {
-      handleUIError(error, "options:events:bulk-move", showToast)
+    )
+    if (!response) {
+      return
     }
   }
 
@@ -245,24 +245,23 @@ export const EventsTab = ({
     }
     setEventBusyId(eventId)
     try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.bulkMoveEvents,
-        payload: {
-          eventIds: [eventId],
-          targetCategoryId
+      await runNcAction(
+        () =>
+          sendNcMessage({
+            type: MESSAGE_TYPES.bulkMoveEvents,
+            payload: {
+              eventIds: [eventId],
+              targetCategoryId
+            }
+          }),
+        {
+          context: "options:events:move",
+          errorMessage: "カテゴリの移動に失敗しました。",
+          successMessage: "カテゴリを移動しました。",
+          showToast,
+          refreshState: () => refreshState(true)
         }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "move failed",
-          "options:events:move",
-          "カテゴリの移動に失敗しました。"
-        )
-      }
-      await refreshState(true)
-      showToast("success", "カテゴリを移動しました。")
-    } catch (error) {
-      handleUIError(error, "options:events:move", showToast)
+      )
     } finally {
       setEventBusyId(null)
     }
@@ -277,26 +276,25 @@ export const EventsTab = ({
     }
     setEventBusyId(target.id)
     try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.recordEvent,
-        payload: {
-          currentVideoId: target.currentVideoId,
-          opponentVideoId: target.opponentVideoId,
-          verdict,
-          eventId: target.id
+      await runNcAction(
+        () =>
+          sendNcMessage({
+            type: MESSAGE_TYPES.recordEvent,
+            payload: {
+              currentVideoId: target.currentVideoId,
+              opponentVideoId: target.opponentVideoId,
+              verdict,
+              eventId: target.id
+            }
+          }),
+        {
+          context: "options:events:update",
+          errorMessage: "評価の更新に失敗しました。",
+          successMessage: "評価を更新しました。",
+          showToast,
+          refreshState: () => refreshState(true)
         }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "update failed",
-          "options:events:update",
-          "評価の更新に失敗しました。"
-        )
-      }
-      await refreshState(true)
-      showToast("success", "評価を更新しました。")
-    } catch (error) {
-      handleUIError(error, "options:events:update", showToast)
+      )
     } finally {
       setEventBusyId(null)
     }
@@ -305,21 +303,20 @@ export const EventsTab = ({
   const handleDeleteEvent = async (eventId: number) => {
     setEventBusyId(eventId)
     try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.deleteEvent,
-        payload: { eventId }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "delete failed",
-          "options:events:disable",
-          "評価の無効化に失敗しました。"
-        )
-      }
-      await refreshState(true)
-      showToast("success", "評価を無効化しました。")
-    } catch (error) {
-      handleUIError(error, "options:events:disable", showToast)
+      await runNcAction(
+        () =>
+          sendNcMessage({
+            type: MESSAGE_TYPES.deleteEvent,
+            payload: { eventId }
+          }),
+        {
+          context: "options:events:disable",
+          errorMessage: "評価の無効化に失敗しました。",
+          successMessage: "評価を無効化しました。",
+          showToast,
+          refreshState: () => refreshState(true)
+        }
+      )
     } finally {
       setEventBusyId(null)
     }
@@ -328,21 +325,20 @@ export const EventsTab = ({
   const handleRestoreEvent = async (eventId: number) => {
     setEventBusyId(eventId)
     try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.restoreEvent,
-        payload: { eventId }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "restore failed",
-          "options:events:restore",
-          "評価の有効化に失敗しました。"
-        )
-      }
-      await refreshState(true)
-      showToast("success", "評価を有効化しました。")
-    } catch (error) {
-      handleUIError(error, "options:events:restore", showToast)
+      await runNcAction(
+        () =>
+          sendNcMessage({
+            type: MESSAGE_TYPES.restoreEvent,
+            payload: { eventId }
+          }),
+        {
+          context: "options:events:restore",
+          errorMessage: "評価の有効化に失敗しました。",
+          successMessage: "評価を有効化しました。",
+          showToast,
+          refreshState: () => refreshState(true)
+        }
+      )
     } finally {
       setEventBusyId(null)
     }
@@ -355,21 +351,20 @@ export const EventsTab = ({
     if (!confirmed) return
     setEventBusyId(eventId)
     try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.purgeEvent,
-        payload: { eventId }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "purge failed",
-          "options:events:purge",
-          "評価の削除に失敗しました。"
-        )
-      }
-      await refreshState(true)
-      showToast("success", "評価を削除しました。")
-    } catch (error) {
-      handleUIError(error, "options:events:purge", showToast)
+      await runNcAction(
+        () =>
+          sendNcMessage({
+            type: MESSAGE_TYPES.purgeEvent,
+            payload: { eventId }
+          }),
+        {
+          context: "options:events:purge",
+          errorMessage: "評価の削除に失敗しました。",
+          successMessage: "評価を削除しました。",
+          showToast,
+          refreshState: () => refreshState(true)
+        }
+      )
     } finally {
       setEventBusyId(null)
     }

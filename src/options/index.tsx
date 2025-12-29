@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "react"
 import "../style.css"
 
 import { MESSAGE_TYPES } from "../lib/constants"
-import { handleUIError, NcError } from "../lib/error-handler"
 import { sendNcMessage } from "../lib/messages"
 import { useOptionsData } from "./hooks/useOptionsData"
 import { CategoriesTab } from "./tabs/CategoriesTab"
@@ -11,6 +10,7 @@ import { DataTab } from "./tabs/DataTab"
 import { EventsTab } from "./tabs/EventsTab"
 import { SettingsTab } from "./tabs/SettingsTab"
 import { VideosTab } from "./tabs/VideosTab"
+import { runNcAction } from "./utils/nc-action"
 
 type TabKey = "videos" | "events" | "categories" | "settings" | "data"
 
@@ -71,21 +71,20 @@ export default function OptionsPage() {
 
   const handleToggleEventThumbnails = async (checked: boolean) => {
     setEventShowThumbnails(checked)
-    try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.updateSettings,
-        payload: { showEventThumbnails: checked }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "update failed",
-          "options:toggle-event-thumbnails",
-          "設定の更新に失敗しました。"
-        )
+    const response = await runNcAction(
+      () =>
+        sendNcMessage({
+          type: MESSAGE_TYPES.updateSettings,
+          payload: { showEventThumbnails: checked }
+        }),
+      {
+        context: "options:toggle-event-thumbnails",
+        errorMessage: "設定の更新に失敗しました。",
+        showToast,
+        refreshState: () => refreshState(true)
       }
-      await refreshState(true)
-    } catch (error) {
-      handleUIError(error, "options:toggle-event-thumbnails", showToast)
+    )
+    if (!response) {
       setEventShowThumbnails(snapshot?.settings.showEventThumbnails ?? true)
     }
   }

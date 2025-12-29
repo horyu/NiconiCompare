@@ -6,10 +6,10 @@ import {
   MAX_RECENT_WINDOW_SIZE,
   MESSAGE_TYPES
 } from "../../lib/constants"
-import { handleUIError, NcError } from "../../lib/error-handler"
 import { sendNcMessage } from "../../lib/messages"
 import type { NcSettings } from "../../lib/types"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
+import { runNcAction } from "../utils/nc-action"
 
 type SettingsTabProps = {
   snapshot: OptionsSnapshot
@@ -86,22 +86,26 @@ export const SettingsTab = ({
           volatility: Number(settingsForm.glickoVolatility)
         }
       }
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.updateSettings,
-        payload
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "update failed",
-          "options:settings:update",
-          "設定の更新に失敗しました。"
-        )
+      const response = await runNcAction(
+        () =>
+          sendNcMessage({
+            type: MESSAGE_TYPES.updateSettings,
+            payload
+          }),
+        {
+          context: "options:settings:update",
+          errorMessage: "設定の更新に失敗しました。",
+          successMessage: "設定を更新しました。",
+          showToast,
+          refreshState: () => refreshState(true)
+        }
+      )
+      if (!response) {
+        applySettingsToForm(snapshot.settings)
+        return false
       }
-      await refreshState(true)
-      showToast("success", "設定を更新しました。")
       return true
-    } catch (error) {
-      handleUIError(error, "options:settings:update", showToast)
+    } catch {
       applySettingsToForm(snapshot.settings)
       return false
     } finally {
@@ -126,20 +130,19 @@ export const SettingsTab = ({
     if (hasUnsavedSettings) return
     setRebuildingRatings(true)
     try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.rebuildRatings
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "rebuild failed",
-          "options:settings:rebuild",
-          "再計算に失敗しました。"
-        )
-      }
-      await refreshState(true)
-      showToast("success", "レーティングを再計算しました。")
-    } catch (error) {
-      handleUIError(error, "options:settings:rebuild", showToast)
+      await runNcAction(
+        () =>
+          sendNcMessage({
+            type: MESSAGE_TYPES.rebuildRatings
+          }),
+        {
+          context: "options:settings:rebuild",
+          errorMessage: "再計算に失敗しました。",
+          successMessage: "レーティングを再計算しました。",
+          showToast,
+          refreshState: () => refreshState(true)
+        }
+      )
     } finally {
       setRebuildingRatings(false)
     }

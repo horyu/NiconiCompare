@@ -1,9 +1,10 @@
 import { useRef, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
-import { handleUIError, NcError } from "../../lib/error-handler"
+import { handleUIError } from "../../lib/error-handler"
 import { sendNcMessage } from "../../lib/messages"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
+import { runNcAction } from "../utils/nc-action"
 
 type DataTabProps = {
   snapshot: OptionsSnapshot
@@ -29,11 +30,18 @@ export const DataTab = ({
     : "未実行"
 
   const handleCleanup = async () => {
-    await sendNcMessage({
-      type: MESSAGE_TYPES.metaAction,
-      payload: { action: "cleanup" }
-    })
-    await refreshState(true)
+    await runNcAction(
+      () =>
+        sendNcMessage({
+          type: MESSAGE_TYPES.metaAction,
+          payload: { action: "cleanup" }
+        }),
+      {
+        context: "options:data:cleanup",
+        errorMessage: "クリーンアップに失敗しました。",
+        refreshState: () => refreshState(true)
+      }
+    )
   }
 
   const handleDeleteAllData = async () => {
@@ -45,20 +53,19 @@ export const DataTab = ({
     }
     setDeletingAll(true)
     try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.deleteAllData
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "delete all failed",
-          "options:data:delete-all",
-          "全データの削除に失敗しました。"
-        )
-      }
-      await refreshState(true)
-      showToast("success", "全データを削除しました。")
-    } catch (error) {
-      handleUIError(error, "options:data:delete-all", showToast)
+      await runNcAction(
+        () =>
+          sendNcMessage({
+            type: MESSAGE_TYPES.deleteAllData
+          }),
+        {
+          context: "options:data:delete-all",
+          errorMessage: "全データの削除に失敗しました。",
+          successMessage: "全データを削除しました。",
+          showToast,
+          refreshState: () => refreshState(true)
+        }
+      )
     } finally {
       setDeletingAll(false)
     }
@@ -67,15 +74,19 @@ export const DataTab = ({
   const handleExport = async () => {
     setExporting(true)
     try {
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.exportData
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "export failed",
-          "options:data:export",
-          "エクスポートに失敗しました。"
-        )
+      const response = await runNcAction(
+        () =>
+          sendNcMessage({
+            type: MESSAGE_TYPES.exportData
+          }),
+        {
+          context: "options:data:export",
+          errorMessage: "エクスポートに失敗しました。",
+          showToast
+        }
+      )
+      if (!response) {
+        return
       }
       const data = JSON.stringify(response.data, null, 2)
       const blob = new Blob([data], { type: "application/json" })
@@ -116,23 +127,29 @@ export const DataTab = ({
     try {
       const text = await file.text()
       const data = JSON.parse(text) as Record<string, unknown>
-      const response = await sendNcMessage({
-        type: MESSAGE_TYPES.importData,
-        payload: { data }
-      })
-      if (!response.ok) {
-        throw new NcError(
-          response.error ?? "import failed",
-          "options:data:import",
-          "インポートに失敗しました。"
-        )
+      const response = await runNcAction(
+        () =>
+          sendNcMessage({
+            type: MESSAGE_TYPES.importData,
+            payload: { data }
+          }),
+        {
+          context: "options:data:import",
+          errorMessage: "インポートに失敗しました。",
+          successMessage: "インポートしました。",
+          showToast,
+          refreshState: () => refreshState(true),
+          onSuccess: () => {
+            if (importFileRef.current) {
+              importFileRef.current.value = ""
+            }
+            setImportFileName("")
+          }
+        }
+      )
+      if (!response) {
+        return
       }
-      if (importFileRef.current) {
-        importFileRef.current.value = ""
-      }
-      setImportFileName("")
-      await refreshState(true)
-      showToast("success", "インポートしました。")
     } catch (error) {
       handleUIError(error, "options:data:import", showToast)
     } finally {
