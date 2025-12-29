@@ -339,7 +339,7 @@ function normalizeSettings(settings: NcSettings): NcSettings {
     ),
     overlayAutoCloseMs: Math.min(
       5000,
-      Math.max(500, settings.overlayAutoCloseMs || 1500)
+      Math.max(0, settings.overlayAutoCloseMs || 1500)
     ),
     showEventThumbnails:
       settings.showEventThumbnails ?? DEFAULT_SETTINGS.showEventThumbnails,
@@ -352,7 +352,7 @@ function normalizeSettings(settings: NcSettings): NcSettings {
 
 **バリデーション範囲**:
 - `recentWindowSize`: 1〜50 の整数
-- `overlayAutoCloseMs`: 500?5000ms
+- `overlayAutoCloseMs`: 0〜5000ms
 - `showEventThumbnails`: boolean
 - `glicko`: 初期値の妥当性チェック
 

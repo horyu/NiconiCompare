@@ -18,7 +18,7 @@ export function normalizeSettings(settings: NcSettings): NcSettings {
     ),
     overlayAutoCloseMs: Math.min(
       5000,
-      Math.max(500, settings.overlayAutoCloseMs || 1500)
+      Math.max(0, settings.overlayAutoCloseMs || 1500)
     ),
     overlayAndCaptureEnabled:
       settings.overlayAndCaptureEnabled ??
