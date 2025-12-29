@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
+import { runNcAction } from "../../lib/nc-action"
 import type { Verdict } from "../../lib/types"
 
 export const RETRY_MESSAGE = "保存に失敗しました。再度お試しください。"
@@ -36,15 +37,22 @@ export function useVerdictSubmission({
         }
 
         try {
-          const response = await sendNcMessage({
-            type: MESSAGE_TYPES.deleteEvent,
-            payload: { eventId: lastEventId }
-          })
+          const response = await runNcAction(
+            () =>
+              sendNcMessage({
+                type: MESSAGE_TYPES.deleteEvent,
+                payload: { eventId: lastEventId }
+              }),
+            {
+              context: "overlay:delete",
+              errorMessage: "評価の削除に失敗しました。"
+            }
+          )
 
           setLastVerdict(undefined)
           setLastEventId(undefined)
 
-          if (response.ok) {
+          if (response) {
             onStatusMessage?.(undefined)
             await refreshState()
           } else {
@@ -59,17 +67,24 @@ export function useVerdictSubmission({
       if (!opponentVideoId || !currentVideoId) return
 
       try {
-        const response = await sendNcMessage({
-          type: MESSAGE_TYPES.recordEvent,
-          payload: {
-            currentVideoId,
-            opponentVideoId,
-            verdict,
-            eventId: lastEventId
+        const response = await runNcAction(
+          () =>
+            sendNcMessage({
+              type: MESSAGE_TYPES.recordEvent,
+              payload: {
+                currentVideoId,
+                opponentVideoId,
+                verdict,
+                eventId: lastEventId
+              }
+            }),
+          {
+            context: "overlay:submit",
+            errorMessage: "評価の送信に失敗しました。"
           }
-        })
+        )
 
-        if (response.ok) {
+        if (response) {
           onStatusMessage?.(undefined)
           setLastVerdict(verdict)
           setLastEventId(response.eventId)

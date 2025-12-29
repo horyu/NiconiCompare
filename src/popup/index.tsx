@@ -4,6 +4,7 @@ import "../style.css"
 
 import { MESSAGE_TYPES } from "../lib/constants"
 import { sendNcMessage } from "../lib/messages"
+import { runNcAction } from "../lib/nc-action"
 import type {
   NcCategories,
   NcEventsBucket,
@@ -32,11 +33,18 @@ export default function Popup() {
 
   const refreshState = async () => {
     setLoading(true)
-    const response = await sendNcMessage({
-      type: MESSAGE_TYPES.requestState
-    })
-    if (!response.ok) {
-      setError(response.error ?? "状態取得に失敗しました")
+    const response = await runNcAction(
+      () =>
+        sendNcMessage({
+          type: MESSAGE_TYPES.requestState
+        }),
+      {
+        context: "popup:request-state",
+        errorMessage: "状態取得に失敗しました"
+      }
+    )
+    if (!response) {
+      setError("状態取得に失敗しました")
       setLoading(false)
       return
     }
@@ -46,10 +54,21 @@ export default function Popup() {
 
   const toggleOverlay = async (enabled: boolean) => {
     setError(undefined)
-    await sendNcMessage({
-      type: MESSAGE_TYPES.toggleOverlay,
-      payload: { enabled }
-    })
+    const response = await runNcAction(
+      () =>
+        sendNcMessage({
+          type: MESSAGE_TYPES.toggleOverlay,
+          payload: { enabled }
+        }),
+      {
+        context: "popup:toggle-overlay",
+        errorMessage: "更新に失敗しました。"
+      }
+    )
+    if (!response) {
+      setError("更新に失敗しました。")
+      return
+    }
     await refreshState()
   }
 

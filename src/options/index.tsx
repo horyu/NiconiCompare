@@ -4,13 +4,13 @@ import "../style.css"
 
 import { MESSAGE_TYPES } from "../lib/constants"
 import { sendNcMessage } from "../lib/messages"
+import { runNcAction } from "../lib/nc-action"
 import { useOptionsData } from "./hooks/useOptionsData"
 import { CategoriesTab } from "./tabs/CategoriesTab"
 import { DataTab } from "./tabs/DataTab"
 import { EventsTab } from "./tabs/EventsTab"
 import { SettingsTab } from "./tabs/SettingsTab"
 import { VideosTab } from "./tabs/VideosTab"
-import { runNcAction } from "./utils/nc-action"
 
 type TabKey = "videos" | "events" | "categories" | "settings" | "data"
 

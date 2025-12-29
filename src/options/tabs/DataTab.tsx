@@ -3,8 +3,8 @@ import { useRef, useState } from "react"
 import { MESSAGE_TYPES } from "../../lib/constants"
 import { handleUIError } from "../../lib/error-handler"
 import { sendNcMessage } from "../../lib/messages"
+import { runNcAction } from "../../lib/nc-action"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
-import { runNcAction } from "../utils/nc-action"
 
 type DataTabProps = {
   snapshot: OptionsSnapshot

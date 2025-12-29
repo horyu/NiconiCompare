@@ -2,9 +2,9 @@ import { useMemo, useState } from "react"
 
 import { DEFAULT_CATEGORY_ID, MESSAGE_TYPES } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
+import { runNcAction } from "../../lib/nc-action"
 import { CategorySelect } from "../components/CategorySelect"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
-import { runNcAction } from "../utils/nc-action"
 
 type CategoriesTabProps = {
   snapshot: OptionsSnapshot

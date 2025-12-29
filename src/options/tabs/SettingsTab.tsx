@@ -7,9 +7,9 @@ import {
   MESSAGE_TYPES
 } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
+import { runNcAction } from "../../lib/nc-action"
 import type { NcSettings } from "../../lib/types"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
-import { runNcAction } from "../utils/nc-action"
 
 type SettingsTabProps = {
   snapshot: OptionsSnapshot

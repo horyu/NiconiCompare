@@ -3,8 +3,8 @@ import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useCallback, useState } from "react"
 
 import { MESSAGE_TYPES } from "../lib/constants"
-import { handleUIError } from "../lib/error-handler"
 import { sendNcMessage } from "../lib/messages"
+import { runNcAction } from "../lib/nc-action"
 import type { AuthorProfile, VideoSnapshot } from "../lib/types"
 import { CategorySelector } from "./components/CategorySelector"
 import { OpponentSelector } from "./components/OpponentSelector"
@@ -78,33 +78,42 @@ export default function Overlay() {
 
   const handleCategoryChange = useCallback(
     async (categoryId: string) => {
-      try {
-        const response = await sendNcMessage({
-          type: MESSAGE_TYPES.updateActiveCategory,
-          payload: { categoryId }
-        })
-        if (!response.ok) {
-          setStatusMessage("カテゴリの更新に失敗しました。")
+      const response = await runNcAction(
+        () =>
+          sendNcMessage({
+            type: MESSAGE_TYPES.updateActiveCategory,
+            payload: { categoryId }
+          }),
+        {
+          context: "overlay:category-change",
+          errorMessage: "カテゴリの更新に失敗しました。"
+        }
+      )
+      if (!response) {
+        setStatusMessage("カテゴリの更新に失敗しました。")
+        return
+      }
+      if (lastEventId) {
+        const moveResponse = await runNcAction(
+          () =>
+            sendNcMessage({
+              type: MESSAGE_TYPES.bulkMoveEvents,
+              payload: {
+                eventIds: [lastEventId],
+                targetCategoryId: categoryId
+              }
+            }),
+          {
+            context: "overlay:category-change",
+            errorMessage: "カテゴリの移動に失敗しました。"
+          }
+        )
+        if (!moveResponse) {
+          setStatusMessage("カテゴリの移動に失敗しました。")
           return
         }
-        if (lastEventId) {
-          const moveResponse = await sendNcMessage({
-            type: MESSAGE_TYPES.bulkMoveEvents,
-            payload: {
-              eventIds: [lastEventId],
-              targetCategoryId: categoryId
-            }
-          })
-          if (!moveResponse.ok) {
-            setStatusMessage("カテゴリの移動に失敗しました。")
-            return
-          }
-        }
-        await refreshState()
-      } catch (error) {
-        handleUIError(error, "overlay:category-change")
-        setStatusMessage("カテゴリの更新に失敗しました。")
       }
+      await refreshState()
     },
     [lastEventId, refreshState, setStatusMessage]
   )

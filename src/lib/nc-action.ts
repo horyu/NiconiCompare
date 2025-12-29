@@ -1,5 +1,5 @@
-import { handleUIError, NcError } from "../../lib/error-handler"
-import type { BackgroundResponse } from "../../lib/messages"
+import { handleUIError, NcError } from "./error-handler"
+import type { BackgroundResponse } from "./messages"
 
 type ToastTone = "success" | "error"
 type ShowToast = (tone: ToastTone, text: string) => void
