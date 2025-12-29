@@ -6,8 +6,9 @@ import { CategorySelect } from "../components/CategorySelect"
 import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
+import { useSessionState } from "../hooks/useSessionState"
+import { buildCategoryOptions } from "../utils/categories"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
-import { readSessionState, writeSessionState } from "../utils/sessionStorage"
 
 type VideosTabProps = {
   snapshot: OptionsSnapshot
@@ -26,6 +27,20 @@ type VideoSessionState = {
 
 const VIDEO_PAGE_SIZE = 50
 const SESSION_KEY = "nc_options_video_state"
+const EXPORT_HEADERS = [
+  "動画ID",
+  "サムネURL",
+  "動画URL",
+  "タイトル",
+  "投稿者",
+  "Rating",
+  "RD",
+  "評価数",
+  "勝ち数",
+  "引き分け数",
+  "負け数",
+  "最終判定日時"
+]
 const DEFAULT_VIDEO_SESSION_STATE: VideoSessionState = {
   search: "",
   author: "all",
@@ -36,15 +51,11 @@ const DEFAULT_VIDEO_SESSION_STATE: VideoSessionState = {
 }
 
 export const VideosTab = ({ snapshot }: VideosTabProps) => {
-  const initialStateRef = useRef<VideoSessionState>()
+  const { initialState, persistState } = useSessionState(
+    SESSION_KEY,
+    DEFAULT_VIDEO_SESSION_STATE
+  )
   const [exportMenuOpen, setExportMenuOpen] = useState(false)
-  if (!initialStateRef.current) {
-    initialStateRef.current = readSessionState(
-      SESSION_KEY,
-      DEFAULT_VIDEO_SESSION_STATE
-    )
-  }
-  const initialState = initialStateRef.current
   const [videoSearch, setVideoSearch] = useState(initialState.search)
   const [videoAuthor, setVideoAuthor] = useState(initialState.author)
   const [videoCategoryId, setVideoCategoryId] = useState(
@@ -66,7 +77,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
   }, [videoSearch, videoAuthor, videoSort, videoSortOrder, videoCategoryId])
 
   useEffect(() => {
-    writeSessionState(SESSION_KEY, {
+    persistState({
       search: videoSearch,
       author: videoAuthor,
       categoryId: videoCategoryId,
@@ -75,6 +86,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
       page: videoPage
     })
   }, [
+    persistState,
     videoSearch,
     videoAuthor,
     videoSort,
@@ -95,135 +107,52 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
     )
   }, [snapshot.authors])
 
-  const lastEventByVideo = useMemo(() => {
-    const map = new Map<string, number>()
-    for (const event of snapshot.events.items) {
-      if (event.disabled) continue
-      const categoryId = event.categoryId ?? snapshot.categories.defaultId
-      if (categoryId !== videoCategoryId) continue
-      map.set(
-        event.currentVideoId,
-        Math.max(map.get(event.currentVideoId) ?? 0, event.timestamp)
-      )
-      map.set(
-        event.opponentVideoId,
-        Math.max(map.get(event.opponentVideoId) ?? 0, event.timestamp)
-      )
-    }
-    return map
-  }, [snapshot.events.items, snapshot.categories.defaultId, videoCategoryId])
+  const lastEventByVideo = useMemo(
+    () =>
+      buildLastEventByVideo(
+        snapshot.events.items,
+        snapshot.categories.defaultId,
+        videoCategoryId
+      ),
+    [snapshot.events.items, snapshot.categories.defaultId, videoCategoryId]
+  )
 
-  const verdictCountsByVideo = useMemo(() => {
-    const map = new Map<
-      string,
-      { wins: number; draws: number; losses: number }
-    >()
+  const verdictCountsByVideo = useMemo(
+    () =>
+      buildVerdictCountsByVideo(
+        snapshot.events.items,
+        snapshot.categories.defaultId,
+        videoCategoryId
+      ),
+    [snapshot.events.items, snapshot.categories.defaultId, videoCategoryId]
+  )
 
-    const ensure = (videoId: string) => {
-      const current = map.get(videoId)
-      if (current) {
-        return current
-      }
-      const next = { wins: 0, draws: 0, losses: 0 }
-      map.set(videoId, next)
-      return next
-    }
-
-    for (const event of snapshot.events.items) {
-      if (event.disabled) continue
-      const categoryId = event.categoryId ?? snapshot.categories.defaultId
-      if (categoryId !== videoCategoryId) continue
-      const currentStats = ensure(event.currentVideoId)
-      const opponentStats = ensure(event.opponentVideoId)
-
-      if (event.verdict === "better") {
-        currentStats.wins += 1
-        opponentStats.losses += 1
-      } else if (event.verdict === "same") {
-        currentStats.draws += 1
-        opponentStats.draws += 1
-      } else {
-        currentStats.losses += 1
-        opponentStats.wins += 1
-      }
-    }
-
-    return map
-  }, [snapshot.events.items, snapshot.categories.defaultId, videoCategoryId])
-
-  const filteredVideos = useMemo(() => {
-    const normalizedSearch = videoSearch.trim().toLowerCase()
-    const ratingsByCategory = snapshot.ratings[videoCategoryId] ?? {}
-
-    const videos = Object.values(snapshot.videos).filter((video) => {
-      const hasRating = Boolean(ratingsByCategory[video.videoId])
-      const matchesSearch =
-        normalizedSearch.length === 0 ||
-        video.videoId.toLowerCase().includes(normalizedSearch) ||
-        video.title.toLowerCase().includes(normalizedSearch)
-      const matchesAuthor =
-        videoAuthor === "all" ||
-        snapshot.authors[video.authorUrl]?.name === videoAuthor
-      return hasRating && matchesSearch && matchesAuthor
-    })
-
-    type VideoItem = (typeof videos)[number]
-    const compareByRating = (left: VideoItem, right: VideoItem) =>
-      (ratingsByCategory[right.videoId]?.rating ?? 0) -
-      (ratingsByCategory[left.videoId]?.rating ?? 0)
-    const compareByTitle = (left: VideoItem, right: VideoItem) =>
-      left.title.localeCompare(right.title)
-    const compareByRd = (left: VideoItem, right: VideoItem) =>
-      (ratingsByCategory[right.videoId]?.rd ?? 0) -
-      (ratingsByCategory[left.videoId]?.rd ?? 0)
-    const compareByLastVerdict = (left: VideoItem, right: VideoItem) =>
-      (lastEventByVideo.get(right.videoId) ?? 0) -
-      (lastEventByVideo.get(left.videoId) ?? 0)
-    const compareByEvalCount = (left: VideoItem, right: VideoItem) => {
-      const leftCounts = verdictCountsByVideo.get(left.videoId)
-      const rightCounts = verdictCountsByVideo.get(right.videoId)
-      const leftTotal = leftCounts
-        ? leftCounts.wins + leftCounts.draws + leftCounts.losses
-        : 0
-      const rightTotal = rightCounts
-        ? rightCounts.wins + rightCounts.draws + rightCounts.losses
-        : 0
-      return rightTotal - leftTotal
-    }
-    const compareByWins = (left: VideoItem, right: VideoItem) =>
-      (verdictCountsByVideo.get(right.videoId)?.wins ?? 0) -
-      (verdictCountsByVideo.get(left.videoId)?.wins ?? 0)
-    const compareByLosses = (left: VideoItem, right: VideoItem) =>
-      (verdictCountsByVideo.get(right.videoId)?.losses ?? 0) -
-      (verdictCountsByVideo.get(left.videoId)?.losses ?? 0)
-
-    const sorter =
-      videoSort === "title"
-        ? compareByTitle
-        : videoSort === "rd"
-          ? compareByRd
-          : videoSort === "lastVerdict"
-            ? compareByLastVerdict
-            : videoSort === "evalCount"
-              ? compareByEvalCount
-              : videoSort === "wins"
-                ? compareByWins
-                : videoSort === "losses"
-                  ? compareByLosses
-                  : compareByRating
-
-    const direction = videoSortOrder === "asc" ? -1 : 1
-    return videos.sort((left, right) => direction * sorter(left, right))
-  }, [
-    snapshot,
-    videoAuthor,
-    videoSearch,
-    videoSort,
-    videoSortOrder,
-    videoCategoryId,
-    lastEventByVideo,
-    verdictCountsByVideo
-  ])
+  const filteredVideos = useMemo(
+    () =>
+      filterVideos({
+        videos: snapshot.videos,
+        authors: snapshot.authors,
+        ratingsByCategory: snapshot.ratings[videoCategoryId] ?? {},
+        lastEventByVideo,
+        verdictCountsByVideo,
+        search: videoSearch,
+        author: videoAuthor,
+        sort: videoSort,
+        order: videoSortOrder
+      }),
+    [
+      snapshot.videos,
+      snapshot.authors,
+      snapshot.ratings,
+      videoCategoryId,
+      lastEventByVideo,
+      verdictCountsByVideo,
+      videoSearch,
+      videoAuthor,
+      videoSort,
+      videoSortOrder
+    ]
+  )
 
   const start = (videoPage - 1) * VIDEO_PAGE_SIZE
   const pagedVideos = filteredVideos.slice(start, start + VIDEO_PAGE_SIZE)
@@ -250,20 +179,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
     })
     const delimiter = format === "csv" ? "," : "\t"
     const content = buildDelimitedText({
-      header: [
-        "動画ID",
-        "サムネURL",
-        "動画URL",
-        "タイトル",
-        "投稿者",
-        "Rating",
-        "RD",
-        "評価数",
-        "勝ち数",
-        "引き分け数",
-        "負け数",
-        "最終判定日時"
-      ],
+      header: EXPORT_HEADERS,
       rows: exportRows.map((row) => [
         row.videoId,
         row.thumbnailUrl,
@@ -291,13 +207,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
     setExportMenuOpen(false)
   }
 
-  const categoryOptions = snapshot.categories.order.filter(
-    (id) => snapshot.categories.items[id]
-  )
-  const categorySelectOptions = categoryOptions.map((id) => ({
-    id,
-    name: snapshot.categories.items[id]?.name ?? "カテゴリ"
-  }))
+  const categorySelectOptions = buildCategoryOptions(snapshot.categories)
 
   const handleCategoryChange = (categoryId: string) => {
     setVideoCategoryId(categoryId)
@@ -434,58 +344,15 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
                 draws: 0,
                 losses: 0
               }
-              const verdictTotal =
-                verdictCounts.wins + verdictCounts.draws + verdictCounts.losses
               return (
-                <div
+                <VideoRow
                   key={video.videoId}
-                  className="grid grid-cols-[90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 items-center px-3 py-2">
-                  <a
-                    href={createWatchUrl(video.videoId)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-20 h-12 bg-slate-200 rounded overflow-hidden block">
-                    {video.thumbnailUrls?.[0] ? (
-                      <img
-                        src={video.thumbnailUrls[0]}
-                        alt={video.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : null}
-                  </a>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-slate-900">
-                      {video.title || "データ未取得"}
-                    </span>
-                    <span className="text-xs text-slate-500">
-                      {video.videoId}
-                    </span>
-                  </div>
-                  <div className="text-sm text-slate-700">
-                    {author?.name ?? "不明"}
-                  </div>
-                  <div className="text-sm">
-                    {rating ? Math.round(rating.rating) : "-"}
-                  </div>
-                  <div className="text-sm">
-                    {rating ? Math.round(rating.rd) : "-"}
-                  </div>
-                  <div className="text-sm">
-                    {verdictTotal > 0 ? verdictTotal : "-"}
-                  </div>
-                  <div className="text-xs text-slate-600">
-                    {verdictTotal > 0
-                      ? `${verdictCounts.wins}/${verdictCounts.draws}/${verdictCounts.losses}`
-                      : "-"}
-                  </div>
-                  <div className="text-xs text-slate-600">
-                    {lastEventByVideo.get(video.videoId)
-                      ? new Date(
-                          lastEventByVideo.get(video.videoId) ?? 0
-                        ).toLocaleString()
-                      : "-"}
-                  </div>
-                </div>
+                  video={video}
+                  rating={rating}
+                  authorName={author?.name}
+                  verdictCounts={verdictCounts}
+                  lastVerdictAt={lastEventByVideo.get(video.videoId)}
+                />
               )
             })
           )}
@@ -525,6 +392,229 @@ type ExportRowParams = {
     string,
     { wins: number; draws: number; losses: number }
   >
+}
+
+type VideoRowProps = {
+  video: VideoSnapshot
+  rating?: RatingSnapshot
+  authorName?: string
+  verdictCounts: { wins: number; draws: number; losses: number }
+  lastVerdictAt?: number
+}
+
+const VideoRow = ({
+  video,
+  rating,
+  authorName,
+  verdictCounts,
+  lastVerdictAt
+}: VideoRowProps) => {
+  const verdictTotal =
+    verdictCounts.wins + verdictCounts.draws + verdictCounts.losses
+  return (
+    <div className="grid grid-cols-[90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 items-center px-3 py-2">
+      <a
+        href={createWatchUrl(video.videoId)}
+        target="_blank"
+        rel="noreferrer"
+        className="w-20 h-12 bg-slate-200 rounded overflow-hidden block">
+        {video.thumbnailUrls?.[0] ? (
+          <img
+            src={video.thumbnailUrls[0]}
+            alt={video.title}
+            className="w-full h-full object-cover"
+          />
+        ) : null}
+      </a>
+      <div className="flex flex-col">
+        <span className="text-sm font-medium text-slate-900">
+          {video.title || "データ未取得"}
+        </span>
+        <span className="text-xs text-slate-500">{video.videoId}</span>
+      </div>
+      <div className="text-sm text-slate-700">{authorName ?? "不明"}</div>
+      <div className="text-sm">{rating ? Math.round(rating.rating) : "-"}</div>
+      <div className="text-sm">{rating ? Math.round(rating.rd) : "-"}</div>
+      <div className="text-sm">{verdictTotal > 0 ? verdictTotal : "-"}</div>
+      <div className="text-xs text-slate-600">
+        {verdictTotal > 0
+          ? `${verdictCounts.wins}/${verdictCounts.draws}/${verdictCounts.losses}`
+          : "-"}
+      </div>
+      <div className="text-xs text-slate-600">
+        {lastVerdictAt ? new Date(lastVerdictAt).toLocaleString() : "-"}
+      </div>
+    </div>
+  )
+}
+
+type FilterVideosParams = {
+  videos: OptionsSnapshot["videos"]
+  authors: OptionsSnapshot["authors"]
+  ratingsByCategory: Record<string, RatingSnapshot>
+  lastEventByVideo: Map<string, number>
+  verdictCountsByVideo: Map<
+    string,
+    { wins: number; draws: number; losses: number }
+  >
+  search: string
+  author: string
+  sort: string
+  order: "desc" | "asc"
+}
+
+const buildLastEventByVideo = (
+  events: OptionsSnapshot["events"]["items"],
+  defaultCategoryId: string,
+  categoryId: string
+) => {
+  const map = new Map<string, number>()
+  for (const event of events) {
+    if (event.disabled) continue
+    const resolvedCategoryId = event.categoryId ?? defaultCategoryId
+    if (resolvedCategoryId !== categoryId) continue
+    map.set(
+      event.currentVideoId,
+      Math.max(map.get(event.currentVideoId) ?? 0, event.timestamp)
+    )
+    map.set(
+      event.opponentVideoId,
+      Math.max(map.get(event.opponentVideoId) ?? 0, event.timestamp)
+    )
+  }
+  return map
+}
+
+const buildVerdictCountsByVideo = (
+  events: OptionsSnapshot["events"]["items"],
+  defaultCategoryId: string,
+  categoryId: string
+) => {
+  const map = new Map<string, { wins: number; draws: number; losses: number }>()
+
+  const ensure = (videoId: string) => {
+    const current = map.get(videoId)
+    if (current) {
+      return current
+    }
+    const next = { wins: 0, draws: 0, losses: 0 }
+    map.set(videoId, next)
+    return next
+  }
+
+  for (const event of events) {
+    if (event.disabled) continue
+    const resolvedCategoryId = event.categoryId ?? defaultCategoryId
+    if (resolvedCategoryId !== categoryId) continue
+    const currentStats = ensure(event.currentVideoId)
+    const opponentStats = ensure(event.opponentVideoId)
+
+    if (event.verdict === "better") {
+      currentStats.wins += 1
+      opponentStats.losses += 1
+    } else if (event.verdict === "same") {
+      currentStats.draws += 1
+      opponentStats.draws += 1
+    } else {
+      currentStats.losses += 1
+      opponentStats.wins += 1
+    }
+  }
+
+  return map
+}
+
+const filterVideos = ({
+  videos,
+  authors,
+  ratingsByCategory,
+  lastEventByVideo,
+  verdictCountsByVideo,
+  search,
+  author,
+  sort,
+  order
+}: FilterVideosParams) => {
+  const normalizedSearch = search.trim().toLowerCase()
+  const filtered = Object.values(videos).filter((video) => {
+    const hasRating = Boolean(ratingsByCategory[video.videoId])
+    const matchesSearch =
+      normalizedSearch.length === 0 ||
+      video.videoId.toLowerCase().includes(normalizedSearch) ||
+      video.title.toLowerCase().includes(normalizedSearch)
+    const matchesAuthor =
+      author === "all" || authors[video.authorUrl]?.name === author
+    return hasRating && matchesSearch && matchesAuthor
+  })
+
+  const sorter = getVideoSorter({
+    sort,
+    ratingsByCategory,
+    lastEventByVideo,
+    verdictCountsByVideo
+  })
+
+  const direction = order === "asc" ? -1 : 1
+  return filtered.sort((left, right) => direction * sorter(left, right))
+}
+
+const getVideoSorter = ({
+  sort,
+  ratingsByCategory,
+  lastEventByVideo,
+  verdictCountsByVideo
+}: {
+  sort: string
+  ratingsByCategory: Record<string, RatingSnapshot>
+  lastEventByVideo: Map<string, number>
+  verdictCountsByVideo: Map<
+    string,
+    { wins: number; draws: number; losses: number }
+  >
+}) => {
+  type VideoItem = VideoSnapshot
+  const compareByRating = (left: VideoItem, right: VideoItem) =>
+    (ratingsByCategory[right.videoId]?.rating ?? 0) -
+    (ratingsByCategory[left.videoId]?.rating ?? 0)
+  const compareByTitle = (left: VideoItem, right: VideoItem) =>
+    left.title.localeCompare(right.title)
+  const compareByRd = (left: VideoItem, right: VideoItem) =>
+    (ratingsByCategory[right.videoId]?.rd ?? 0) -
+    (ratingsByCategory[left.videoId]?.rd ?? 0)
+  const compareByLastVerdict = (left: VideoItem, right: VideoItem) =>
+    (lastEventByVideo.get(right.videoId) ?? 0) -
+    (lastEventByVideo.get(left.videoId) ?? 0)
+  const compareByEvalCount = (left: VideoItem, right: VideoItem) => {
+    const leftCounts = verdictCountsByVideo.get(left.videoId)
+    const rightCounts = verdictCountsByVideo.get(right.videoId)
+    const leftTotal = leftCounts
+      ? leftCounts.wins + leftCounts.draws + leftCounts.losses
+      : 0
+    const rightTotal = rightCounts
+      ? rightCounts.wins + rightCounts.draws + rightCounts.losses
+      : 0
+    return rightTotal - leftTotal
+  }
+  const compareByWins = (left: VideoItem, right: VideoItem) =>
+    (verdictCountsByVideo.get(right.videoId)?.wins ?? 0) -
+    (verdictCountsByVideo.get(left.videoId)?.wins ?? 0)
+  const compareByLosses = (left: VideoItem, right: VideoItem) =>
+    (verdictCountsByVideo.get(right.videoId)?.losses ?? 0) -
+    (verdictCountsByVideo.get(left.videoId)?.losses ?? 0)
+
+  return sort === "title"
+    ? compareByTitle
+    : sort === "rd"
+      ? compareByRd
+      : sort === "lastVerdict"
+        ? compareByLastVerdict
+        : sort === "evalCount"
+          ? compareByEvalCount
+          : sort === "wins"
+            ? compareByWins
+            : sort === "losses"
+              ? compareByLosses
+              : compareByRating
 }
 
 const buildExportRows = ({
