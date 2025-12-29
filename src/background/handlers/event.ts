@@ -17,6 +17,7 @@ import {
   getOrCreateRatingSnapshot,
   rebuildRatingsFromEvents
 } from "../utils/rating-helpers"
+import { updateRecentWindow } from "../utils/recent-window"
 
 type RecordEventPayload = {
   currentVideoId: string
@@ -179,11 +180,10 @@ function updateStateForNewEvent(
   videos: NcVideos
 ): NcState {
   return produce(state, (draft) => {
-    draft.recentWindow = buildRecentWindow(
+    draft.recentWindow = updateRecentWindow(
       draft.recentWindow,
       settings.recentWindowSize,
-      payload.currentVideoId,
-      payload.opponentVideoId,
+      [payload.currentVideoId, payload.opponentVideoId],
       videos
     )
   })
@@ -204,19 +204,4 @@ async function persistEventChanges(
     handleBackgroundError(error, "handleRecordEvent.persistEventChanges")
     throw error
   }
-}
-
-function buildRecentWindow(
-  current: string[],
-  size: number,
-  currentVideoId: string,
-  opponentVideoId: string,
-  videos: NcVideos
-) {
-  const hasVideo = (id: string) => !!(id && videos[id])
-  const deduped = current.filter(
-    (id) => id !== currentVideoId && id !== opponentVideoId && hasVideo(id)
-  )
-  const next = [currentVideoId, opponentVideoId, ...deduped].filter(hasVideo)
-  return next.slice(0, Math.max(1, size))
 }

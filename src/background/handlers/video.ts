@@ -1,7 +1,7 @@
 import { produce } from "immer"
 
-import type { NcVideos } from "../../lib/types"
 import { getStorageData, setStorageData } from "../services/storage"
+import { updateRecentWindow } from "../utils/recent-window"
 
 export async function handleUpdateCurrentVideo(videoId: string) {
   const { state, settings, videos } = await getStorageData([
@@ -16,10 +16,10 @@ export async function handleUpdateCurrentVideo(videoId: string) {
 
   const nextState = produce(state, (draft) => {
     if (state.currentVideoId && state.currentVideoId !== videoId) {
-      draft.recentWindow = insertVideoIntoRecentWindow(
+      draft.recentWindow = updateRecentWindow(
         draft.recentWindow,
         settings.recentWindowSize,
-        state.currentVideoId,
+        [state.currentVideoId],
         videos
       )
     }
@@ -39,18 +39,4 @@ export async function handleUpdatePinnedOpponent(videoId?: string) {
       pinnedOpponentVideoId: nextPinned
     }
   })
-}
-
-function insertVideoIntoRecentWindow(
-  current: string[],
-  size: number,
-  videoId: string,
-  videos: NcVideos
-) {
-  const filtered = current.filter((id) => videos[id])
-  if (!videoId || !videos[videoId]) {
-    return filtered
-  }
-  const deduped = filtered.filter((id) => id !== videoId)
-  return [videoId, ...deduped].slice(0, Math.max(1, size))
 }

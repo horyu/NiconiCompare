@@ -1,5 +1,40 @@
 import type { CompareEvent, NcVideos } from "../../lib/types"
 
+export function updateRecentWindow(
+  current: string[],
+  size: number,
+  candidates: Array<string | undefined>,
+  videos: NcVideos
+) {
+  const maxSize = Math.max(1, size)
+  const result: string[] = []
+  const seen = new Set<string>()
+
+  // candidates を優先的に追加
+  for (const candidate of candidates) {
+    if (candidate && videos[candidate] && !seen.has(candidate)) {
+      seen.add(candidate)
+      result.push(candidate)
+      if (result.length >= maxSize) {
+        return result // 早期リターン
+      }
+    }
+  }
+
+  // current から追加
+  for (const id of current) {
+    if (videos[id] && !seen.has(id)) {
+      seen.add(id)
+      result.push(id)
+      if (result.length >= maxSize) {
+        return result // 早期リターン
+      }
+    }
+  }
+
+  return result
+}
+
 export function rebuildRecentWindowFromEvents(
   events: CompareEvent[],
   size: number,
