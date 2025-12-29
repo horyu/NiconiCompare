@@ -24,6 +24,7 @@ const videoSnapshots: Record<string, VideoSnapshot> = {
 }
 
 const meta: Meta<typeof VideoComparison> = {
+  title: "Overlay/VideoComparison",
   component: VideoComparison,
   decorators: [
     (Story) => (

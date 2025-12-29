@@ -13,6 +13,7 @@ const sampleVideo: VideoSnapshot = {
 }
 
 const meta: Meta<typeof EventVideoLabel> = {
+  title: "OptionComponents/EventVideoLabel",
   component: EventVideoLabel,
   decorators: [
     (Story) => (

@@ -47,6 +47,7 @@ const baseSnapshot: OptionsSnapshot = {
 }
 
 const meta: Meta<typeof DataTab> = {
+  title: "OptionTabs/DataTab",
   component: DataTab,
   decorators: [
     (Story) => {

@@ -219,6 +219,7 @@ const withSessionState = (state: Partial<VideoSessionState>) => {
 }
 
 const meta: Meta<typeof VideosTab> = {
+  title: "OptionTabs/VideosTab",
   component: VideosTab,
   decorators: [
     (Story) => (

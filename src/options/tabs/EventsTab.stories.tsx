@@ -161,6 +161,7 @@ const withLoadingOverlay = (Story: () => JSX.Element) => (
 )
 
 const meta: Meta<typeof EventsTab> = {
+  title: "OptionTabs/EventsTab",
   component: EventsTab,
   decorators: [
     (Story) => (

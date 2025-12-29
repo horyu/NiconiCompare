@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { VerdictButtons } from "./VerdictButtons"
 
 const meta: Meta<typeof VerdictButtons> = {
+  title: "Overlay/VerdictButtons",
   component: VerdictButtons,
   decorators: [
     (Story) => (

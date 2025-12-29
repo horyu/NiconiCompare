@@ -53,6 +53,7 @@ const baseSnapshot: OptionsSnapshot = {
 }
 
 const meta: Meta<typeof CategoriesTab> = {
+  title: "OptionTabs/CategoriesTab",
   component: CategoriesTab,
   decorators: [
     (Story) => (

@@ -79,6 +79,7 @@ const withUnsavedSettings = () => {
 }
 
 const meta: Meta<typeof SettingsTab> = {
+  title: "OptionTabs/SettingsTab",
   component: SettingsTab,
   decorators: [
     (Story) => (

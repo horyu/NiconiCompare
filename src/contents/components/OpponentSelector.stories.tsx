@@ -23,6 +23,7 @@ const videoSnapshots: Record<string, VideoSnapshot> = {
 }
 
 const meta: Meta<typeof OpponentSelector> = {
+  title: "Overlay/OpponentSelector",
   component: OpponentSelector,
   decorators: [
     (Story) => (

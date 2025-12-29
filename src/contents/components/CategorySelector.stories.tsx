@@ -37,6 +37,7 @@ const sampleCategories = {
 }
 
 const meta: Meta<typeof CategorySelector> = {
+  title: "Overlay/CategorySelector",
   component: CategorySelector,
   decorators: [
     (Story) => (

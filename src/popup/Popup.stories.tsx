@@ -115,6 +115,7 @@ const withPopupFrame = (Story: () => JSX.Element) => (
 )
 
 const meta: Meta<typeof Popup> = {
+  title: "Popup/Popup",
   component: Popup,
   decorators: [withPopupData(), withPopupFrame]
 }
