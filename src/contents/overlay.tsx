@@ -5,6 +5,7 @@ import { useCallback, useState } from "react"
 import { MESSAGE_TYPES } from "../lib/constants"
 import { sendNcMessage } from "../lib/messages"
 import type { AuthorProfile, VideoSnapshot } from "../lib/types"
+import { CategorySelector } from "./components/CategorySelector"
 import { OpponentSelector } from "./components/OpponentSelector"
 import { VerdictButtons } from "./components/VerdictButtons"
 import { VideoComparison } from "./components/VideoComparison"
@@ -43,7 +44,8 @@ export default function Overlay() {
     setPinnedOpponentVideoId,
     setStatusMessage,
     statusMessage,
-    videoSnapshots
+    videoSnapshots,
+    categories
   } = useOverlayState()
   const {
     hasSelectableCandidates,
@@ -69,6 +71,22 @@ export default function Overlay() {
     refreshState,
     onStatusMessage: setStatusMessage
   })
+  const activeCategoryId = categories.items[overlaySettings.activeCategoryId]
+    ? overlaySettings.activeCategoryId
+    : categories.defaultId
+
+  const handleCategoryChange = useCallback(
+    async (categoryId: string) => {
+      const response = await sendNcMessage({
+        type: MESSAGE_TYPES.updateActiveCategory,
+        payload: { categoryId }
+      })
+      if (response.ok) {
+        await refreshState()
+      }
+    },
+    [refreshState]
+  )
 
   const handleVideoChange = useCallback(
     async (videoData: { video: VideoSnapshot; author: AuthorProfile }) => {
@@ -148,7 +166,14 @@ export default function Overlay() {
       className="fixed top-0 right-0 z-[2147483647] bg-black/75 text-white p-3 rounded-lg shadow-lg max-w-[320px] flex flex-col gap-2"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}>
-      <strong className="text-right w-full">NiconiCompare</strong>
+      <div className="flex items-center justify-between gap-2">
+        <CategorySelector
+          activeCategoryId={activeCategoryId}
+          categories={categories}
+          onChange={handleCategoryChange}
+        />
+        <strong className="text-right w-full">NiconiCompare</strong>
+      </div>
 
       {displayStatus && (
         <span className="text-xs opacity-80 text-right w-full">

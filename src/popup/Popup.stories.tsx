@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { DEFAULT_META, DEFAULT_SETTINGS } from "../lib/constants"
+import {
+  DEFAULT_CATEGORY_ID,
+  DEFAULT_META,
+  DEFAULT_SETTINGS
+} from "../lib/constants"
 import type { NcEventsBucket, NcMeta, NcVideos } from "../lib/types"
 import Popup from "./index"
 
@@ -22,7 +26,8 @@ const baseData: PopupData = {
         currentVideoId: "sm1111111",
         opponentVideoId: "sm2222222",
         verdict: "better",
-        disabled: false
+        disabled: false,
+        categoryId: DEFAULT_CATEGORY_ID
       },
       {
         id: 2,
@@ -30,7 +35,8 @@ const baseData: PopupData = {
         currentVideoId: "sm3333333",
         opponentVideoId: "sm4444444",
         verdict: "same",
-        disabled: false
+        disabled: false,
+        categoryId: DEFAULT_CATEGORY_ID
       }
     ]
   },

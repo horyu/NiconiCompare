@@ -22,6 +22,7 @@ export type CompareEvent = {
   opponentVideoId: string
   verdict: Verdict
   disabled: boolean
+  categoryId: string
 }
 
 export type RatingSnapshot = {
@@ -38,6 +39,7 @@ export type NcSettings = {
   overlayAndCaptureEnabled: boolean
   overlayAutoCloseMs: number
   showEventThumbnails: boolean
+  activeCategoryId: string
   glicko: {
     rating: number
     rd: number
@@ -56,7 +58,20 @@ export type NcEventsBucket = {
   nextId: number
 }
 
-export type NcRatings = Record<string, RatingSnapshot>
+export type NcRatings = Record<string, Record<string, RatingSnapshot>>
+
+export type Category = {
+  id: string
+  name: string
+  createdAt: number
+}
+
+export type NcCategories = {
+  items: Record<string, Category>
+  order: string[]
+  overlayVisibleIds: string[]
+  defaultId: string
+}
 export type NcVideos = Record<string, VideoSnapshot>
 export type NcAuthors = Record<string, AuthorProfile>
 
@@ -74,4 +89,5 @@ export type StorageShape = {
   nc_events: NcEventsBucket
   nc_ratings: NcRatings
   nc_meta: NcMeta
+  nc_categories: NcCategories
 }

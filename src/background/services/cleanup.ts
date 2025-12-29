@@ -56,7 +56,14 @@ export async function performCleanup() {
     Object.entries(videos).filter(([videoId]) => referencedVideos.has(videoId))
   )
   const cleanedRatings = Object.fromEntries(
-    Object.entries(ratings).filter(([videoId]) => referencedVideos.has(videoId))
+    Object.entries(ratings).map(([categoryId, categoryRatings]) => [
+      categoryId,
+      Object.fromEntries(
+        Object.entries(categoryRatings).filter(([videoId]) =>
+          referencedVideos.has(videoId)
+        )
+      )
+    ])
   )
   const cleanedAuthors = Object.fromEntries(
     Object.entries(authors).filter(([authorUrl]) =>

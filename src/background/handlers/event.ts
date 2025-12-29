@@ -1,5 +1,6 @@
 import { produce } from "immer"
 
+import { DEFAULT_CATEGORY_ID } from "../../lib/constants"
 import { handleBackgroundError } from "../../lib/error-handler"
 import { updatePairRatings } from "../../lib/glicko"
 import type {
@@ -48,13 +49,15 @@ export async function handleRecordEvent(payload: RecordEventPayload) {
   }
 
   const eventId = events.nextId
-  const newEvent = buildNewEvent(eventId, payload)
+  const activeCategoryId = settings.activeCategoryId ?? DEFAULT_CATEGORY_ID
+  const newEvent = buildNewEvent(eventId, payload, activeCategoryId)
   const updatedEvents = appendEvent(events, newEvent)
   const nextRatings = updateRatingsForNewEvent(
     ratings,
     payload,
     settings,
-    eventId
+    eventId,
+    activeCategoryId
   )
   const updatedState = updateStateForNewEvent(state, settings, payload, videos)
 
@@ -109,7 +112,8 @@ function updateEventVerdict(
 
 function buildNewEvent(
   eventId: number,
-  payload: RecordEventPayload
+  payload: RecordEventPayload,
+  categoryId: string
 ): CompareEvent {
   return {
     id: eventId,
@@ -117,7 +121,8 @@ function buildNewEvent(
     currentVideoId: payload.currentVideoId,
     opponentVideoId: payload.opponentVideoId,
     verdict: payload.verdict,
-    disabled: false
+    disabled: false,
+    categoryId
   }
 }
 
@@ -135,20 +140,26 @@ function updateRatingsForNewEvent(
   ratings: NcRatings,
   payload: RecordEventPayload,
   settings: NcSettings,
-  eventId: number
+  eventId: number,
+  categoryId: string
 ): NcRatings {
+  const categoryRatings = ratings[categoryId] ?? {}
   const leftRating = getOrCreateRatingSnapshot(
-    ratings,
+    categoryRatings,
     payload.currentVideoId,
     settings
   )
   const rightRating = getOrCreateRatingSnapshot(
-    ratings,
+    categoryRatings,
     payload.opponentVideoId,
     settings
   )
 
   return produce(ratings, (draft) => {
+    if (!draft[categoryId]) {
+      draft[categoryId] = {}
+    }
+    const draftCategory = draft[categoryId]
     const { left, right } = updatePairRatings({
       settings,
       left: leftRating,
@@ -156,8 +167,8 @@ function updateRatingsForNewEvent(
       verdict: payload.verdict,
       eventId
     })
-    draft[left.videoId] = left
-    draft[right.videoId] = right
+    draftCategory[left.videoId] = left
+    draftCategory[right.videoId] = right
   })
 }
 

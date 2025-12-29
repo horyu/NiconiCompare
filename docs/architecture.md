@@ -157,6 +157,7 @@ type CompareEvent = {
   opponentVideoId: string; // 比較対象 (選択動画)
   verdict: "better" | "same" | "worse"; // currentVideo視点の評価
   disabled: boolean; // 無効化フラグ
+  categoryId: string; // 比較カテゴリ
   persistent?: boolean; // Storage書き込み完了フラグ
 };
 ```
@@ -273,11 +274,16 @@ Chrome Storage Local は、Key-Value 型のストレージ（JSON シリアラ�
 | `nc_videos`   | Map<string, VideoSnapshot>              | 500 B/件   |
 | `nc_authors`  | Map<string, AuthorProfile>              | 200 B/件   |
 | `nc_events`   | {items: CompareEvent[], nextId: number} | 150 B/件   |
-| `nc_ratings`  | Map<string, RatingSnapshot>             | 100 B/件   |
+| `nc_ratings`  | Map<categoryId, Map<videoId, RatingSnapshot>> | 100 B/件   |
+| `nc_categories` | {items, order, overlayVisibleIds, defaultId} | ~2 KB |
 | `nc_meta`     | Object                                  | ~10 KB     |
 
 **nc_meta の主な用途**:
 - lastReplayEventId / lastCleanupAt などのメタ情報を保持
+
+**nc_categories の主な用途**:
+- カテゴリ一覧、表示順、オーバーレイ表示対象の管理
+- `nc_settings.activeCategoryId` と連携し、比較/ランキングのカテゴリを切り替える
 
 ### 5.2 データ更新の不変性管理
 
@@ -316,6 +322,8 @@ function normalizeSettings(settings: NcSettings): NcSettings {
     ),
     showEventThumbnails:
       settings.showEventThumbnails ?? DEFAULT_SETTINGS.showEventThumbnails,
+    activeCategoryId:
+      settings.activeCategoryId ?? DEFAULT_SETTINGS.activeCategoryId,
     glicko: settings.glicko || DEFAULT_SETTINGS.glicko
   }
 }

@@ -5,6 +5,7 @@ import { handleUIError } from "../../lib/error-handler"
 import { sendNcMessage } from "../../lib/messages"
 import type {
   NcAuthors,
+  NcCategories,
   NcEventsBucket,
   NcMeta,
   NcRatings,
@@ -21,6 +22,7 @@ export type OptionsSnapshot = {
   events: NcEventsBucket
   ratings: NcRatings
   meta: NcMeta
+  categories: NcCategories
 }
 
 type UseOptionsDataResult = {

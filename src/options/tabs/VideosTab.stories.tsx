@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import {
+  DEFAULT_CATEGORIES,
+  DEFAULT_CATEGORY_ID,
   DEFAULT_EVENTS_BUCKET,
   DEFAULT_META,
   DEFAULT_SETTINGS,
@@ -21,6 +23,7 @@ import { VideosTab } from "./VideosTab"
 type VideoSessionState = {
   search: string
   author: string
+  categoryId: string
   sort: string
   order: "desc" | "asc"
   page: number
@@ -30,6 +33,7 @@ const SESSION_KEY = "nc_options_video_state"
 const DEFAULT_SESSION_STATE: VideoSessionState = {
   search: "",
   author: "all",
+  categoryId: DEFAULT_CATEGORY_ID,
   sort: "rating",
   order: "desc",
   page: 1
@@ -42,7 +46,8 @@ const baseSnapshot: OptionsSnapshot = {
   authors: {},
   events: { ...DEFAULT_EVENTS_BUCKET },
   ratings: {},
-  meta: { ...DEFAULT_META }
+  meta: { ...DEFAULT_META },
+  categories: { ...DEFAULT_CATEGORIES }
 }
 
 const createVideo = (videoId: string, title: string, authorUrl: string) => ({
@@ -84,13 +89,14 @@ const createEvent = (
   currentVideoId,
   opponentVideoId,
   verdict,
-  disabled: false
+  disabled: false,
+  categoryId: DEFAULT_CATEGORY_ID
 })
 
 const buildSnapshotWithVideos = (count: number): OptionsSnapshot => {
   const videos: NcVideos = {}
   const authors: NcAuthors = {}
-  const ratings: NcRatings = {}
+  const ratings: NcRatings = { [DEFAULT_CATEGORY_ID]: {} }
   const events: CompareEvent[] = []
 
   for (let index = 1; index <= count; index += 1) {
@@ -101,7 +107,7 @@ const buildSnapshotWithVideos = (count: number): OptionsSnapshot => {
     const title = `評価済み動画 ${index}`
     videos[videoId] = createVideo(videoId, title, authorUrl)
     authors[authorUrl] = createAuthor(authorUrl, authorName)
-    ratings[videoId] = createRating(
+    ratings[DEFAULT_CATEGORY_ID][videoId] = createRating(
       videoId,
       1500 + index * 3,
       200 + (index % 50),
@@ -123,6 +129,7 @@ const buildSnapshotWithVideos = (count: number): OptionsSnapshot => {
     videos,
     authors,
     ratings,
+    categories: { ...DEFAULT_CATEGORIES },
     events: {
       items: events,
       nextId: events.length + 1
@@ -152,7 +159,9 @@ const meta: Meta<typeof VideosTab> = {
     )
   ],
   args: {
-    snapshot: baseSnapshot
+    snapshot: baseSnapshot,
+    refreshState: async () => {},
+    showToast: () => {}
   }
 }
 

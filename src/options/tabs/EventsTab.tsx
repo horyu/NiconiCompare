@@ -24,6 +24,7 @@ type EventSessionState = {
   search: string
   verdict: string
   includeDeleted: boolean
+  categoryId: string
   page: number
 }
 
@@ -33,6 +34,7 @@ const DEFAULT_EVENT_SESSION_STATE: EventSessionState = {
   search: "",
   verdict: "all",
   includeDeleted: false,
+  categoryId: "",
   page: 1
 }
 
@@ -57,9 +59,19 @@ export const EventsTab = ({
   const [eventIncludeDeleted, setEventIncludeDeleted] = useState(
     initialState.includeDeleted
   )
+  const [eventCategoryId, setEventCategoryId] = useState(
+    initialState.categoryId || snapshot.settings.activeCategoryId
+  )
   const [eventPage, setEventPage] = useState(initialState.page)
   const shouldResetPageRef = useRef(false)
   const [eventBusyId, setEventBusyId] = useState<number | null>(null)
+  const [bulkMoveTargetId, setBulkMoveTargetId] = useState(
+    snapshot.categories.defaultId
+  )
+  const categoryOptions = snapshot.categories.order.filter(
+    (id) => snapshot.categories.items[id]
+  )
+  const bulkMoveTargets = categoryOptions.filter((id) => id !== eventCategoryId)
 
   useEffect(() => {
     if (!shouldResetPageRef.current) {
@@ -67,16 +79,38 @@ export const EventsTab = ({
       return
     }
     setEventPage(1)
-  }, [eventSearch, eventVerdict, eventIncludeDeleted])
+  }, [eventSearch, eventVerdict, eventIncludeDeleted, eventCategoryId])
 
   useEffect(() => {
     writeSessionState(SESSION_KEY, {
       search: eventSearch,
       verdict: eventVerdict,
       includeDeleted: eventIncludeDeleted,
+      categoryId: eventCategoryId,
       page: eventPage
     })
-  }, [eventSearch, eventVerdict, eventIncludeDeleted, eventPage])
+  }, [
+    eventSearch,
+    eventVerdict,
+    eventIncludeDeleted,
+    eventPage,
+    eventCategoryId
+  ])
+
+  useEffect(() => {
+    if (!snapshot.categories.items[eventCategoryId]) {
+      setEventCategoryId(snapshot.categories.defaultId)
+    }
+  }, [eventCategoryId, snapshot.categories])
+
+  useEffect(() => {
+    if (bulkMoveTargets.length === 0) {
+      return
+    }
+    if (!bulkMoveTargets.includes(bulkMoveTargetId)) {
+      setBulkMoveTargetId(bulkMoveTargets[0])
+    }
+  }, [bulkMoveTargetId, bulkMoveTargets])
 
   const filteredEvents = useMemo(() => {
     const normalizedSearch = eventSearch.trim().toLowerCase()
@@ -85,6 +119,10 @@ export const EventsTab = ({
         return false
       }
       if (eventVerdict !== "all" && event.verdict !== eventVerdict) {
+        return false
+      }
+      const categoryId = event.categoryId ?? snapshot.categories.defaultId
+      if (categoryId !== eventCategoryId) {
         return false
       }
       if (normalizedSearch.length === 0) {
@@ -106,7 +144,13 @@ export const EventsTab = ({
       return idMatch || text.toLowerCase().includes(normalizedSearch)
     })
     return events.sort((a, b) => b.id - a.id)
-  }, [snapshot, eventIncludeDeleted, eventSearch, eventVerdict])
+  }, [
+    snapshot,
+    eventIncludeDeleted,
+    eventSearch,
+    eventVerdict,
+    eventCategoryId
+  ])
 
   const start = (eventPage - 1) * EVENT_PAGE_SIZE
   const pagedEvents = filteredEvents.slice(start, start + EVENT_PAGE_SIZE)
@@ -154,9 +198,65 @@ export const EventsTab = ({
       content,
       format,
       withBom,
-      filenamePrefix: "NiconiCompareComparison"
+      filenamePrefix: "NiconiCompareComparison",
+      categoryName:
+        snapshot.categories.items[eventCategoryId]?.name ?? eventCategoryId
     })
     setExportMenuOpen(false)
+  }
+
+  const handleCategoryChange = async (categoryId: string) => {
+    setEventCategoryId(categoryId)
+    try {
+      const response = await sendNcMessage({
+        type: MESSAGE_TYPES.updateActiveCategory,
+        payload: { categoryId }
+      })
+      if (!response.ok) {
+        throw new NcError(
+          response.error ?? "update failed",
+          "options:events:category",
+          "カテゴリの更新に失敗しました。"
+        )
+      }
+      await refreshState(true)
+    } catch (error) {
+      handleUIError(error, "options:events:category", showToast)
+    }
+  }
+
+  const handleBulkMove = async (targetCategoryId: string) => {
+    if (!targetCategoryId) {
+      return
+    }
+    const count = filteredEvents.length
+    const targetName = snapshot.categories.items[targetCategoryId]?.name ?? ""
+    const confirmed = confirm(
+      `検索条件に一致する ${count} 件を [${targetName}] カテゴリに移動します。よろしいですか？`
+    )
+    if (!confirmed) {
+      return
+    }
+    try {
+      const response = await sendNcMessage({
+        type: MESSAGE_TYPES.bulkMoveEvents,
+        payload: {
+          eventIds: filteredEvents.map((event) => event.id),
+          targetCategoryId
+        }
+      })
+      if (!response.ok) {
+        throw new NcError(
+          response.error ?? "bulk move failed",
+          "options:events:bulk-move",
+          "一括移動に失敗しました。"
+        )
+      }
+      await refreshState(true)
+      showToast("success", "カテゴリを一括移動しました。")
+    } catch (error) {
+      handleUIError(error, "options:events:bulk-move", showToast)
+    }
   }
 
   const handleEventVerdictChange = async (
@@ -304,6 +404,19 @@ export const EventsTab = ({
             <option value="worse">負け</option>
           </select>
         </label>
+        <label className="text-sm flex flex-col gap-1 min-w-[140px]">
+          カテゴリ
+          <select
+            value={eventCategoryId}
+            onChange={(event) => handleCategoryChange(event.target.value)}
+            className="border border-slate-200 rounded-md px-2 py-1">
+            {categoryOptions.map((id) => (
+              <option key={id} value={id}>
+                {snapshot.categories.items[id]?.name ?? "カテゴリ"}
+              </option>
+            ))}
+          </select>
+        </label>
         <label className="text-sm flex items-center gap-2 mb-1">
           <input
             type="checkbox"
@@ -320,6 +433,27 @@ export const EventsTab = ({
           />
           サムネ表示
         </label>
+      </div>
+
+      <div className="flex items-center gap-2 text-sm">
+        <span>一括移動:</span>
+        <select
+          value={bulkMoveTargetId}
+          onChange={(event) => setBulkMoveTargetId(event.target.value)}
+          className="border border-slate-200 rounded-md px-2 py-1">
+          {bulkMoveTargets.map((id) => (
+            <option key={id} value={id}>
+              {snapshot.categories.items[id]?.name ?? "カテゴリ"}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={() => handleBulkMove(bulkMoveTargetId)}
+          disabled={filteredEvents.length === 0 || bulkMoveTargets.length === 0}
+          className="px-3 py-1 rounded border border-slate-200 text-xs hover:bg-slate-100 disabled:opacity-50">
+          現在の条件で移動
+        </button>
       </div>
 
       <Pagination

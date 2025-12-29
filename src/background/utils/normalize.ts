@@ -25,6 +25,8 @@ export function normalizeSettings(settings: NcSettings): NcSettings {
       DEFAULT_SETTINGS.overlayAndCaptureEnabled,
     showEventThumbnails:
       settings.showEventThumbnails ?? DEFAULT_SETTINGS.showEventThumbnails,
+    activeCategoryId:
+      settings.activeCategoryId ?? DEFAULT_SETTINGS.activeCategoryId,
     glicko: settings.glicko || DEFAULT_SETTINGS.glicko
   }
 }

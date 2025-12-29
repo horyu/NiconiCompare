@@ -1,4 +1,10 @@
-import type { NcEventsBucket, NcMeta, NcSettings, NcState } from "./types"
+import type {
+  NcCategories,
+  NcEventsBucket,
+  NcMeta,
+  NcSettings,
+  NcState
+} from "./types"
 
 export const STORAGE_KEYS = {
   settings: "nc_settings",
@@ -7,8 +13,25 @@ export const STORAGE_KEYS = {
   authors: "nc_authors",
   events: "nc_events",
   ratings: "nc_ratings",
-  meta: "nc_meta"
+  meta: "nc_meta",
+  categories: "nc_categories"
 } as const
+
+export const DEFAULT_CATEGORY_ID = "00000000-0000-0000-0000-000000000000"
+export const DEFAULT_CATEGORY_NAME = "総合"
+
+export const DEFAULT_CATEGORIES: NcCategories = {
+  items: {
+    [DEFAULT_CATEGORY_ID]: {
+      id: DEFAULT_CATEGORY_ID,
+      name: DEFAULT_CATEGORY_NAME,
+      createdAt: 0
+    }
+  },
+  order: [DEFAULT_CATEGORY_ID],
+  overlayVisibleIds: [DEFAULT_CATEGORY_ID],
+  defaultId: DEFAULT_CATEGORY_ID
+}
 
 export const DEFAULT_SETTINGS: NcSettings = {
   recentWindowSize: 5,
@@ -16,6 +39,7 @@ export const DEFAULT_SETTINGS: NcSettings = {
   overlayAndCaptureEnabled: true,
   overlayAutoCloseMs: 2000,
   showEventThumbnails: true,
+  activeCategoryId: DEFAULT_CATEGORY_ID,
   glicko: {
     rating: 1500,
     rd: 350,
@@ -39,7 +63,7 @@ export const DEFAULT_EVENTS_BUCKET: NcEventsBucket = {
 
 export const DEFAULT_META: NcMeta = {
   lastReplayEventId: 0,
-  schemaVersion: "1.0.0",
+  schemaVersion: "1.1.0",
   lastCleanupAt: 0
 }
 
@@ -58,5 +82,12 @@ export const MESSAGE_TYPES = {
   metaAction: "nc/metaAction",
   rebuildRatings: "nc/rebuildRatings",
   exportData: "nc/exportData",
-  importData: "nc/importData"
+  importData: "nc/importData",
+  createCategory: "nc/createCategory",
+  updateCategoryName: "nc/updateCategoryName",
+  deleteCategory: "nc/deleteCategory",
+  reorderCategories: "nc/reorderCategories",
+  updateOverlayVisibleIds: "nc/updateOverlayVisibleIds",
+  updateActiveCategory: "nc/updateActiveCategory",
+  bulkMoveEvents: "nc/bulkMoveEvents"
 } as const

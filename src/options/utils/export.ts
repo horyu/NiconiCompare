@@ -4,6 +4,7 @@ type ExportDownloadOptions = {
   format: ExportFormat
   withBom: boolean
   filenamePrefix: string
+  categoryName?: string
 }
 
 type DelimitedTextInput = {
@@ -23,20 +24,29 @@ export const buildDelimitedText = ({
   return lines.join("\n")
 }
 
-export const buildExportFilename = (prefix: string, format: ExportFormat) => {
+export const buildExportFilename = (
+  prefix: string,
+  format: ExportFormat,
+  categoryName?: string
+) => {
   const now = new Date()
   const pad2 = (value: number) => value.toString().padStart(2, "0")
   const stamp = `${now.getFullYear()}${pad2(now.getMonth() + 1)}${pad2(
     now.getDate()
   )}${pad2(now.getHours())}${pad2(now.getMinutes())}${pad2(now.getSeconds())}`
-  return `${prefix}-${stamp}.${format}`
+  const categorySuffix =
+    categoryName !== undefined
+      ? `-${sanitizeFilenameSegment(categoryName)}`
+      : ""
+  return `${prefix}${categorySuffix}-${stamp}.${format}`
 }
 
 export const downloadDelimitedFile = ({
   content,
   format,
   withBom,
-  filenamePrefix
+  filenamePrefix,
+  categoryName
 }: ExportDownloadOptions) => {
   const payload = withBom && format === "csv" ? `\uFEFF${content}` : content
   const blob = new Blob([payload], {
@@ -45,7 +55,7 @@ export const downloadDelimitedFile = ({
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement("a")
   anchor.href = url
-  anchor.download = buildExportFilename(filenamePrefix, format)
+  anchor.download = buildExportFilename(filenamePrefix, format, categoryName)
   anchor.click()
   URL.revokeObjectURL(url)
 }
@@ -62,3 +72,6 @@ const escapeField = (value: string, delimiter: string) => {
   }
   return text
 }
+
+const sanitizeFilenameSegment = (value: string) =>
+  value.replace(/[\\/:*?"<>|]/g, "")

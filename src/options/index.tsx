@@ -6,12 +6,13 @@ import { MESSAGE_TYPES } from "../lib/constants"
 import { handleUIError, NcError } from "../lib/error-handler"
 import { sendNcMessage } from "../lib/messages"
 import { useOptionsData } from "./hooks/useOptionsData"
+import { CategoriesTab } from "./tabs/CategoriesTab"
 import { DataTab } from "./tabs/DataTab"
 import { EventsTab } from "./tabs/EventsTab"
 import { SettingsTab } from "./tabs/SettingsTab"
 import { VideosTab } from "./tabs/VideosTab"
 
-type TabKey = "videos" | "events" | "settings" | "data"
+type TabKey = "videos" | "events" | "categories" | "settings" | "data"
 
 type Toast = {
   tone: "success" | "error"
@@ -21,6 +22,7 @@ type Toast = {
 const TAB_LABELS: { key: TabKey; label: string }[] = [
   { key: "videos", label: "動画一覧" },
   { key: "events", label: "評価一覧" },
+  { key: "categories", label: "カテゴリ" },
   { key: "settings", label: "設定" },
   { key: "data", label: "データ操作" }
 ]
@@ -154,13 +156,27 @@ export default function OptionsPage() {
           </div>
         )}
 
-        {activeTab === "videos" && <VideosTab snapshot={snapshot} />}
+        {activeTab === "videos" && (
+          <VideosTab
+            snapshot={snapshot}
+            refreshState={refreshState}
+            showToast={showToast}
+          />
+        )}
 
         {activeTab === "events" && (
           <EventsTab
             snapshot={snapshot}
             eventShowThumbnails={eventShowThumbnails}
             onToggleEventThumbnails={handleToggleEventThumbnails}
+            refreshState={refreshState}
+            showToast={showToast}
+          />
+        )}
+
+        {activeTab === "categories" && (
+          <CategoriesTab
+            snapshot={snapshot}
             refreshState={refreshState}
             showToast={showToast}
           />

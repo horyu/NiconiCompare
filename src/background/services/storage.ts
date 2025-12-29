@@ -1,4 +1,5 @@
 import {
+  DEFAULT_CATEGORIES,
   DEFAULT_EVENTS_BUCKET,
   DEFAULT_META,
   DEFAULT_SETTINGS,
@@ -7,6 +8,7 @@ import {
 } from "../../lib/constants"
 import type {
   NcAuthors,
+  NcCategories,
   NcEventsBucket,
   NcMeta,
   NcRatings,
@@ -23,6 +25,7 @@ export type StorageDataByKey = {
   events: NcEventsBucket
   ratings: NcRatings
   meta: NcMeta
+  categories: NcCategories
 }
 
 export type StorageKey = keyof StorageDataByKey
@@ -34,7 +37,8 @@ const DEFAULT_BY_KEY: StorageDataByKey = {
   authors: {},
   events: DEFAULT_EVENTS_BUCKET,
   ratings: {},
-  meta: DEFAULT_META
+  meta: DEFAULT_META,
+  categories: DEFAULT_CATEGORIES
 }
 
 const ALL_STORAGE_KEYS: StorageKey[] = [
@@ -44,7 +48,8 @@ const ALL_STORAGE_KEYS: StorageKey[] = [
   "authors",
   "events",
   "ratings",
-  "meta"
+  "meta",
+  "categories"
 ]
 
 function ensureStorageAvailable(): chrome.storage.LocalStorageArea {

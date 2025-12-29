@@ -223,3 +223,20 @@
 1. `docs/architecture.md` にカテゴリ機能を追記
 2. `docs/developer-guide.md` にカテゴリ関連の開発ガイド追加
 3. README.md の機能説明にカテゴリを追加
+
+## 12. 実装状況
+
+以下は実装完了状況のサマリ。完了済みの Phase は ✅、未着手は ⬜︎ で示す。
+
+- ✅ Phase 1: 型定義とデータ層の準備
+- ✅ Phase 2: マイグレーション機能
+- ✅ Phase 3: Background - カテゴリ操作ハンドラ
+- ✅ Phase 4: Background - Rating計算のカテゴリ対応
+- ✅ Phase 5: Background - イベント操作のカテゴリ対応
+- ✅ Phase 6: Options - カテゴリタブ
+- ✅ Phase 7: Options - 評価一覧タブのカテゴリ対応
+- ✅ Phase 8: Options - 動画一覧タブのカテゴリ対応
+- ✅ Phase 9: オーバーレイのカテゴリ対応
+- ✅ Phase 10: エクスポート機能のカテゴリ対応
+- ✅ Phase 11: テストとデバッグ（`pnpm fix` / `pnpm lint` 実行済み）
+- ✅ Phase 12: ドキュメント更新（README / architecture / developer-guide 反映済み）

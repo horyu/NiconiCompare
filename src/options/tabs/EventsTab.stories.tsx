@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import {
+  DEFAULT_CATEGORIES,
+  DEFAULT_CATEGORY_ID,
   DEFAULT_EVENTS_BUCKET,
   DEFAULT_META,
   DEFAULT_SETTINGS,
@@ -21,6 +23,7 @@ type EventSessionState = {
   search: string
   verdict: string
   includeDeleted: boolean
+  categoryId: string
   page: number
 }
 
@@ -29,6 +32,7 @@ const DEFAULT_SESSION_STATE: EventSessionState = {
   search: "",
   verdict: "all",
   includeDeleted: false,
+  categoryId: DEFAULT_CATEGORY_ID,
   page: 1
 }
 
@@ -39,7 +43,8 @@ const baseSnapshot: OptionsSnapshot = {
   authors: {},
   events: { ...DEFAULT_EVENTS_BUCKET },
   ratings: {},
-  meta: { ...DEFAULT_META }
+  meta: { ...DEFAULT_META },
+  categories: { ...DEFAULT_CATEGORIES }
 }
 
 const createEvent = (
@@ -52,6 +57,7 @@ const createEvent = (
   opponentVideoId: `sm${2000000 + id}`,
   verdict: "better",
   disabled: false,
+  categoryId: DEFAULT_CATEGORY_ID,
   ...overrides
 })
 
@@ -96,7 +102,8 @@ const buildSnapshotWithEvents = (events: CompareEvent[]): OptionsSnapshot => {
     events: {
       items: events,
       nextId: events.length + 1
-    }
+    },
+    categories: { ...DEFAULT_CATEGORIES }
   }
 }
 
