@@ -19,6 +19,7 @@
 ```tsx
 <Overlay> // Plasmo CSUI React Component
   <div className="fixed top-0 right-0 z-[2147483647] ...">
+    <CategorySelector />
     <strong>NiconiCompare</strong>
     {displayStatus && <span>{displayStatus}</span>}
     {showControls && (
@@ -35,6 +36,8 @@
 ```
 
 - Tailwind CSS utility classes でスタイリング（`fixed`, `top-0`, `right-0`, `z-[2147483647]` など）
+- ヘッダーにカテゴリドロップダウンを表示し、`overlayVisibleIds` に含まれるカテゴリのみを選択肢にする（`showControls` 時のみ表示）
+- ドロップダウンは幅固定＋省略表示（長いカテゴリ名を見切る）
 - verdict ボタンは 3 つ（再生中/引き分け/選択中）で、`submitVerdict` を通じて background へ送信
 - verdict ボタンは最後に押したものが選択状態になり、`currentVideoId` の切替時に解除される
 - サムネイルは current/opponent の2枚表示。opponent 側は新規タブで watch ページを開くリンクにしている
