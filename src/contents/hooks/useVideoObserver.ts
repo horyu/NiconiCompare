@@ -4,6 +4,7 @@ import {
   extractVideoDataFromLdJson,
   observeLdJsonChanges
 } from "../../lib/dom-observer"
+import { logger } from "../../lib/logger"
 import type { AuthorProfile, VideoSnapshot } from "../../lib/types"
 
 type VideoData = { video: VideoSnapshot; author: AuthorProfile }
@@ -25,6 +26,10 @@ export function useVideoObserver({
     if (!isReady || !enabled) {
       return
     }
+    logger.debug("[ui:overlay:video-observer] start", {
+      isReady,
+      enabled
+    })
     const cleanup = observeLdJsonChanges({
       onVideoDataChange: onVideoChange,
       onError: onStatusMessage
@@ -32,8 +37,10 @@ export function useVideoObserver({
 
     const videoData = extractVideoDataFromLdJson()
     if (videoData) {
+      logger.debug("[ui:overlay:video-observer] initial video detected")
       onVideoChange(videoData)
     } else {
+      logger.debug("[ui:overlay:video-observer] initial video missing")
       onStatusMessage?.("動画情報を取得中...")
     }
 

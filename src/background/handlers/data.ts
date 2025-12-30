@@ -39,6 +39,12 @@ export async function handleDeleteAllData() {
 export async function handleExportData() {
   try {
     const data = await readAllStorage()
+    logger.debug("[bg:data:export] snapshot counts", {
+      events: data.events.items.length,
+      videos: Object.keys(data.videos).length,
+      authors: Object.keys(data.authors).length,
+      categories: Object.keys(data.categories.items).length
+    })
     return {
       [STORAGE_KEYS.settings]: data.settings,
       [STORAGE_KEYS.state]: data.state,
@@ -113,6 +119,12 @@ export async function handleImportData(data: Partial<StorageShape>) {
     ...nextSettings,
     activeCategoryId: nextSettings.activeCategoryId || nextCategories.defaultId
   }
+  logger.debug("[bg:data:import] snapshot counts", {
+    events: normalizedEvents.items.length,
+    videos: Object.keys(nextVideos).length,
+    authors: Object.keys(nextAuthors).length,
+    categories: Object.keys(nextCategories.items).length
+  })
   const nextRatings = rebuildRatingsFromEvents(
     normalizedEvents.items,
     normalizedSettings

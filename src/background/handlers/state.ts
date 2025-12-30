@@ -21,6 +21,12 @@ export async function readStateSnapshot() {
     const meta = data.meta
     const authors = data.authors
     const categories = normalizeCategories(data.categories)
+    logger.debug("[bg:state:read] snapshot counts", {
+      events: events.items.length,
+      videos: Object.keys(videos).length,
+      authors: Object.keys(authors).length,
+      categories: Object.keys(categories.items).length
+    })
 
     let normalizedState: typeof state = {
       ...state,
@@ -31,6 +37,7 @@ export async function readStateSnapshot() {
       normalizedState.pinnedOpponentVideoId &&
       !videos[normalizedState.pinnedOpponentVideoId]
     ) {
+      logger.debug("[bg:state:read] clear missing pinned opponent")
       normalizedState = {
         ...normalizedState,
         pinnedOpponentVideoId: ""
