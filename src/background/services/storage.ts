@@ -7,6 +7,7 @@ import {
   STORAGE_KEYS
 } from "../../lib/constants"
 import { handleBackgroundError } from "../../lib/error-handler"
+import { logger } from "../../lib/logger"
 import type {
   NcAuthors,
   NcCategories,
@@ -133,6 +134,7 @@ export async function withStorageUpdates<K extends StorageKey, TResult>({
     const data = await getStorageData(keys)
     const { updates, result } = await update(data)
     if (Object.keys(updates).length > 0) {
+      logger.info(`[${context}] storage update`, Object.keys(updates).sort())
       await setStorageData(updates)
     }
     return result

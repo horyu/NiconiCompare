@@ -1,4 +1,5 @@
 import { handleUIError, NcError } from "./error-handler"
+import { logger } from "./logger"
 import type { BackgroundResponse } from "./messages"
 
 type ToastTone = "success" | "error"
@@ -18,6 +19,7 @@ export async function runNcAction<TResponse extends BackgroundResponse>(
   options: NcActionOptions<TResponse>
 ): Promise<Extract<TResponse, { ok: true }> | null> {
   try {
+    logger.info(`[${options.context}] action start`)
     const response = await action()
     if (!response.ok) {
       throw new NcError(
@@ -26,6 +28,7 @@ export async function runNcAction<TResponse extends BackgroundResponse>(
         options.errorMessage
       )
     }
+    logger.info(`[${options.context}] action success`)
     if (options.onSuccess) {
       await options.onSuccess(response)
     }
