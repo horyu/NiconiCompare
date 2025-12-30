@@ -7,6 +7,7 @@ import {
   DEFAULT_STATE,
   STORAGE_KEYS
 } from "../../lib/constants"
+import { logger } from "../../lib/logger"
 import type {
   NcAuthors,
   NcCategories,
@@ -49,7 +50,7 @@ export async function handleExportData() {
       [STORAGE_KEYS.categories]: data.categories
     }
   } catch (error) {
-    console.warn("chrome.storage.local is unavailable.", error)
+    logger.warn("chrome.storage.local is unavailable.", error)
     return {
       [STORAGE_KEYS.settings]: DEFAULT_SETTINGS,
       [STORAGE_KEYS.state]: DEFAULT_STATE,

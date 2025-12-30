@@ -1,3 +1,5 @@
+import { logger } from "./logger"
+
 export class NcError extends Error {
   code: string
   userMessage: string
@@ -13,7 +15,7 @@ type ToastTone = "success" | "error"
 type ShowToast = (tone: ToastTone, text: string) => void
 
 export function handleBackgroundError(error: unknown, context: string) {
-  console.error(`[${context}]`, error)
+  logger.error(`[${context}]`, error)
 }
 
 export function handleUIError(
@@ -22,7 +24,7 @@ export function handleUIError(
   showToast?: ShowToast,
   userMessage?: string
 ) {
-  console.error(`[${context}]`, error)
+  logger.error(`[${context}]`, error)
 
   if (!showToast) {
     return

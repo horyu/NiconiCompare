@@ -45,6 +45,9 @@ pnpm fix              # ESLint + Prettier 自動修正（並列実行）
   - `true` に設定すると、コンテンツオーバーレイが自動で閉じなくなり、動作確認が容易になる
   - デフォルトは `false`（通常の自動クローズ動作）
   - オーバーレイの `handleMouseLeave` イベントで参照され、開発中のデバッグに使用
+- **`PLASMO_PUBLIC_NC_LOG_LEVEL`**: ログレベル設定
+  - `error` / `warn` / `info` / `debug` を指定
+  - デフォルトは `warn`
 - Plasmo/Parcel は `.env` の内容を `process.env` に注入するため、他の `PLASMO_PUBLIC_` プレフィックス変数もこのファイルで管理する。
 
 ### 1.4 主要依存関係
