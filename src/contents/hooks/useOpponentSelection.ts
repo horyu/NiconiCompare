@@ -13,6 +13,7 @@ export function useOpponentSelection({
 }: UseOpponentSelectionParams) {
   const [opponentVideoId, setOpponentVideoId] = useState<string>()
   const previousCurrentVideoIdRef = useRef<string>()
+  const pendingPreviousVideoIdRef = useRef<string | null>(null)
 
   const selectableWindow = recentWindow.filter((id) => id !== currentVideoId)
   const hasSelectableCandidates = selectableWindow.length > 0
@@ -20,6 +21,9 @@ export function useOpponentSelection({
 
   useEffect(() => {
     const currentChanged = previousCurrentVideoIdRef.current !== currentVideoId
+    if (currentChanged && previousCurrentVideoIdRef.current) {
+      pendingPreviousVideoIdRef.current = previousCurrentVideoIdRef.current
+    }
 
     if (pinnedOpponentVideoId) {
       if (opponentVideoId !== pinnedOpponentVideoId) {
@@ -35,19 +39,27 @@ export function useOpponentSelection({
       return
     }
 
+    // 直前の動画が selectableWindow に入っている場合は優先的に選択
+    const pendingPrevious = pendingPreviousVideoIdRef.current
     const previousSelectable =
-      currentChanged &&
-      previousCurrentVideoIdRef.current &&
-      selectableWindow.includes(previousCurrentVideoIdRef.current)
-        ? previousCurrentVideoIdRef.current
+      pendingPrevious && selectableWindow.includes(pendingPrevious)
+        ? pendingPrevious
         : undefined
 
+    const shouldSelectPrevious =
+      previousSelectable && opponentVideoId !== previousSelectable
     if (
       currentChanged ||
       !opponentVideoId ||
-      !selectableWindow.includes(opponentVideoId)
+      !selectableWindow.includes(opponentVideoId) ||
+      shouldSelectPrevious
     ) {
-      setOpponentVideoId(previousSelectable ?? selectableWindow[0])
+      const nextOpponent = previousSelectable ?? selectableWindow[0]
+      setOpponentVideoId(nextOpponent)
+      // 直前の動画が選択された場合のみクリア
+      if (previousSelectable) {
+        pendingPreviousVideoIdRef.current = null
+      }
     }
 
     previousCurrentVideoIdRef.current = currentVideoId
