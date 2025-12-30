@@ -12,8 +12,8 @@ import { SettingsTab } from "./SettingsTab"
 const baseSnapshot: OptionsSnapshot = {
   settings: { ...DEFAULT_SETTINGS },
   state: {
-    currentVideoId: undefined,
-    pinnedOpponentVideoId: undefined,
+    currentVideoId: "",
+    pinnedOpponentVideoId: "",
     recentWindow: []
   },
   videos: {},

@@ -69,7 +69,7 @@ export async function handleImportData(data: Partial<StorageShape>) {
   )
   const nextEvents =
     (data[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
-  const nextState = (data[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
+  const rawState = (data[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
   const rawMeta = (data[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
   const nextMeta: NcMeta = {
     ...DEFAULT_META,
@@ -99,7 +99,9 @@ export async function handleImportData(data: Partial<StorageShape>) {
   const normalizedMeta: NcMeta = nextMeta
 
   const rebuiltState: NcState = {
-    ...nextState,
+    ...rawState,
+    currentVideoId: rawState.currentVideoId ?? "",
+    pinnedOpponentVideoId: rawState.pinnedOpponentVideoId ?? "",
     recentWindow: rebuildRecentWindowFromEvents(
       normalizedEvents.items,
       nextSettings.recentWindowSize,

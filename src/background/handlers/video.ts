@@ -34,7 +34,7 @@ export async function handleUpdatePinnedOpponent(videoId?: string) {
     keys: ["state", "videos"],
     context: "video:updatePinned",
     update: ({ state, videos }) => {
-      const nextPinned = videoId && videos[videoId] ? videoId : undefined
+      const nextPinned = videoId && videos[videoId] ? videoId : ""
       return {
         updates: {
           state: {

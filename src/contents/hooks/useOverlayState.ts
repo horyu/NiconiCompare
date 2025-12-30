@@ -21,9 +21,9 @@ type StateResponse = {
 }
 
 export function useOverlayState() {
-  const [currentVideoId, setCurrentVideoId] = useState<string>()
+  const [currentVideoId, setCurrentVideoId] = useState<string>("")
   const [recentWindow, setRecentWindow] = useState<string[]>([])
-  const [pinnedOpponentVideoId, setPinnedOpponentVideoId] = useState<string>()
+  const [pinnedOpponentVideoId, setPinnedOpponentVideoId] = useState<string>("")
   const [overlaySettings, setOverlaySettings] =
     useState<NcSettings>(DEFAULT_SETTINGS)
   const [isReady, setIsReady] = useState(false)

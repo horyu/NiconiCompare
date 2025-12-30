@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react"
 
 type UseOpponentSelectionParams = {
-  currentVideoId?: string
-  pinnedOpponentVideoId?: string
+  currentVideoId: string
+  pinnedOpponentVideoId: string
   recentWindow: string[]
 }
 

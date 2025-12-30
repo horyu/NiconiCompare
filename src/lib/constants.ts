@@ -51,8 +51,8 @@ export const MAX_RECENT_WINDOW_SIZE = 50
 export const MAX_POPUP_RECENT_COUNT = 20
 
 export const DEFAULT_STATE: NcState = {
-  currentVideoId: undefined,
-  pinnedOpponentVideoId: undefined,
+  currentVideoId: "",
+  pinnedOpponentVideoId: "",
   recentWindow: []
 }
 

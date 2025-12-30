@@ -21,11 +21,18 @@ export async function readStateSnapshot() {
     const authors = data.authors
     const categories = normalizeCategories(data.categories)
 
-    let normalizedState = state
-    if (state.pinnedOpponentVideoId && !videos[state.pinnedOpponentVideoId]) {
+    let normalizedState: typeof state = {
+      ...state,
+      currentVideoId: state.currentVideoId ?? "",
+      pinnedOpponentVideoId: state.pinnedOpponentVideoId ?? ""
+    }
+    if (
+      normalizedState.pinnedOpponentVideoId &&
+      !videos[normalizedState.pinnedOpponentVideoId]
+    ) {
       normalizedState = {
-        ...state,
-        pinnedOpponentVideoId: undefined
+        ...normalizedState,
+        pinnedOpponentVideoId: ""
       }
       await setStorageData({ state: normalizedState })
     }

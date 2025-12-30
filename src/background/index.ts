@@ -9,7 +9,7 @@ import {
 } from "../lib/constants"
 import { handleBackgroundError } from "../lib/error-handler"
 import type { Message } from "../lib/messages"
-import type { NcCategories, NcSettings } from "../lib/types"
+import type { NcCategories, NcSettings, NcState } from "../lib/types"
 import {
   handleBulkMoveEvents,
   handleCreateCategory,
@@ -213,6 +213,20 @@ async function ensureDefaults() {
   }
   if (!result.state) {
     updates.state = DEFAULT_STATE
+  } else {
+    const state = result.state as Partial<NcState>
+    if (
+      state.currentVideoId === undefined ||
+      state.pinnedOpponentVideoId === undefined ||
+      state.recentWindow === undefined
+    ) {
+      updates.state = {
+        ...state,
+        currentVideoId: state.currentVideoId ?? "",
+        pinnedOpponentVideoId: state.pinnedOpponentVideoId ?? "",
+        recentWindow: state.recentWindow ?? []
+      }
+    }
   }
   if (!result.events) {
     updates.events = DEFAULT_EVENTS_BUCKET
