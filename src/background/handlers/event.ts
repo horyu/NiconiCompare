@@ -28,7 +28,7 @@ type RecordEventPayload = {
 export async function handleRecordEvent(payload: RecordEventPayload) {
   const result = await withStorageUpdates({
     keys: ["events", "state", "settings", "ratings", "videos"],
-    context: "events:record",
+    context: "bg:events:record",
     update: ({ events, state, settings, ratings, videos }) => {
       const targetEvent = findTargetEvent(events, payload)
       if (targetEvent && isSamePairEvent(targetEvent, payload)) {

@@ -93,7 +93,7 @@ export const SettingsTab = ({
             payload
           }),
         {
-          context: "options:settings:update",
+          context: "ui:options:settings:update",
           errorMessage: "設定の更新に失敗しました。",
           successMessage: "設定を更新しました。",
           showToast,
@@ -136,7 +136,7 @@ export const SettingsTab = ({
             type: MESSAGE_TYPES.rebuildRatings
           }),
         {
-          context: "options:settings:rebuild",
+          context: "ui:options:settings:rebuild",
           errorMessage: "再計算に失敗しました。",
           successMessage: "レーティングを再計算しました。",
           showToast,

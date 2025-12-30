@@ -78,7 +78,7 @@ export default function OptionsPage() {
           payload: { showEventThumbnails: checked }
         }),
       {
-        context: "options:toggle-event-thumbnails",
+        context: "ui:options:toggle-event-thumbnails",
         errorMessage: "設定の更新に失敗しました。",
         showToast,
         refreshState: () => refreshState(true)

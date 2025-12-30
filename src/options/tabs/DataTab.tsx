@@ -37,7 +37,7 @@ export const DataTab = ({
           payload: { action: "cleanup" }
         }),
       {
-        context: "options:data:cleanup",
+        context: "ui:options:data:cleanup",
         errorMessage: "クリーンアップに失敗しました。",
         refreshState: () => refreshState(true)
       }
@@ -59,7 +59,7 @@ export const DataTab = ({
             type: MESSAGE_TYPES.deleteAllData
           }),
         {
-          context: "options:data:delete-all",
+          context: "ui:options:data:delete-all",
           errorMessage: "全データの削除に失敗しました。",
           successMessage: "全データを削除しました。",
           showToast,
@@ -80,7 +80,7 @@ export const DataTab = ({
             type: MESSAGE_TYPES.exportData
           }),
         {
-          context: "options:data:export",
+          context: "ui:options:data:export",
           errorMessage: "エクスポートに失敗しました。",
           showToast
         }
@@ -105,7 +105,7 @@ export const DataTab = ({
       URL.revokeObjectURL(url)
       showToast("success", "エクスポートしました。")
     } catch (error) {
-      handleUIError(error, "options:data:export", showToast)
+      handleUIError(error, "ui:options:data:export", showToast)
     } finally {
       setExporting(false)
     }
@@ -134,7 +134,7 @@ export const DataTab = ({
             payload: { data }
           }),
         {
-          context: "options:data:import",
+          context: "ui:options:data:import",
           errorMessage: "インポートに失敗しました。",
           successMessage: "インポートしました。",
           showToast,
@@ -151,7 +151,7 @@ export const DataTab = ({
         return
       }
     } catch (error) {
-      handleUIError(error, "options:data:import", showToast)
+      handleUIError(error, "ui:options:data:import", showToast)
     } finally {
       setImporting(false)
     }

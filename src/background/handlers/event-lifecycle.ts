@@ -7,7 +7,7 @@ import { rebuildRatingsFromEvents } from "../utils/rating-helpers"
 export async function handleDeleteEvent(eventId: number) {
   const result = await withStorageUpdates({
     keys: ["events", "settings", "meta"],
-    context: "events:delete",
+    context: "bg:events:delete",
     update: ({ events, settings, meta }) => {
       const index = events.items.findIndex((event) => event.id === eventId)
       if (index === -1) {
@@ -43,7 +43,7 @@ export async function handleDeleteEvent(eventId: number) {
 export async function handleRestoreEvent(eventId: number) {
   const result = await withStorageUpdates({
     keys: ["events", "settings"],
-    context: "events:restore",
+    context: "bg:events:restore",
     update: ({ events, settings }) => {
       const index = events.items.findIndex((event) => event.id === eventId)
       if (index === -1) {
@@ -78,7 +78,7 @@ export async function handleRestoreEvent(eventId: number) {
 export async function handlePurgeEvent(eventId: number) {
   const result = await withStorageUpdates({
     keys: ["events", "settings", "meta"],
-    context: "events:purge",
+    context: "bg:events:purge",
     update: ({ events, settings, meta }) => {
       const index = events.items.findIndex((event) => event.id === eventId)
       if (index === -1) {

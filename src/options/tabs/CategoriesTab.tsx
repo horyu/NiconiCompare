@@ -49,7 +49,7 @@ export const CategoriesTab = ({
           payload: { name: newCategoryName.trim() }
         }),
       {
-        context: "options:categories:create",
+        context: "ui:options:categories:create",
         errorMessage: "カテゴリの追加に失敗しました。",
         successMessage: "カテゴリを追加しました。",
         showToast,
@@ -74,7 +74,7 @@ export const CategoriesTab = ({
           payload: { categoryId, name: nextName.trim() }
         }),
       {
-        context: "options:categories:update",
+        context: "ui:options:categories:update",
         errorMessage: "カテゴリ名の更新に失敗しました。",
         successMessage: "カテゴリ名を更新しました。",
         showToast,
@@ -110,7 +110,7 @@ export const CategoriesTab = ({
           payload: { categoryId, moveToCategoryId }
         }),
       {
-        context: "options:categories:delete",
+        context: "ui:options:categories:delete",
         errorMessage: "カテゴリの削除に失敗しました。",
         successMessage: "カテゴリを削除しました。",
         showToast,
@@ -137,7 +137,7 @@ export const CategoriesTab = ({
           payload: { overlayVisibleIds: next }
         }),
       {
-        context: "options:categories:overlay",
+        context: "ui:options:categories:overlay",
         errorMessage: "オーバーレイ表示の更新に失敗しました。",
         showToast,
         refreshState: () => refreshState(true)
@@ -165,7 +165,7 @@ export const CategoriesTab = ({
           payload: { order: nextOrder }
         }),
       {
-        context: "options:categories:reorder",
+        context: "ui:options:categories:reorder",
         errorMessage: "並び替えに失敗しました。",
         showToast,
         refreshState: () => refreshState(true)

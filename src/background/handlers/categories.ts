@@ -8,7 +8,7 @@ import { rebuildRatingsFromEvents } from "../utils/rating-helpers"
 export async function handleCreateCategory(name: string) {
   const result = await withStorageUpdates({
     keys: ["categories"],
-    context: "categories:create",
+    context: "bg:categories:create",
     update: ({ categories }) => {
       const nextCategories = normalizeCategories(categories)
       const id = crypto.randomUUID()
@@ -32,7 +32,7 @@ export async function handleUpdateCategoryName(
 ) {
   await withStorageUpdates({
     keys: ["categories"],
-    context: "categories:updateName",
+    context: "bg:categories:updateName",
     update: ({ categories }) => {
       const nextCategories = normalizeCategories(categories)
       if (!nextCategories.items[categoryId]) {
@@ -55,7 +55,7 @@ export async function handleDeleteCategory(
   }
   await withStorageUpdates({
     keys: ["categories", "events", "settings"],
-    context: "categories:delete",
+    context: "bg:categories:delete",
     update: ({ categories, events, settings }) => {
       const nextCategories = normalizeCategories(categories)
       if (!nextCategories.items[categoryId]) {
@@ -118,7 +118,7 @@ export async function handleDeleteCategory(
 export async function handleReorderCategories(order: string[]) {
   await withStorageUpdates({
     keys: ["categories"],
-    context: "categories:reorder",
+    context: "bg:categories:reorder",
     update: ({ categories }) => {
       const nextCategories = normalizeCategories(categories)
       const uniqueOrder = Array.from(new Set(order)).filter(
@@ -150,7 +150,7 @@ export async function handleUpdateOverlayVisibleIds(
 ) {
   await withStorageUpdates({
     keys: ["categories"],
-    context: "categories:updateOverlayVisibleIds",
+    context: "bg:categories:updateOverlayVisibleIds",
     update: ({ categories }) => {
       const nextCategories = normalizeCategories(categories)
       const filtered = overlayVisibleIds.filter(
@@ -174,7 +174,7 @@ export async function handleUpdateOverlayVisibleIds(
 export async function handleUpdateActiveCategory(categoryId: string) {
   await withStorageUpdates({
     keys: ["categories", "settings"],
-    context: "categories:updateActive",
+    context: "bg:categories:updateActive",
     update: ({ categories, settings }) => {
       const nextCategories = normalizeCategories(categories)
       if (!nextCategories.items[categoryId]) {
@@ -201,7 +201,7 @@ export async function handleBulkMoveEvents(
 ) {
   await withStorageUpdates({
     keys: ["categories", "events", "settings"],
-    context: "categories:bulkMove",
+    context: "bg:categories:bulkMove",
     update: ({ categories, events, settings }) => {
       const nextCategories = normalizeCategories(categories)
       if (!nextCategories.items[targetCategoryId]) {

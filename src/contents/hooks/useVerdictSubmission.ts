@@ -44,7 +44,7 @@ export function useVerdictSubmission({
                 payload: { eventId: lastEventId }
               }),
             {
-              context: "overlay:delete",
+              context: "ui:overlay:delete",
               errorMessage: "評価の削除に失敗しました。"
             }
           )
@@ -79,7 +79,7 @@ export function useVerdictSubmission({
               }
             }),
           {
-            context: "overlay:submit",
+            context: "ui:overlay:submit",
             errorMessage: "評価の送信に失敗しました。"
           }
         )

@@ -110,6 +110,7 @@ src/
 
 TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関数/変数), snake_case (storage キー)
 - エラーハンドリングは `src/lib/error-handler.ts` を使用し、`console.error` の直書きは避ける
+- エラー context は `bg:*`（background）/ `ui:*`（UI）のプレフィックスで統一する
 - background へのメッセージ送信は `sendNcMessage` を使用して型チェックする
 - UIコンポーネントを追加した場合や props が増えた場合は、Storybook の stories も更新する
 

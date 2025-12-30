@@ -48,7 +48,7 @@ if (chrome?.alarms) {
   chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === "nc.autoCleanup") {
       runAutoCleanupIfNeeded().catch((error) =>
-        handleBackgroundError(error, "autoCleanup.alarm")
+        handleBackgroundError(error, "bg:background:autoCleanup.alarm")
       )
     }
   })
@@ -179,7 +179,7 @@ chrome.runtime.onMessage.addListener(
             sendResponse({ ok: false, error: "Unknown message" })
         }
       } catch (error) {
-        handleBackgroundError(error, "backgroundMessage")
+        handleBackgroundError(error, "bg:background:message")
         sendResponse({
           ok: false,
           error: error instanceof Error ? error.message : "Unexpected error"
@@ -269,6 +269,6 @@ async function initializeBackground(context: string) {
     await ensureDefaults()
     await runAutoCleanupIfNeeded()
   } catch (error) {
-    handleBackgroundError(error, `initializeBackground.${context}`)
+    handleBackgroundError(error, `bg:background:init:${context}`)
   }
 }

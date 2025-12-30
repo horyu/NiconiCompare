@@ -31,7 +31,7 @@ export function observeLdJsonChanges(
   if (!head) {
     handleUIError(
       "document.head is missing; ld+json observer disabled.",
-      "dom-observer:missing-head"
+      "ui:dom-observer:missing-head"
     )
     callbacks.onError("動画情報を取得できません")
     return undefined
@@ -124,7 +124,7 @@ export function extractVideoDataFromLdJson(): VideoData | undefined {
 
       return { video, author }
     } catch (error) {
-      handleUIError(error, "dom-observer:parse-ld-json")
+      handleUIError(error, "ui:dom-observer:parse-ld-json")
     }
   }
   return undefined

@@ -58,7 +58,7 @@ export const useOptionsData = (): UseOptionsDataResult => {
       const bytes = await chrome.storage.local.getBytesInUse()
       setBytesInUse(bytes)
     } catch (error) {
-      handleUIError(error, "options:bytes-in-use")
+      handleUIError(error, "ui:options:bytes-in-use")
       setBytesInUse(null)
     }
 

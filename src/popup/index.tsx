@@ -39,7 +39,7 @@ export default function Popup() {
           type: MESSAGE_TYPES.requestState
         }),
       {
-        context: "popup:request-state",
+        context: "ui:popup:request-state",
         errorMessage: "状態取得に失敗しました"
       }
     )
@@ -61,7 +61,7 @@ export default function Popup() {
           payload: { enabled }
         }),
       {
-        context: "popup:toggle-overlay",
+        context: "ui:popup:toggle-overlay",
         errorMessage: "更新に失敗しました。"
       }
     )

@@ -226,7 +226,7 @@ export const EventsTab = ({
           }
         }),
       {
-        context: "options:events:bulk-move",
+        context: "ui:options:events:bulk-move",
         errorMessage: "一括移動に失敗しました。",
         successMessage: "カテゴリを一括移動しました。",
         showToast,
@@ -254,7 +254,7 @@ export const EventsTab = ({
             }
           }),
         {
-          context: "options:events:move",
+          context: "ui:options:events:move",
           errorMessage: "カテゴリの移動に失敗しました。",
           successMessage: "カテゴリを移動しました。",
           showToast,
@@ -287,7 +287,7 @@ export const EventsTab = ({
             }
           }),
         {
-          context: "options:events:update",
+          context: "ui:options:events:update",
           errorMessage: "評価の更新に失敗しました。",
           successMessage: "評価を更新しました。",
           showToast,
@@ -309,7 +309,7 @@ export const EventsTab = ({
             payload: { eventId }
           }),
         {
-          context: "options:events:disable",
+          context: "ui:options:events:disable",
           errorMessage: "評価の無効化に失敗しました。",
           successMessage: "評価を無効化しました。",
           showToast,
@@ -331,7 +331,7 @@ export const EventsTab = ({
             payload: { eventId }
           }),
         {
-          context: "options:events:restore",
+          context: "ui:options:events:restore",
           errorMessage: "評価の有効化に失敗しました。",
           successMessage: "評価を有効化しました。",
           showToast,
@@ -357,7 +357,7 @@ export const EventsTab = ({
             payload: { eventId }
           }),
         {
-          context: "options:events:purge",
+          context: "ui:options:events:purge",
           errorMessage: "評価の削除に失敗しました。",
           successMessage: "評価を削除しました。",
           showToast,

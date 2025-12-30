@@ -85,7 +85,7 @@ export default function Overlay() {
             payload: { categoryId }
           }),
         {
-          context: "overlay:category-change",
+          context: "ui:overlay:category-change",
           errorMessage: "カテゴリの更新に失敗しました。"
         }
       )
@@ -104,7 +104,7 @@ export default function Overlay() {
               }
             }),
           {
-            context: "overlay:category-change",
+            context: "ui:overlay:category-change",
             errorMessage: "カテゴリの移動に失敗しました。"
           }
         )
