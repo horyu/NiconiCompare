@@ -8,7 +8,7 @@ const LOG_LEVELS: Record<LogLevel, number> = {
 }
 
 const resolveLogLevel = (): LogLevel => {
-  const raw = (process.env.PLASMO_PUBLIC_NC_LOG_LEVEL ?? "")
+  const raw = (globalThis?.process?.env?.PLASMO_PUBLIC_NC_LOG_LEVEL ?? "")
     .toLowerCase()
     .trim()
   if (raw === "error" || raw === "warn" || raw === "info" || raw === "debug") {
