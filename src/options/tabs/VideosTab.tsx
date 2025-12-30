@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
+import { VIDEO_PAGE_SIZE } from "../../lib/constants"
 import type { RatingSnapshot, VideoSnapshot } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
 import { CategorySelect } from "../components/CategorySelect"
@@ -25,7 +26,6 @@ type VideoSessionState = {
   page: number
 }
 
-const VIDEO_PAGE_SIZE = 50
 const SESSION_KEY = "nc_options_video_state"
 const EXPORT_HEADERS = [
   "動画ID",

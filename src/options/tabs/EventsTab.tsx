@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import { MESSAGE_TYPES } from "../../lib/constants"
+import { EVENT_PAGE_SIZE, MESSAGE_TYPES } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
 import { runNcAction } from "../../lib/nc-action"
 import type { CompareEvent, Verdict } from "../../lib/types"
@@ -31,7 +31,6 @@ type EventSessionState = {
   page: number
 }
 
-const EVENT_PAGE_SIZE = 100
 const SESSION_KEY = "nc_options_event_state"
 const EXPORT_HEADERS = [
   "ID",
