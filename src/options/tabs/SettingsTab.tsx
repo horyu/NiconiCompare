@@ -2,6 +2,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
 
 import {
   DEFAULT_SETTINGS,
+  MAX_OVERLAY_AUTO_CLOSE_MS,
   MAX_POPUP_RECENT_COUNT,
   MAX_RECENT_WINDOW_SIZE,
   MESSAGE_TYPES
@@ -179,10 +180,11 @@ export const SettingsTab = ({
           />
         </label>
         <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
-          オーバーレイ自動閉鎖 (ms)
+          オーバーレイ自動非表示 (ms, 0-{MAX_OVERLAY_AUTO_CLOSE_MS})
           <input
             type="number"
             min={0}
+            max={MAX_OVERLAY_AUTO_CLOSE_MS}
             value={settingsForm.overlayAutoCloseMs}
             onChange={handleSettingsChange("overlayAutoCloseMs")}
             className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"

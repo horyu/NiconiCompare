@@ -1,5 +1,6 @@
 import {
   DEFAULT_SETTINGS,
+  MAX_OVERLAY_AUTO_CLOSE_MS,
   MAX_POPUP_RECENT_COUNT,
   MAX_RECENT_WINDOW_SIZE
 } from "../../lib/constants"
@@ -17,7 +18,7 @@ export function normalizeSettings(settings: NcSettings): NcSettings {
       Math.max(1, Math.floor(settings.popupRecentCount || 5))
     ),
     overlayAutoCloseMs: Math.min(
-      5000,
+      MAX_OVERLAY_AUTO_CLOSE_MS,
       Math.max(0, settings.overlayAutoCloseMs || 1500)
     ),
     overlayAndCaptureEnabled:
