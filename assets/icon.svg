@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60">
+  <!-- 透過背景 -->
+  <rect width="60" height="60" fill="transparent" />
+  <!-- 縦横2:3の長方形 -->
+  <rect x="0" y="10" width="60" height="40" fill="#E6E7E9" />
+  <!-- 左足 -->
+  <rect x="15" y="45" width="5" height="10" fill="#E6E7E9" />
+  <!-- 右足 -->
+  <rect x="40" y="45" width="5" height="10" fill="#E6E7E9" />
+  <!-- アンテナ -->
+  <path
+    d="M15 0 L30 15 L45 0"
+    fill="none"
+    stroke="#E6E7E9"
+    stroke-width="5"
+    stroke-linecap="round"
+    stroke-linejoin="round" />
+  <!-- 左不等号 > -->
+  <polyline
+    points="15 15 45 30 15 45"
+    fill="none"
+    stroke="#252525"
+    stroke-width="5"
+    stroke-linecap="round"
+    stroke-linejoin="round" />
+</svg>
