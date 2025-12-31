@@ -158,16 +158,20 @@ export const DataTab = ({
   }
 
   return (
-    <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-6">
+    <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-6 dark:bg-slate-900 dark:border-slate-700">
       <header>
-        <h2 className="text-lg font-semibold">データ操作</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+          データ操作
+        </h2>
       </header>
 
       <div className="grid grid-cols-2 gap-6">
         <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold">エクスポート/インポート</h3>
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+            エクスポート/インポート
+          </h3>
           {bytesInUse !== null && (
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-slate-600 dark:text-slate-400">
               ストレージ使用量: {(bytesInUse / 1024).toFixed(2)} KB {" / "}
               {(chrome.storage.local.QUOTA_BYTES / 1024 / 1024).toFixed(0)} MB
             </div>
@@ -176,7 +180,7 @@ export const DataTab = ({
             type="button"
             onClick={handleExport}
             disabled={exporting}
-            className="px-3 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100 disabled:opacity-50">
+            className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
             JSON エクスポート
           </button>
           <div className="flex flex-col gap-2">
@@ -187,7 +191,7 @@ export const DataTab = ({
               onChange={(event) => {
                 setImportFileName(event.currentTarget.files?.[0]?.name ?? "")
               }}
-              className="text-sm file:mr-2 file:rounded-md file:border file:border-slate-200 file:bg-white file:px-3 file:py-2 file:text-sm file:hover:bg-slate-100"
+              className="text-sm text-slate-700 dark:text-slate-200 file:mr-2 file:rounded-md file:border file:border-slate-200 file:bg-white file:px-3 file:py-2 file:text-sm file:hover:bg-slate-100 dark:file:border-slate-700 dark:file:bg-slate-900 dark:file:text-slate-100 dark:file:hover:bg-slate-800"
             />
             <button
               type="button"
@@ -196,20 +200,22 @@ export const DataTab = ({
               title={
                 !importFileName ? "ファイルを選択してください。" : undefined
               }
-              className="px-3 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100 disabled:opacity-50">
+              className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
               JSON インポート
             </button>
           </div>
         </div>
 
         <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold">クリーンアップ</h3>
-          <div className="text-sm text-slate-600">
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+            クリーンアップ
+          </h3>
+          <div className="text-sm text-slate-600 dark:text-slate-400">
             最終実行: {lastCleanupLabel}
           </div>
           <button
             type="button"
-            className="px-3 py-2 rounded-md border border-slate-200 text-sm hover:bg-slate-100"
+            className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
             onClick={handleCleanup}>
             孤立データ（動画/投稿者）を削除
           </button>
@@ -218,15 +224,17 @@ export const DataTab = ({
 
       <div className="grid grid-cols-2 gap-6">
         <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold text-rose-700">全データ削除</h3>
-          <p className="text-sm text-slate-600">
+          <h3 className="text-sm font-semibold text-rose-700 dark:text-rose-200">
+            全データ削除
+          </h3>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             設定・カテゴリ・評価履歴・レーティング・動画/投稿者データ・メタ情報を初期化します。
           </p>
           <button
             type="button"
             onClick={handleDeleteAllData}
             disabled={deletingAll}
-            className="px-3 py-2 rounded-md border border-rose-200 text-sm text-rose-700 hover:bg-rose-50 disabled:opacity-50">
+            className="px-3 py-2 rounded-md border border-rose-200 text-sm text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-200 dark:hover:bg-rose-950/40">
             全データ削除
           </button>
         </div>

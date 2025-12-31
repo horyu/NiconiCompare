@@ -74,7 +74,7 @@ export default function Popup() {
 
   if (loading) {
     return (
-      <main className="w-80 p-4 flex flex-col gap-4 font-sans">
+      <main className="w-80 p-4 flex flex-col gap-4 font-sans bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
         <p>読込中...</p>
       </main>
     )
@@ -82,9 +82,11 @@ export default function Popup() {
 
   if (!snapshot) {
     return (
-      <main className="w-80 p-4 flex flex-col gap-4 font-sans">
+      <main className="w-80 p-4 flex flex-col gap-4 font-sans bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
         <p>状態を取得できませんでした。</p>
-        {error && <small className="text-red-300">{error}</small>}
+        {error && (
+          <small className="text-rose-500 dark:text-rose-300">{error}</small>
+        )}
       </main>
     )
   }
@@ -103,7 +105,7 @@ export default function Popup() {
     snapshot.categories.defaultId
   )
   return (
-    <main className="w-80 p-4 flex flex-col gap-4 font-sans">
+    <main className="w-80 p-4 flex flex-col gap-4 font-sans bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="flex items-center justify-between">
         <strong>NiconiCompare</strong>
         <label className="text-xs flex items-center gap-2">
@@ -123,7 +125,9 @@ export default function Popup() {
           </span>
         </h3>
         {lastEvents.length === 0 ? (
-          <p className="text-xs opacity-70">評価なし</p>
+          <p className="text-xs opacity-70 text-slate-500 dark:text-slate-400">
+            評価なし
+          </p>
         ) : (
           <ul className="list-none p-0 m-0 flex flex-col gap-1 text-[13px]">
             {lastEvents.map((event) => {
@@ -131,7 +135,7 @@ export default function Popup() {
               return (
                 <li
                   key={event.id}
-                  className="grid grid-cols-[auto_96px_auto_96px] items-center gap-0 p-2 rounded-lg bg-slate-900/10">
+                  className="grid grid-cols-[auto_96px_auto_96px] items-center gap-0 p-2 rounded-lg bg-slate-900/10 dark:bg-white/10">
                   <div className="flex flex-col gap-0.5 text-[10px]">
                     <strong>#{event.id}</strong>
                     <span>{timestamp.toLocaleDateString()}</span>
@@ -141,7 +145,7 @@ export default function Popup() {
                     snapshot.videos[event.currentVideoId],
                     event.currentVideoId
                   )}
-                  <span className="w-fit justify-self-center text-base font-bold text-center text-slate-700">
+                  <span className="w-fit justify-self-center text-base font-bold text-center text-slate-700 dark:text-slate-200">
                     {labelVerdict(event.verdict)}
                   </span>
                   {renderVideoCard(
@@ -155,7 +159,9 @@ export default function Popup() {
         )}
       </section>
 
-      {error && <small className="text-red-300">{error}</small>}
+      {error && (
+        <small className="text-rose-500 dark:text-rose-300">{error}</small>
+      )}
     </main>
   )
 }
@@ -202,10 +208,10 @@ function renderVideoCard(
         <img
           src={thumbnailUrl}
           alt={`${videoId} thumbnail`}
-          className="w-24 h-[54px] rounded-md object-cover bg-slate-800"
+          className="w-24 h-[54px] rounded-md object-cover bg-slate-200 dark:bg-slate-700"
         />
       ) : (
-        <div className="w-24 h-[54px] rounded-md bg-slate-800" />
+        <div className="w-24 h-[54px] rounded-md bg-slate-200 dark:bg-slate-700" />
       )}
     </a>
   )

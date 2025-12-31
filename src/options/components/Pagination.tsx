@@ -14,14 +14,14 @@ export const Pagination = ({ current, total, onChange }: PaginationProps) => {
         type="button"
         disabled={!canGoPrev}
         onClick={() => onChange(current - 1)}
-        className="px-3 py-1 rounded border border-slate-200 disabled:opacity-40">
+        className="px-3 py-1 rounded border border-slate-200 bg-white text-slate-900 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
         前へ
       </button>
-      <div className="flex items-center gap-2 text-slate-500">
+      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
         <select
           value={current}
           onChange={(event) => onChange(Number(event.target.value))}
-          className="border border-slate-200 rounded-md px-2 py-1 text-sm text-slate-700">
+          className="border border-slate-200 rounded-md px-2 py-1 text-sm bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
           {pageOptions.map((page) => (
             <option key={page} value={page}>
               {page}
@@ -34,7 +34,7 @@ export const Pagination = ({ current, total, onChange }: PaginationProps) => {
         type="button"
         disabled={!canGoNext}
         onClick={() => onChange(current + 1)}
-        className="px-3 py-1 rounded border border-slate-200 disabled:opacity-40">
+        className="px-3 py-1 rounded border border-slate-200 bg-white text-slate-900 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
         次へ
       </button>
     </div>

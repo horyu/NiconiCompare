@@ -91,7 +91,7 @@ export default function OptionsPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen p-8 font-sans">
+      <main className="min-h-screen p-8 font-sans bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
         <p>読込中...</p>
       </main>
     )
@@ -99,20 +99,22 @@ export default function OptionsPage() {
 
   if (!snapshot) {
     return (
-      <main className="min-h-screen p-8 font-sans">
+      <main className="min-h-screen p-8 font-sans bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
         <p>状態を取得できませんでした。</p>
-        {error && <small className="text-red-500">{error}</small>}
+        {error && (
+          <small className="text-rose-500 dark:text-rose-300">{error}</small>
+        )}
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <div className="max-w-6xl mx-auto p-6 flex flex-col gap-6 font-sans">
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold">NiconiCompare Options</h1>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               設定・履歴・データ操作をまとめて管理します。
             </p>
           </div>
@@ -125,8 +127,8 @@ export default function OptionsPage() {
                 className={[
                   "px-4 py-2 rounded-md text-sm font-medium border",
                   activeTab === tab.key
-                    ? "bg-slate-900 text-white border-slate-900"
-                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                    ? "bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-800"
                 ].join(" ")}>
                 {tab.label}
               </button>
@@ -140,8 +142,8 @@ export default function OptionsPage() {
               className={[
                 "flex items-center gap-3 rounded-md px-4 py-2 text-sm",
                 toast.tone === "success"
-                  ? "bg-emerald-100 text-emerald-900"
-                  : "bg-rose-100 text-rose-900"
+                  ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-100"
+                  : "bg-rose-100 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100"
               ].join(" ")}>
               {toast.text}
               <button

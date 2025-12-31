@@ -148,6 +148,10 @@ pnpm storybook:build   # Storybook ビルド
 3. `pnpm lint` で全チェック合格を確認
 4. コミット
 
+## 2.5 UI テーマ
+
+- Options/Popup の主要UIはダークモード対応済み（Storybookで確認可能）
+
 ---
 
 ## 3. テスト

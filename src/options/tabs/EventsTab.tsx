@@ -370,11 +370,13 @@ export const EventsTab = ({
   }
 
   return (
-    <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4">
+    <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4 dark:bg-slate-900 dark:border-slate-700">
       <header className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">評価一覧</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+          評価一覧
+        </h2>
         <div className="flex items-center gap-3">
-          <div className="text-sm text-slate-500">
+          <div className="text-sm text-slate-500 dark:text-slate-400">
             {filteredEvents.length} 件
           </div>
           <ExportMenu
@@ -386,28 +388,28 @@ export const EventsTab = ({
       </header>
 
       <div className="flex items-end gap-3 flex-nowrap">
-        <label className="text-sm flex flex-col gap-1 min-w-[220px]">
+        <label className="text-sm flex flex-col gap-1 min-w-[220px] text-slate-700 dark:text-slate-200">
           検索
           <input
             value={eventSearch}
             onChange={(event) => setEventSearch(event.target.value)}
-            className="border border-slate-200 rounded-md px-2 py-1"
+            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             placeholder="ID・タイトル・動画ID・投稿者で検索"
           />
         </label>
-        <label className="text-sm flex flex-col gap-1 min-w-[140px]">
+        <label className="text-sm flex flex-col gap-1 min-w-[140px] text-slate-700 dark:text-slate-200">
           評価
           <select
             value={eventVerdict}
             onChange={(event) => setEventVerdict(event.target.value)}
-            className="border border-slate-200 rounded-md px-2 py-1">
+            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
             <option value="all">全て</option>
             <option value="better">勝ち</option>
             <option value="same">引き分け</option>
             <option value="worse">負け</option>
           </select>
         </label>
-        <label className="text-sm flex flex-col gap-1 min-w-[140px]">
+        <label className="text-sm flex flex-col gap-1 min-w-[140px] text-slate-700 dark:text-slate-200">
           カテゴリ
           <CategorySelect
             value={eventCategoryId}
@@ -416,7 +418,7 @@ export const EventsTab = ({
             className="w-[15ch] max-w-[15ch]"
           />
         </label>
-        <label className="text-sm flex items-center gap-2 mb-1">
+        <label className="text-sm flex items-center gap-2 mb-1 text-slate-700 dark:text-slate-200">
           <input
             type="checkbox"
             checked={eventIncludeDeleted}
@@ -424,7 +426,7 @@ export const EventsTab = ({
           />
           無効化済みも表示
         </label>
-        <label className="text-sm flex items-center gap-2 mb-1">
+        <label className="text-sm flex items-center gap-2 mb-1 text-slate-700 dark:text-slate-200">
           <input
             type="checkbox"
             checked={showCategoryOps}
@@ -432,7 +434,7 @@ export const EventsTab = ({
           />
           カテゴリ操作
         </label>
-        <label className="text-sm flex items-center gap-2 mb-1">
+        <label className="text-sm flex items-center gap-2 mb-1 text-slate-700 dark:text-slate-200">
           <input
             type="checkbox"
             checked={eventShowThumbnails}
@@ -443,7 +445,7 @@ export const EventsTab = ({
       </div>
 
       {showCategoryOps && (
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
           <span>一括移動:</span>
           <CategorySelect
             value={bulkMoveTargetId}
@@ -457,7 +459,7 @@ export const EventsTab = ({
             disabled={
               filteredEvents.length === 0 || bulkMoveTargets.length === 0
             }
-            className="px-3 py-1 rounded border border-slate-200 text-xs hover:bg-slate-100 disabled:opacity-50">
+            className="px-3 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
             現在の条件で移動
           </button>
         </div>
@@ -469,13 +471,13 @@ export const EventsTab = ({
         onChange={setEventPage}
       />
 
-      <div className="border border-slate-200 rounded-lg overflow-hidden">
+      <div className="border border-slate-200 rounded-lg overflow-hidden dark:border-slate-700">
         <div
           className={`grid ${
             showCategoryOps
               ? "grid-cols-[40px_70px_1fr_1fr_90px_160px_90px]"
               : "grid-cols-[40px_70px_1fr_1fr_90px_90px]"
-          } gap-2 bg-slate-100 text-xs font-semibold px-3 py-2`}>
+          } gap-2 bg-slate-100 text-xs font-semibold px-3 py-2 text-slate-700 dark:bg-slate-800 dark:text-slate-200`}>
           <div>ID</div>
           <div>日時</div>
           <div>基準</div>
@@ -484,9 +486,9 @@ export const EventsTab = ({
           {showCategoryOps && <div>カテゴリ</div>}
           <div>操作</div>
         </div>
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-slate-100 dark:divide-slate-800">
           {pagedEvents.length === 0 ? (
-            <div className="px-3 py-4 text-sm text-slate-500">
+            <div className="px-3 py-4 text-sm text-slate-500 dark:text-slate-400">
               表示できる評価がありません。
             </div>
           ) : (
@@ -626,16 +628,16 @@ const EventRow = ({
         showCategoryOps
           ? "grid-cols-[40px_70px_1fr_1fr_90px_160px_90px]"
           : "grid-cols-[40px_70px_1fr_1fr_90px_90px]"
-      } gap-2 items-center px-3 py-2 text-sm`}>
+      } gap-2 items-center px-3 py-2 text-sm text-slate-700 dark:text-slate-200`}>
       <div className="font-medium flex flex-col gap-1 items-center">
         <span>#{event.id}</span>
         {event.disabled && (
-          <span className="text-[10px] px-2 py-[1px] rounded-full bg-slate-100 text-slate-500 border border-slate-200 w-fit">
+          <span className="text-[10px] px-2 py-[1px] rounded-full bg-slate-100 text-slate-500 border border-slate-200 w-fit dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">
             無効
           </span>
         )}
       </div>
-      <div className="text-xs text-slate-500">
+      <div className="text-xs text-slate-500 dark:text-slate-400">
         {timestamp.toLocaleDateString()}
         <br />
         {timestamp.toLocaleTimeString()}
@@ -664,7 +666,7 @@ const EventRow = ({
         value={event.verdict}
         disabled={event.disabled || isBusy}
         onChange={(e) => onVerdictChange(event, e.target.value as Verdict)}
-        className="border border-slate-200 rounded-md px-2 py-1 text-sm">
+        className="border border-slate-200 rounded-md px-2 py-1 text-sm bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
         <option value="better">勝ち</option>
         <option value="same">引き分け</option>
         <option value="worse">負け</option>
@@ -672,7 +674,9 @@ const EventRow = ({
       {showCategoryOps && (
         <div className="flex items-center gap-2">
           {rowMoveTargets.length === 0 ? (
-            <span className="text-xs text-slate-400">移動先なし</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500">
+              移動先なし
+            </span>
           ) : (
             <>
               <CategorySelect
@@ -686,7 +690,7 @@ const EventRow = ({
                 type="button"
                 onClick={() => onMoveEvent(event.id, rowMoveTargetId)}
                 disabled={!rowMoveTargetId || isBusy}
-                className="px-2 py-1 rounded border border-slate-200 text-xs hover:bg-slate-100 disabled:opacity-50">
+                className="px-2 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
                 移動
               </button>
             </>
@@ -699,7 +703,7 @@ const EventRow = ({
             type="button"
             onClick={() => onDeleteEvent(event.id)}
             disabled={isBusy}
-            className="px-3 py-1 rounded border border-slate-200 text-xs hover:bg-slate-100 disabled:opacity-50">
+            className="px-3 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
             無効化
           </button>
         ) : (
@@ -708,14 +712,14 @@ const EventRow = ({
               type="button"
               onClick={() => onRestoreEvent(event.id)}
               disabled={isBusy}
-              className="px-3 py-1 rounded border border-slate-200 text-xs hover:bg-slate-100 disabled:opacity-50">
+              className="px-3 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
               有効化
             </button>
             <button
               type="button"
               onClick={() => onPurgeEvent(event.id)}
               disabled={isBusy}
-              className="px-3 py-1 rounded border border-rose-200 text-xs text-rose-700 hover:bg-rose-50 disabled:opacity-50">
+              className="px-3 py-1 rounded border border-rose-200 text-xs text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-200 dark:hover:bg-rose-950/40">
               削除
             </button>
           </>

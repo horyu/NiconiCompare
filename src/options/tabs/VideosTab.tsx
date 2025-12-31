@@ -214,11 +214,13 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
   }
 
   return (
-    <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4">
+    <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4 dark:bg-slate-900 dark:border-slate-700">
       <header className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">評価済み動画一覧</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+          評価済み動画一覧
+        </h2>
         <div className="flex items-center gap-3">
-          <div className="text-sm text-slate-500">
+          <div className="text-sm text-slate-500 dark:text-slate-400">
             {filteredVideos.length} 件
           </div>
           <ExportMenu
@@ -230,7 +232,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
       </header>
 
       {(hasMissingVideoData || hasMissingAuthorData) && (
-        <div className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+        <div className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 dark:text-amber-200 dark:bg-amber-900/30 dark:border-amber-900/50">
           {hasMissingVideoData && "nc_videos のデータ未取得"}
           {hasMissingVideoData && hasMissingAuthorData && " / "}
           {hasMissingAuthorData && "nc_authors のデータ未取得"}
@@ -238,16 +240,16 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
       )}
 
       <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3">
-        <label className="text-sm flex flex-col gap-1">
+        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           検索
           <input
             value={videoSearch}
             onChange={(event) => setVideoSearch(event.target.value)}
-            className="border border-slate-200 rounded-md px-2 py-1"
+            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             placeholder="タイトル・IDで検索"
           />
         </label>
-        <label className="text-sm flex flex-col gap-1">
+        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           投稿者
           <div className="relative">
             <input
@@ -257,14 +259,14 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
                 const next = event.target.value.trim()
                 setVideoAuthor(next.length === 0 ? "all" : next)
               }}
-              className="border border-slate-200 rounded-md px-2 py-1 w-full"
+              className="border border-slate-200 rounded-md px-2 py-1 w-full bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               placeholder="全て / 投稿者を入力"
             />
             {videoAuthor !== "all" && (
               <button
                 type="button"
                 onClick={() => setVideoAuthor("all")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 bg-white px-1 text-base leading-none z-10"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 bg-white px-1 text-base leading-none z-10 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
                 aria-label="投稿者フィルタをクリア">
                 ×
               </button>
@@ -276,7 +278,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
             ))}
           </datalist>
         </label>
-        <label className="text-sm flex flex-col gap-1">
+        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           Rating表示カテゴリ
           <CategorySelect
             value={videoCategoryId}
@@ -285,12 +287,12 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
             className="w-full max-w-full"
           />
         </label>
-        <label className="text-sm flex flex-col gap-1">
+        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           ソート
           <select
             value={videoSort}
             onChange={(event) => setVideoSort(event.target.value)}
-            className="border border-slate-200 rounded-md px-2 py-1">
+            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
             <option value="title">タイトル</option>
             <option value="rating">Rating</option>
             <option value="rd">RD</option>
@@ -300,14 +302,14 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
             <option value="lastVerdict">最終判定日時</option>
           </select>
         </label>
-        <label className="text-sm flex flex-col gap-1">
+        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           並び順
           <button
             type="button"
             onClick={() =>
               setVideoSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
             }
-            className="border border-slate-200 rounded-md px-2 py-1 text-left hover:bg-slate-100">
+            className="border border-slate-200 rounded-md px-2 py-1 text-left bg-white text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
             {videoSortOrder === "asc" ? "昇順" : "降順"}
           </button>
         </label>
@@ -319,8 +321,8 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
         onChange={setVideoPage}
       />
 
-      <div className="border border-slate-200 rounded-lg overflow-hidden">
-        <div className="grid grid-cols-[90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 bg-slate-100 text-xs font-semibold px-3 py-2">
+      <div className="border border-slate-200 rounded-lg overflow-hidden dark:border-slate-700">
+        <div className="grid grid-cols-[90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 bg-slate-100 text-xs font-semibold px-3 py-2 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
           <div>サムネ</div>
           <div>タイトル</div>
           <div>投稿者</div>
@@ -330,9 +332,9 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
           <div>勝/分/敗</div>
           <div>最終判定日時</div>
         </div>
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-slate-100 dark:divide-slate-800">
           {pagedVideos.length === 0 ? (
-            <div className="px-3 py-4 text-sm text-slate-500">
+            <div className="px-3 py-4 text-sm text-slate-500 dark:text-slate-400">
               表示できる動画がありません。
             </div>
           ) : (
@@ -417,7 +419,7 @@ const VideoRow = ({
         href={createWatchUrl(video.videoId)}
         target="_blank"
         rel="noreferrer"
-        className="w-20 h-12 bg-slate-200 rounded overflow-hidden block">
+        className="w-20 h-12 bg-slate-200 rounded overflow-hidden block dark:bg-slate-700">
         {video.thumbnailUrls?.[0] ? (
           <img
             src={video.thumbnailUrls[0]}
@@ -427,21 +429,31 @@ const VideoRow = ({
         ) : null}
       </a>
       <div className="flex flex-col">
-        <span className="text-sm font-medium text-slate-900">
+        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
           {video.title || "データ未取得"}
         </span>
-        <span className="text-xs text-slate-500">{video.videoId}</span>
+        <span className="text-xs text-slate-500 dark:text-slate-400">
+          {video.videoId}
+        </span>
       </div>
-      <div className="text-sm text-slate-700">{authorName ?? "不明"}</div>
-      <div className="text-sm">{rating ? Math.round(rating.rating) : "-"}</div>
-      <div className="text-sm">{rating ? Math.round(rating.rd) : "-"}</div>
-      <div className="text-sm">{verdictTotal > 0 ? verdictTotal : "-"}</div>
-      <div className="text-xs text-slate-600">
+      <div className="text-sm text-slate-700 dark:text-slate-200">
+        {authorName ?? "不明"}
+      </div>
+      <div className="text-sm text-slate-700 dark:text-slate-200">
+        {rating ? Math.round(rating.rating) : "-"}
+      </div>
+      <div className="text-sm text-slate-700 dark:text-slate-200">
+        {rating ? Math.round(rating.rd) : "-"}
+      </div>
+      <div className="text-sm text-slate-700 dark:text-slate-200">
+        {verdictTotal > 0 ? verdictTotal : "-"}
+      </div>
+      <div className="text-xs text-slate-600 dark:text-slate-400">
         {verdictTotal > 0
           ? `${verdictCounts.wins}/${verdictCounts.draws}/${verdictCounts.losses}`
           : "-"}
       </div>
-      <div className="text-xs text-slate-600">
+      <div className="text-xs text-slate-600 dark:text-slate-400">
         {lastVerdictAt ? new Date(lastVerdictAt).toLocaleString() : "-"}
       </div>
     </div>
