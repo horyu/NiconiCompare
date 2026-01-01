@@ -10,6 +10,7 @@ import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { useSessionState } from "../hooks/useSessionState"
 import { buildCategoryOptions } from "../utils/categories"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
+import { scrollIntoViewIfNeeded } from "../utils/scroll"
 
 type VideosTabProps = {
   snapshot: OptionsSnapshot
@@ -66,6 +67,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
     initialState.order
   )
   const [videoPage, setVideoPage] = useState(initialState.page)
+  const paginationTopRef = useRef<HTMLDivElement | null>(null)
   const shouldResetPageRef = useRef(false)
 
   useEffect(() => {
@@ -213,6 +215,16 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
     setVideoCategoryId(categoryId)
   }
 
+  const handlePageChange = (nextPage: number) => {
+    if (nextPage === videoPage) {
+      return
+    }
+    setVideoPage(nextPage)
+    requestAnimationFrame(() => {
+      scrollIntoViewIfNeeded(paginationTopRef.current, { block: "nearest" })
+    })
+  }
+
   return (
     <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4 dark:bg-slate-900 dark:border-slate-700">
       <header className="flex items-center justify-between">
@@ -315,11 +327,13 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
         </label>
       </div>
 
-      <Pagination
-        current={videoPage}
-        total={videoTotalPages}
-        onChange={setVideoPage}
-      />
+      <div ref={paginationTopRef}>
+        <Pagination
+          current={videoPage}
+          total={videoTotalPages}
+          onChange={handlePageChange}
+        />
+      </div>
 
       <div className="border border-slate-200 rounded-lg overflow-hidden dark:border-slate-700">
         <div className="grid grid-cols-[90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 bg-slate-100 text-xs font-semibold px-3 py-2 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
@@ -364,7 +378,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
       <Pagination
         current={videoPage}
         total={videoTotalPages}
-        onChange={setVideoPage}
+        onChange={handlePageChange}
       />
     </section>
   )

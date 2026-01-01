@@ -13,6 +13,7 @@ import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { useSessionState } from "../hooks/useSessionState"
 import { buildCategoryOptions } from "../utils/categories"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
+import { scrollIntoViewIfNeeded } from "../utils/scroll"
 
 type EventsTabProps = {
   snapshot: OptionsSnapshot
@@ -79,6 +80,7 @@ export const EventsTab = ({
     initialState.categoryId || snapshot.settings.activeCategoryId
   )
   const [eventPage, setEventPage] = useState(initialState.page)
+  const paginationTopRef = useRef<HTMLDivElement | null>(null)
   const shouldResetPageRef = useRef(false)
   const [eventBusyId, setEventBusyId] = useState<number | null>(null)
   const [moveTargets, setMoveTargets] = useState<Record<number, string>>({})
@@ -163,6 +165,16 @@ export const EventsTab = ({
     1,
     Math.ceil(filteredEvents.length / EVENT_PAGE_SIZE)
   )
+
+  const handlePageChange = (nextPage: number) => {
+    if (nextPage === eventPage) {
+      return
+    }
+    setEventPage(nextPage)
+    requestAnimationFrame(() => {
+      scrollIntoViewIfNeeded(paginationTopRef.current, { block: "nearest" })
+    })
+  }
 
   // Handlers
   const handleCategoryChange = (categoryId: string) => {
@@ -465,11 +477,13 @@ export const EventsTab = ({
         </div>
       )}
 
-      <Pagination
-        current={eventPage}
-        total={eventTotalPages}
-        onChange={setEventPage}
-      />
+      <div ref={paginationTopRef}>
+        <Pagination
+          current={eventPage}
+          total={eventTotalPages}
+          onChange={handlePageChange}
+        />
+      </div>
 
       <div className="border border-slate-200 rounded-lg overflow-hidden dark:border-slate-700">
         <div
@@ -553,7 +567,7 @@ export const EventsTab = ({
       <Pagination
         current={eventPage}
         total={eventTotalPages}
-        onChange={setEventPage}
+        onChange={handlePageChange}
       />
     </section>
   )
