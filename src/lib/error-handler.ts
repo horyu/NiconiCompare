@@ -1,12 +1,12 @@
 import { logger } from "./logger"
 
 export class NcError extends Error {
-  code: string
+  context: string
   userMessage: string
 
-  constructor(message: string, code: string, userMessage: string) {
+  constructor(message: string, context: string, userMessage: string) {
     super(message)
-    this.code = code
+    this.context = context
     this.userMessage = userMessage
   }
 }
