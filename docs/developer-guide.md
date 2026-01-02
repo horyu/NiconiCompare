@@ -53,9 +53,9 @@ pnpm fix              # ESLint + Prettier 自動修正（並列実行）
 ### 1.4 主要依存関係
 
 - WXT 0.20+ (MV3 拡張ビルド)
-- TypeScript 5+, React 18.2.0
-- Tailwind CSS v4 (@tailwindcss/postcss 4.1.18)
-  - **設定**: postcss.config.js のみ（tailwind.config.js 不要）
+- TypeScript 5+, React 19.2
+- Tailwind CSS v4 (@tailwindcss/vite 4.1)
+  - **設定**: `wxt.config.ts` の `vite.plugins` に `tailwindcss()` を追加（postcss.config.js 不要）
 - glicko2-lite (Glicko-2 レーティング計算)
 - immer (Immutable state 更新)
 - **コード品質ツール**:
@@ -64,7 +64,7 @@ pnpm fix              # ESLint + Prettier 自動修正（並列実行）
   - npm-run-all (並列スクリプト実行)
 - **UI開発**:
   - Storybook 10.1+ (React/Vite)
-- **テストフレームワーク**: 現状未セットアップ（Vitest の導入は将来予定）
+- **テストフレームワーク**: Vitest 導入済み（`pnpm test:run` を使用）
 
 ---
 
@@ -157,7 +157,7 @@ pnpm storybook:build   # Storybook ビルド
 
 ## 3. テスト
 
-**現状**: テストフレームワーク（Vitest）は未導入。`pnpm test` は未定義。将来的な実装予定。
+**現状**: テストは Vitest で実装済み。`pnpm test:run` を使用する。
 Storybook は UI プレビュー用途で導入済み。
 
 カバレッジ目標: 80%以上（テストセットアップ後）

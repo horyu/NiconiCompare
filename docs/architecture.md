@@ -54,10 +54,10 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 
 | コンポーネント     | 責務                                           | 技術スタック                        |
 | ------------------ | ---------------------------------------------- | ----------------------------------- |
-| **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得        | React 18.2.0, TypeScript, Tailwind CSS v4, WXT Content Script UI |
+| **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得        | React 19.2, TypeScript, Tailwind CSS v4, WXT Content Script UI |
 | **Service Worker** | イベントログ管理、Glicko-2 計算、Storage I/O | TypeScript, chrome.storage API      |
-| **Popup**          | アクティブカテゴリの直近イベント表示、overlayAndCaptureEnabled トグル | React 18.2.0, TypeScript            |
-| **Options**        | 詳細設定、データ操作、一覧エクスポート/インポート | React 18.2.0, TypeScript            |
+| **Popup**          | アクティブカテゴリの直近イベント表示、overlayAndCaptureEnabled トグル | React 19.2, TypeScript            |
+| **Options**        | 詳細設定、データ操作、一覧エクスポート/インポート | React 19.2, TypeScript            |
 | **Storage**        | 永続化層                                       | chrome.storage.local (Key-Value)  |
 
 Service Worker の内部構成は `background/handlers`（メッセージ単位の処理）、`background/services`（Storage/クリーンアップ）、`background/utils`（正規化・集約ロジック）に分離している。
