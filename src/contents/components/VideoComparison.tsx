@@ -34,7 +34,7 @@ export function VideoComparison({
     ? createWatchUrl(opponentVideoId)
     : undefined
   const opponentTitle = opponentVideoId
-    ? videoSnapshots[opponentVideoId]?.title ?? ""
+    ? (videoSnapshots[opponentVideoId]?.title ?? "")
     : ""
 
   return (

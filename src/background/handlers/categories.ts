@@ -92,7 +92,7 @@ export async function handleDeleteCategory(
 
       const nextActiveCategoryId =
         settings.activeCategoryId === categoryId
-          ? moveToCategoryId ?? updatedCategories.defaultId
+          ? (moveToCategoryId ?? updatedCategories.defaultId)
           : settings.activeCategoryId
 
       const nextRatings = rebuildRatingsFromEvents(

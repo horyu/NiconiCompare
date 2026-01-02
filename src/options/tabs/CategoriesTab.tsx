@@ -93,7 +93,7 @@ export const CategoriesTab = ({
     const target = snapshot.categories.items[categoryId]
     const targetName = target?.name ?? categoryId
     const moveTargetName = moveToCategoryId
-      ? snapshot.categories.items[moveToCategoryId]?.name ?? moveToCategoryId
+      ? (snapshot.categories.items[moveToCategoryId]?.name ?? moveToCategoryId)
       : null
     const confirmed = window.confirm(
       moveToCategoryId
