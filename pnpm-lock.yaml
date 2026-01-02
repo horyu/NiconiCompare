@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       glicko2-lite:
-        specifier: ^1.0.2
-        version: 1.0.2
+        specifier: ^5.0.0
+        version: 5.0.0
       immer:
         specifier: ^10.1.1
         version: 10.2.0
@@ -2105,9 +2105,9 @@ packages:
     resolution: {integrity: sha512-L5bGsVkxJbJgdnwyuheIunkGatUF/zssUoxxjACCseZYAVbaqdh9Tsmmlkl8vYan09H7sbvKt4pS8GqKLBrEzA==}
     hasBin: true
 
-  glicko2-lite@1.0.2:
-    resolution: {integrity: sha512-ILiDI6eioKu1m07P6ohdw3jyiyX+4DbeQxnx8iBeltdmA9x2rUWB+j/Fba2eFzw5o+C4rYsg8tX0RLMTCbmukg==}
-    engines: {node: 10 || 12 || 14 || >=16}
+  glicko2-lite@5.0.0:
+    resolution: {integrity: sha512-iUz9VSAEBGi9jfHYKoio0n0Wi4BamXTg2Yj1LHuhq3wSzBDEhuXxLlrtQd9BeOxW/GCvznAuH4s4mMwOw/ovFQ==}
+    engines: {node: 20 || 22 || >=24}
 
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
@@ -2657,17 +2657,8 @@ packages:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
 
-  lodash.assign@4.2.0:
-    resolution: {integrity: sha512-hFuH8TY+Yji7Eja3mGiuAxBqLagejScbG8GbG0j6o9vzn0YL14My+ktnqtZgFTosKymC9/44wP6s7xyuLfnClw==}
-
-  lodash.map@4.6.0:
-    resolution: {integrity: sha512-worNHGKLDetmcEYDvh2stPCrrQRkP20E4l0iIS7F8EvzMqBBi7ltvFN5m1HvTf1P7Jk1txKhvFcmYsCr8O2F1Q==}
-
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
-
-  lodash.reduce@4.6.0:
-    resolution: {integrity: sha512-6raRe2vxCYBhpBu+B+TtNGUzah+hQjVdu3E17wfusjyrXBka2nBS8OH/gjVZ5PvHOhWmIZTYri09Z6n/QfnNMw==}
 
   log-symbols@6.0.0:
     resolution: {integrity: sha512-i24m8rpwhmPIS4zscNzK6MSEhk0DUWa/8iYQWxhffV8jkI4Phvs3F+quL5xvS0gdQR0FyTCMMH33Y78dDTzzIw==}
@@ -5930,11 +5921,7 @@ snapshots:
       nypm: 0.6.2
       pathe: 2.0.3
 
-  glicko2-lite@1.0.2:
-    dependencies:
-      lodash.assign: 4.2.0
-      lodash.map: 4.6.0
-      lodash.reduce: 4.6.0
+  glicko2-lite@5.0.0: {}
 
   glob-parent@5.1.2:
     dependencies:
@@ -6432,13 +6419,7 @@ snapshots:
     dependencies:
       p-locate: 5.0.0
 
-  lodash.assign@4.2.0: {}
-
-  lodash.map@4.6.0: {}
-
   lodash.merge@4.6.2: {}
-
-  lodash.reduce@4.6.0: {}
 
   log-symbols@6.0.0:
     dependencies:
