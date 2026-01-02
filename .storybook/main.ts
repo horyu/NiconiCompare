@@ -6,12 +6,7 @@ import type { StorybookConfig } from "@storybook/react-vite"
 
 const config: StorybookConfig = {
   framework: "@storybook/react-vite",
-  stories: [
-    "../src/contents/components/**/*.stories.@(ts|tsx)",
-    "../src/options/components/**/*.stories.@(ts|tsx)",
-    "../src/options/tabs/**/*.stories.@(ts|tsx)",
-    "../src/popup/**/*.stories.@(ts|tsx)"
-  ],
+  stories: ["../src/**/*.stories.tsx"],
   addons: ["@storybook/addon-themes"],
   // Storybook専用: アプリのTailwind出力をstorybook.cssに差し替え、classベースのダークモードを有効化する。
   // 却下案:
