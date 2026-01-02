@@ -76,7 +76,7 @@ pnpm fix              # ESLint + Prettier 自動修正（並列実行）
 pnpm dev
 ```
 
-Chrome: `chrome://extensions/` → デベロッパーモード → `build/chrome-mv3-dev` 読み込み
+Chrome: `chrome://extensions/` → デベロッパーモード → `.output/chrome-mv3-dev` 読み込み
 
 ### 2.2 ディレクトリ構造
 
@@ -169,7 +169,7 @@ pnpm lint   # ビルド前に型/フォーマット崩れがないかを確認
 pnpm build
 ```
 
-出力: `build/chrome-mv3-prod/`, `build/firefox-mv3-prod/`
+出力: `.output/chrome-mv3-prod/`, `.output/firefox-mv3-prod/`
 
 ブラウザへの読み込み: chrome://extensions (開発者モード)
 
