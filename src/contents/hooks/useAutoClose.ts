@@ -16,7 +16,7 @@ export function useAutoClose({
   isReady
 }: UseAutoCloseParams) {
   const [showControls, setShowControls] = useState(true)
-  const autoCloseTimerRef = useRef<number>()
+  const autoCloseTimerRef = useRef<number | undefined>(undefined)
 
   const clearAutoCloseTimer = useCallback(() => {
     if (autoCloseTimerRef.current) {

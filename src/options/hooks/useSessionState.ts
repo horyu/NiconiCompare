@@ -3,7 +3,7 @@ import { useCallback, useRef } from "react"
 import { readSessionState, writeSessionState } from "../utils/sessionStorage"
 
 export const useSessionState = <T>(key: string, fallback: T) => {
-  const initialStateRef = useRef<T>()
+  const initialStateRef = useRef<T | undefined>(undefined)
   if (typeof initialStateRef.current === "undefined") {
     initialStateRef.current = readSessionState(key, fallback)
   }

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { ReactElement } from "react"
 
 import {
   DEFAULT_CATEGORIES,
@@ -139,7 +140,7 @@ const buildSnapshotWithEvents = (events: CompareEvent[]): OptionsSnapshot => {
 }
 
 const withSessionState = (state: Partial<EventSessionState>) => {
-  return (Story: () => JSX.Element) => (
+  return (Story: () => ReactElement) => (
     <>
       {writeSessionState(SESSION_KEY, {
         ...DEFAULT_SESSION_STATE,
@@ -150,7 +151,7 @@ const withSessionState = (state: Partial<EventSessionState>) => {
   )
 }
 
-const withLoadingOverlay = (Story: () => JSX.Element) => (
+const withLoadingOverlay = (Story: () => ReactElement) => (
   <div className="relative">
     <Story />
     <div className="absolute inset-0 bg-white/70 flex items-center justify-center text-sm font-semibold text-slate-700">

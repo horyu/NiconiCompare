@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, type ReactElement } from "react"
 
 import {
   DEFAULT_CATEGORIES,
@@ -12,7 +12,7 @@ import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { DataTab } from "./DataTab"
 
 const withImportFileSelected = () => {
-  return (Story: () => JSX.Element) => {
+  return (Story: () => ReactElement) => {
     const ref = useRef<HTMLDivElement>(null)
     useEffect(() => {
       const input = ref.current?.querySelector<HTMLInputElement>(
@@ -51,7 +51,10 @@ const meta: Meta<typeof DataTab> = {
   component: DataTab,
   decorators: [
     (Story) => {
-      globalThis.chrome = {
+      const windowWithChrome = globalThis as typeof globalThis & {
+        chrome: typeof chrome
+      }
+      windowWithChrome.chrome = {
         storage: {
           local: {
             QUOTA_BYTES: 1024 * 1024 * 5

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, type ReactElement } from "react"
 
 import {
   DEFAULT_CATEGORIES,
@@ -46,7 +46,7 @@ const withUnsavedSettings = () => {
     String(modifiedSettings.glicko.rd),
     String(modifiedSettings.glicko.volatility)
   ]
-  return (Story: () => JSX.Element) => {
+  return (Story: () => ReactElement) => {
     const ref = useRef<HTMLDivElement>(null)
     useEffect(() => {
       const rafId = window.requestAnimationFrame(() => {

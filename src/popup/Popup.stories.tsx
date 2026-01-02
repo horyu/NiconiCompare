@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { ReactElement } from "react"
 
 import {
   DEFAULT_CATEGORIES,
@@ -83,7 +84,7 @@ const baseData: PopupData = {
 
 const withPopupData =
   (overrides: Partial<PopupData> = {}) =>
-  (Story: () => JSX.Element) => {
+  (Story: () => ReactElement) => {
     const data: PopupData = {
       settings: { ...baseData.settings, ...overrides.settings },
       events: overrides.events ?? baseData.events,
@@ -92,7 +93,10 @@ const withPopupData =
       categories: overrides.categories ?? baseData.categories
     }
 
-    globalThis.chrome = {
+    const windowWithChrome = globalThis as typeof globalThis & {
+      chrome: typeof chrome
+    }
+    windowWithChrome.chrome = {
       runtime: {
         sendMessage: async () => ({
           ok: true,
@@ -104,7 +108,7 @@ const withPopupData =
     return <Story />
   }
 
-const withPopupFrame = (Story: () => JSX.Element) => (
+const withPopupFrame = (Story: () => ReactElement) => (
   <div className="bg-white p-4 rounded-lg border border-slate-200 max-w-[360px]">
     <Story />
   </div>

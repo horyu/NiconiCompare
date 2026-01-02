@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { ReactElement } from "react"
 
 import {
   DEFAULT_CATEGORIES,
@@ -206,7 +207,7 @@ const buildSnapshotForCategorySwitch = (): OptionsSnapshot => {
 }
 
 const withSessionState = (state: Partial<VideoSessionState>) => {
-  return (Story: () => JSX.Element) => (
+  return (Story: () => ReactElement) => (
     <>
       {writeSessionState(SESSION_KEY, {
         ...DEFAULT_SESSION_STATE,

@@ -11,8 +11,10 @@ export function useOpponentSelection({
   pinnedOpponentVideoId,
   recentWindow
 }: UseOpponentSelectionParams) {
-  const [opponentVideoId, setOpponentVideoId] = useState<string>()
-  const previousCurrentVideoIdRef = useRef<string>()
+  const [opponentVideoId, setOpponentVideoId] = useState<string | undefined>(
+    undefined
+  )
+  const previousCurrentVideoIdRef = useRef<string | undefined>(undefined)
   const pendingPreviousVideoIdRef = useRef<string | null>(null)
 
   const selectableWindow = recentWindow.filter((id) => id !== currentVideoId)
