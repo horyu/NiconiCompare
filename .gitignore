@@ -33,9 +33,6 @@ stats.html
 stats-*.json
 web-ext.config.ts
 
-# plasmo
-.plasmo
-
 # wxt
 .wxt
 
