@@ -28,9 +28,16 @@ out/
 build/
 dist/
 storybook-static/
+.output
+stats.html
+stats-*.json
+web-ext.config.ts
 
 # plasmo
 .plasmo
+
+# wxt
+.wxt
 
 # typescript
 .tsbuildinfo

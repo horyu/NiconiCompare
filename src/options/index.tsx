@@ -49,23 +49,19 @@ export default function OptionsPage() {
   }, [activeTab])
 
   useEffect(() => {
-    const plasmoRoot = document.getElementById("__plasmo")
+    const root = document.documentElement
     const prev = {
-      plasmoOverflowY: plasmoRoot?.style.overflowY,
-      plasmoScrollbarGutter: plasmoRoot?.style.scrollbarGutter,
-      plasmoHeight: plasmoRoot?.style.height
+      overflowY: root.style.overflowY,
+      scrollbarGutter: root.style.scrollbarGutter,
+      height: root.style.height
     }
-    if (plasmoRoot) {
-      plasmoRoot.style.overflowY = "scroll"
-      plasmoRoot.style.scrollbarGutter = "stable"
-      plasmoRoot.style.height = "100vh"
-    }
+    root.style.overflowY = "scroll"
+    root.style.scrollbarGutter = "stable"
+    root.style.height = "100vh"
     return () => {
-      if (plasmoRoot) {
-        plasmoRoot.style.overflowY = prev.plasmoOverflowY ?? ""
-        plasmoRoot.style.scrollbarGutter = prev.plasmoScrollbarGutter ?? ""
-        plasmoRoot.style.height = prev.plasmoHeight ?? ""
-      }
+      root.style.overflowY = prev.overflowY
+      root.style.scrollbarGutter = prev.scrollbarGutter
+      root.style.height = prev.height
     }
   }, [])
 

@@ -32,7 +32,7 @@ export function useVideoObserver({
     })
     const cleanup = observeLdJsonChanges({
       onVideoDataChange: onVideoChange,
-      onError: onStatusMessage
+      onError: (message) => onStatusMessage?.(message)
     })
 
     const videoData = extractVideoDataFromLdJson()

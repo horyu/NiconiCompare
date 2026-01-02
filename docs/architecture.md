@@ -54,7 +54,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 
 | コンポーネント     | 責務                                           | 技術スタック                        |
 | ------------------ | ---------------------------------------------- | ----------------------------------- |
-| **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得        | React 18.2.0, TypeScript, Tailwind CSS v4, Plasmo CSUI |
+| **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得        | React 18.2.0, TypeScript, Tailwind CSS v4, WXT Content Script UI |
 | **Service Worker** | イベントログ管理、Glicko-2 計算、Storage I/O | TypeScript, chrome.storage API      |
 | **Popup**          | アクティブカテゴリの直近イベント表示、overlayAndCaptureEnabled トグル | React 18.2.0, TypeScript            |
 | **Options**        | 詳細設定、データ操作、一覧エクスポート/インポート | React 18.2.0, TypeScript            |
@@ -385,7 +385,7 @@ async function saveCompareEvent(event: CompareEvent) {
 
 ### 6.1 Content Overlay
 
-実装は Plasmo CSUI で DOM に直接マウントされる。
+実装は WXT の content-script UI で DOM に直接マウントされる。
 
 **役割**: 比較UIの常駐、動画メタデータの抽出とService Workerへの転送、比較操作の受付。
 
@@ -414,7 +414,6 @@ async function saveCompareEvent(event: CompareEvent) {
 ```json
 {
   "permissions": [
-    "activeTab", // 現在のタブのみアクセス
     "storage" // chrome.storage.local
   ],
   "host_permissions": [

@@ -3,13 +3,13 @@ import tseslint from "@typescript-eslint/eslint-plugin"
 import tsparser from "@typescript-eslint/parser"
 import reactPlugin from "eslint-plugin-react"
 import reactHooksPlugin from "eslint-plugin-react-hooks"
-import vitestPlugin from "eslint-plugin-vitest"
+import vitest from "@vitest/eslint-plugin"
 
 export default [
   {
     ignores: [
       "build/**",
-      ".plasmo/**",
+      ".wxt/**",
       "node_modules/**",
       "dist/**",
       "*.js",
@@ -77,14 +77,14 @@ export default [
   {
     files: ["**/*.test.ts", "**/*.spec.ts", "**/*.test.tsx", "**/*.spec.tsx"],
     plugins: {
-      vitest: vitestPlugin
+      vitest
     },
     rules: {
-      ...vitestPlugin.configs.recommended.rules
+      ...vitest.configs.recommended.rules
     },
     languageOptions: {
       globals: {
-        ...vitestPlugin.environments.env.globals
+        ...vitest.environments.env.globals
       }
     }
   }

@@ -7,7 +7,7 @@
 - メイン実装: `src/contents/overlay.tsx` (React Functional Component)
   - 状態管理: useState/useEffect/useRef による React hooks パターン
   - スタイリング: Tailwind CSS v4 utility classes
-  - CSS注入: PlasmoGetStyle による data-text import
+  - CSS注入: WXT の content-script UI による Shadow DOM への注入
   - JSON-LD 監視と state 更新: extractVideoDataFromLdJson, observeLdJsonChanges
   - verdict 送信と UI 更新: submitVerdict, refreshState
   - auto-close・overlayAndCaptureEnabled の制御: useEffect による自動制御
@@ -17,7 +17,7 @@
 ## コンポーネント構造
 
 ```tsx
-<Overlay> // Plasmo CSUI React Component
+<Overlay> // WXT content-script UI React Component
   <div className="fixed top-0 right-0 z-[2147483647] ...">
     <CategorySelector />
     <strong>NiconiCompare</strong>

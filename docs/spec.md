@@ -21,9 +21,9 @@
 ## 3. 対応環境・開発スタック
 
 - **ブラウザ**: Chrome 109+ / Firefox 109+ (Manifest V3)
-- **開発環境**: Node.js 25, TypeScript 5.0+, Plasmo Framework 0.90+
+- **開発環境**: Node.js 25, TypeScript 5.0+, WXT 0.20+
 - **配布**: ローカル sideload 前提（開発者モードで拡張機能を読み込む）。ストア署名・公開は本仕様の対象外。
-- **権限**: `activeTab`, `storage`, `https://www.nicovideo.jp/watch/*`
+- **権限**: `storage`, `https://www.nicovideo.jp/watch/*`
 
 ## 4. コアワークフロー
 

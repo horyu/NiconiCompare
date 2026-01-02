@@ -1,5 +1,3 @@
-import styleText from "data-text:../style.css"
-import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useCallback, useState } from "react"
 
 import { MESSAGE_TYPES } from "../lib/constants"
@@ -19,17 +17,9 @@ import {
 } from "./hooks/useVerdictSubmission"
 import { useVideoObserver } from "./hooks/useVideoObserver"
 
-export const config: PlasmoCSConfig = {
-  matches: ["https://www.nicovideo.jp/watch/*"]
-}
-
-export const getStyle: PlasmoGetStyle = () => {
-  const style = document.createElement("style")
-  style.textContent = styleText
-  return style
-}
-
-const keepOverlayEnvValue = String(process.env.PLASMO_PUBLIC_KEEP_OVERLAY_OPEN)
+const keepOverlayEnvValue = String(
+  import.meta.env.WXT_PUBLIC_KEEP_OVERLAY_OPEN ?? ""
+)
 const forceKeepOverlayOpen = keepOverlayEnvValue.toLowerCase() === "true"
 
 export default function Overlay() {
@@ -169,7 +159,7 @@ export default function Overlay() {
     })
 
     if (response.ok) {
-      setPinnedOpponentVideoId(nextPinned)
+      setPinnedOpponentVideoId(nextPinned ?? "")
       await refreshState()
     }
   }, [

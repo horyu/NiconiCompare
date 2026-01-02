@@ -30,7 +30,9 @@ export function useOverlayState() {
   const [videoSnapshots, setVideoSnapshots] = useState<
     Record<string, VideoSnapshot>
   >({})
-  const [statusMessage, setStatusMessage] = useState<string>()
+  const [statusMessage, setStatusMessage] = useState<string | undefined>(
+    undefined
+  )
   const [categories, setCategories] = useState<NcCategories>(
     normalizeCategories()
   )

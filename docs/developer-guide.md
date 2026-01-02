@@ -41,22 +41,21 @@ pnpm fix              # ESLint + Prettier 自動修正（並列実行）
 ### 1.3 環境変数の管理
 
 - ルートの `.env.sample` を `.env` にコピーし、必要に応じて値を変更する。
-- **`PLASMO_PUBLIC_KEEP_OVERLAY_OPEN`**: 開発用環境変数
+- **`WXT_PUBLIC_KEEP_OVERLAY_OPEN`**: 開発用環境変数
   - `true` に設定すると、コンテンツオーバーレイが自動で閉じなくなり、動作確認が容易になる
   - デフォルトは `false`（通常の自動クローズ動作）
   - オーバーレイの `handleMouseLeave` イベントで参照され、開発中のデバッグに使用
-- **`PLASMO_PUBLIC_NC_LOG_LEVEL`**: ログレベル設定
+- **`WXT_PUBLIC_NC_LOG_LEVEL`**: ログレベル設定
   - `error` / `warn` / `info` / `debug` を指定
   - デフォルトは `warn`
-- Plasmo/Parcel は `.env` の内容を `process.env` に注入するため、他の `PLASMO_PUBLIC_` プレフィックス変数もこのファイルで管理する。
+- WXT/Vite は `.env` の内容を `import.meta.env` に注入するため、他の `WXT_` プレフィックス変数もこのファイルで管理する。
 
 ### 1.4 主要依存関係
 
-- Plasmo 0.90+ (MV3 拡張ビルド)
+- WXT 0.20+ (MV3 拡張ビルド)
 - TypeScript 5+, React 18.2.0
 - Tailwind CSS v4 (@tailwindcss/postcss 4.1.18)
   - **設定**: postcss.config.js のみ（tailwind.config.js 不要）
-  - **Plasmo互換性**: scripts/patch.js により自動パッチ適用
 - glicko2-lite (Glicko-2 レーティング計算)
 - immer (Immutable state 更新)
 - **コード品質ツール**:
@@ -186,6 +185,6 @@ pnpm build
 
 ## 6. 参考資料
 
-- [Plasmo Docs](https://docs.plasmo.com/)
+- [WXT Docs](https://wxt.dev/)
 - [Chrome MV3 Guide](https://developer.chrome.com/docs/extensions/mv3/)
 - [Glicko-2 PDF](http://www.glicko.net/glicko/glicko2.pdf)
