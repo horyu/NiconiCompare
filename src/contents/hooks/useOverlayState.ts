@@ -47,19 +47,24 @@ export function useOverlayState() {
       if (areaName !== "local") return
 
       if (changes[STORAGE_KEYS.settings]?.newValue) {
-        setOverlaySettings(
-          changes[STORAGE_KEYS.settings].newValue ?? DEFAULT_SETTINGS
-        )
+        const nextSettings = changes[STORAGE_KEYS.settings].newValue as
+          | NcSettings
+          | undefined
+        setOverlaySettings(nextSettings ?? DEFAULT_SETTINGS)
       }
 
       if (changes[STORAGE_KEYS.videos]?.newValue) {
-        setVideoSnapshots(changes[STORAGE_KEYS.videos].newValue ?? {})
+        const nextVideos = changes[STORAGE_KEYS.videos].newValue as
+          | Record<string, VideoSnapshot>
+          | undefined
+        setVideoSnapshots(nextVideos ?? {})
       }
 
       if (changes[STORAGE_KEYS.categories]?.newValue) {
-        setCategories(
-          normalizeCategories(changes[STORAGE_KEYS.categories].newValue)
-        )
+        const nextCategories = changes[STORAGE_KEYS.categories].newValue as
+          | NcCategories
+          | undefined
+        setCategories(normalizeCategories(nextCategories))
       }
     }
 
@@ -70,7 +75,10 @@ export function useOverlayState() {
   const loadVideoSnapshots = useCallback(async () => {
     if (!chrome.storage?.local) return
     const result = await chrome.storage.local.get(STORAGE_KEYS.videos)
-    setVideoSnapshots(result?.[STORAGE_KEYS.videos] ?? {})
+    const nextVideos = result?.[STORAGE_KEYS.videos] as
+      | Record<string, VideoSnapshot>
+      | undefined
+    setVideoSnapshots(nextVideos ?? {})
   }, [])
 
   const refreshState = useCallback(async () => {
