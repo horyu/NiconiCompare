@@ -78,6 +78,8 @@ pnpm dev
 
 Chrome: `chrome://extensions/` → デベロッパーモード → `.output/chrome-mv3-dev` 読み込み
 
+自動ブラウザ起動を無効化したい場合は、[WXT の設定ガイド](https://wxt.dev/guide/essentials/config/browser-startup.html#disable-opening-browser)を参照。
+
 ### 2.2 ディレクトリ構造
 
 ```
