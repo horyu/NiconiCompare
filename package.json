@@ -64,21 +64,8 @@
     "wxt": "0.20.13"
   },
   "pnpm": {
-    "overrides": {
-      "msgpackr": "^1.11.5",
-      "content-security-policy-parser": "^0.6.0",
-      "svelte": "^4.2.19",
-      "esbuild": "^0.25.0",
-      "tsup": "^8.5.1"
-    },
     "onlyBuiltDependencies": [
-      "@parcel/watcher",
-      "@swc/core",
-      "esbuild",
-      "less",
-      "lmdb",
-      "msgpackr-extract",
-      "sharp"
+      "esbuild"
     ]
   }
 }
