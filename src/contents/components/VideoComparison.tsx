@@ -38,7 +38,7 @@ export function VideoComparison({
     : ""
 
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-start">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2 items-start">
       <div className="flex flex-col gap-2">
         {getThumbnailUrl(currentVideoId) ? (
           <img
@@ -59,8 +59,8 @@ export function VideoComparison({
       <div className="flex items-center justify-center self-center">
         <div className="text-center text-[14px] font-bold opacity-70">vs</div>
       </div>
-
-      <div className="flex flex-col gap-2">
+      {/* サムネとopponentSelectorとの隙間調整として gap-2 ではなく gap-[7px] を使用 */}
+      <div className="flex flex-col gap-[7px]">
         {opponentWatchUrl ? (
           <a href={opponentWatchUrl} target="_blank" rel="noreferrer">
             {getThumbnailUrl(opponentVideoId) ? (
@@ -85,7 +85,8 @@ export function VideoComparison({
         {/* Wrapper to avoid inserting a gap between the selector row and title */}
         <div>
           {opponentSelector}
-          <div className="text-[14px] opacity-90 self-stretch text-left break-all overflow-hidden">
+          {/* -mt-px で隙間を調整 */}
+          <div className="text-[14px] opacity-90 self-stretch text-left break-all overflow-hidden -mt-px">
             {opponentTitle}
           </div>
         </div>

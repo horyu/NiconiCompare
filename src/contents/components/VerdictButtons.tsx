@@ -13,7 +13,7 @@ export function VerdictButtons({
 }: VerdictButtonsProps) {
   const getVerdictButtonClass = (verdict: Verdict) =>
     [
-      "px-3 py-1.5 rounded disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap w-full",
+      "px-3 py-1.5 rounded disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap w-full text-[14px]",
       lastVerdict === verdict
         ? "bg-white text-black shadow-inner ring-2 ring-white/80"
         : "bg-white/20 hover:bg-white/30"
