@@ -1,4 +1,5 @@
 import react from "@vitejs/plugin-react"
+import tailwindcss from "@tailwindcss/vite"
 import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
@@ -25,7 +26,12 @@ const config: StorybookConfig = {
         return fs.readFileSync(storybookStyle, "utf8")
       }
     } satisfies import("vite").Plugin
-    config.plugins = [replaceStylePlugin, react(), ...(config.plugins ?? [])]
+    config.plugins = [
+      replaceStylePlugin,
+      tailwindcss(),
+      react(),
+      ...(config.plugins ?? [])
+    ]
     return config
   }
 }
