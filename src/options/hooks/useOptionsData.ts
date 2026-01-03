@@ -65,7 +65,10 @@ export const useOptionsData = (): UseOptionsDataResult => {
     setLoading(false)
   }, [])
 
+  // chrome.storageからの初期データ読み込み（外部システム同期）
+  // NOTE: chrome.storage APIが非同期のため、useSyncExternalStoreの直接適用は困難
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refreshState()
   }, [refreshState])
 
