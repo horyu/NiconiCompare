@@ -182,5 +182,5 @@ export type BackgroundResponse<TData = unknown> =
 export async function sendNcMessage<TResponse = BackgroundResponse>(
   message: Message
 ) {
-  return chrome.runtime.sendMessage(message) as Promise<TResponse>
+  return chrome.runtime.sendMessage<Message, TResponse>(message)
 }

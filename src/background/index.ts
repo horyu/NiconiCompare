@@ -205,11 +205,8 @@ async function ensureDefaults() {
 
   if (!result.settings) {
     updates.settings = DEFAULT_SETTINGS
-  } else if (
-    !(result.settings as NcSettings).activeCategoryId ||
-    !(result.settings as NcSettings).glicko
-  ) {
-    updates.settings = normalizeSettings(result.settings as NcSettings)
+  } else if (!result.settings.activeCategoryId || !result.settings.glicko) {
+    updates.settings = normalizeSettings(result.settings)
   }
   if (!result.state) {
     updates.state = DEFAULT_STATE
@@ -246,14 +243,10 @@ async function ensureDefaults() {
   if (!result.categories) {
     updates.categories = DEFAULT_CATEGORIES
   } else {
-    const normalizedCategories = normalizeCategories(
-      result.categories as NcCategories
-    )
+    const normalizedCategories = normalizeCategories(result.categories)
     if (
-      (result.categories as NcCategories).overlayVisibleIds?.length === 0 ||
-      !(result.categories as NcCategories).items?.[
-        normalizedCategories.defaultId
-      ]
+      result.categories.overlayVisibleIds?.length === 0 ||
+      !result.categories.items?.[normalizedCategories.defaultId]
     ) {
       updates.categories = normalizedCategories
     }

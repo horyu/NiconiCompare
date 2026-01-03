@@ -1,6 +1,34 @@
 import { handleUIError } from "./error-handler"
 import type { AuthorProfile, VideoSnapshot } from "./types"
 
+type LdAuthor = {
+  "@id"?: string
+  url?: string
+  name?: string
+}
+
+type LdVideoObject = {
+  "@type"?: string
+  author?: LdAuthor | LdAuthor[]
+  identifier?: string
+  videoId?: string
+  url?: string
+  name?: string
+  thumbnailUrl?: string | string[]
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null
+
+const readString = (value: unknown): string | undefined =>
+  typeof value === "string" ? value : undefined
+
+const asLdAuthor = (value: unknown): LdAuthor | undefined =>
+  isRecord(value) ? (value as LdAuthor) : undefined
+
+const asLdVideoObject = (value: unknown): LdVideoObject | undefined =>
+  isRecord(value) ? (value as LdVideoObject) : undefined
+
 /**
  * Video data extracted from JSON-LD
  */
@@ -78,47 +106,54 @@ export function extractVideoDataFromLdJson(): VideoData | undefined {
     if (!script.textContent) continue
 
     try {
-      const parsed = JSON.parse(script.textContent)
+      const parsed: unknown = JSON.parse(script.textContent)
       const videoObject = Array.isArray(parsed)
-        ? parsed.find((item) => item?.["@type"] === "VideoObject")
-        : parsed
+        ? parsed
+            .map((item) => asLdVideoObject(item))
+            .find((item) => item?.["@type"] === "VideoObject")
+        : asLdVideoObject(parsed)
 
-      if (!videoObject) continue
+      if (!videoObject || videoObject["@type"] !== "VideoObject") continue
 
       const authorData = Array.isArray(videoObject.author)
-        ? videoObject.author[0]
-        : videoObject.author
+        ? asLdAuthor(videoObject.author[0])
+        : asLdAuthor(videoObject.author)
 
       const videoId =
-        videoObject.identifier ||
-        videoObject.videoId ||
-        extractVideoIdFromUrl(videoObject.url) ||
+        readString(videoObject.identifier) ||
+        readString(videoObject.videoId) ||
+        extractVideoIdFromUrl(readString(videoObject.url)) ||
         extractVideoIdFromUrl(window.location.pathname)
 
       if (!videoId) continue
 
       const author: AuthorProfile = {
         authorUrl:
-          authorData?.url ||
-          authorData?.["@id"] ||
+          readString(authorData?.url) ||
+          readString(authorData?.["@id"]) ||
           document.querySelector<HTMLAnchorElement>('[rel="author"]')?.href ||
           window.location.origin,
         name:
-          authorData?.name ||
+          readString(authorData?.name) ||
           document.querySelector('[rel="author"]')?.textContent ||
           "unknown",
         capturedAt: Date.now()
       }
 
+      const thumbnailUrl = readString(videoObject.thumbnailUrl)
+      const thumbnailUrls = Array.isArray(videoObject.thumbnailUrl)
+        ? videoObject.thumbnailUrl.filter(
+            (item): item is string => typeof item === "string"
+          )
+        : thumbnailUrl
+          ? [thumbnailUrl]
+          : []
+
       const video: VideoSnapshot = {
         videoId,
-        title: videoObject.name || document.title || videoId,
+        title: readString(videoObject.name) || document.title || videoId,
         authorUrl: author.authorUrl,
-        thumbnailUrls: Array.isArray(videoObject.thumbnailUrl)
-          ? videoObject.thumbnailUrl
-          : videoObject.thumbnailUrl
-            ? [videoObject.thumbnailUrl]
-            : [],
+        thumbnailUrls,
         capturedAt: Date.now()
       }
 

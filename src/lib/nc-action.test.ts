@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 
 import { handleUIError } from "./error-handler"
+import type { BackgroundResponse } from "./messages"
 import { runNcAction } from "./nc-action"
 
 vi.mock("./logger", () => ({
@@ -20,19 +21,24 @@ vi.mock("./error-handler", async () => {
 
 describe("runNcAction", () => {
   it("成功時にフックとトーストが呼ばれること", async () => {
-    const action = vi.fn().mockResolvedValue({ ok: true, data: { ok: 1 } })
+    const action = vi
+      .fn<Promise<BackgroundResponse<{ ok: number }>>, []>()
+      .mockResolvedValue({ ok: true, data: { ok: 1 } })
     const onSuccess = vi.fn()
     const refreshState = vi.fn()
     const showToast = vi.fn()
 
-    const result = await runNcAction(action, {
-      context: "ui:test:success",
-      errorMessage: "fail",
-      successMessage: "ok",
-      showToast,
-      refreshState,
-      onSuccess
-    })
+    const result = await runNcAction<BackgroundResponse<{ ok: number }>>(
+      action,
+      {
+        context: "ui:test:success",
+        errorMessage: "fail",
+        successMessage: "ok",
+        showToast,
+        refreshState,
+        onSuccess
+      }
+    )
 
     expect(result?.ok).toBe(true)
     expect(onSuccess).toHaveBeenCalled()
