@@ -27,10 +27,6 @@ export default function Popup() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>()
 
-  useEffect(() => {
-    void refreshState()
-  }, [])
-
   const refreshState = async () => {
     setLoading(true)
     const response = await runNcAction(
@@ -51,6 +47,10 @@ export default function Popup() {
     setSnapshot(response.data as PopupSnapshot)
     setLoading(false)
   }
+
+  useEffect(() => {
+    void refreshState()
+  }, [])
 
   const toggleOverlay = async (enabled: boolean) => {
     setError(undefined)
