@@ -123,6 +123,7 @@ TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関�
   - TypeScript 推奨ルール (@typescript-eslint/recommended)
   - React 推奨ルール (react/recommended)
   - React Hooks ルール (react-hooks/rules-of-hooks, exhaustive-deps)
+- **React 設定**: `settings.react.version` を `detect` に指定し、React 版本警告を回避
 - **カスタムルール**:
   - `react/react-in-jsx-scope`: off (React 17+ では不要)
   - `@typescript-eslint/no-explicit-any`: warn
