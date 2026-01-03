@@ -40,6 +40,16 @@ export default defineConfig([
   reactHooks.configs.flat["recommended-latest"],
   {
     rules: {
+      // JSX属性やプロパティに渡すハンドラはPromiseを返しても問題にならないため許容する
+      "@typescript-eslint/no-misused-promises": [
+        "error",
+        { checksVoidReturn: { attributes: false, properties: false } }
+      ],
+      // falsyな文字列を活用するため、文字列は対象外にする
+      "@typescript-eslint/prefer-nullish-coalescing": [
+        "error",
+        { ignorePrimitives: { string: true } }
+      ],
       // React 17+ では不要
       "react/react-in-jsx-scope": "off",
       // TypeScript では PropTypes は不要
@@ -51,6 +61,15 @@ export default defineConfig([
   {
     files: ["**/*.test.ts", "**/*.test.tsx"],
     ...vitest.configs.recommended
+  },
+  {
+    files: ["**/*.stories.ts", "**/*.stories.tsx"],
+    rules: {
+      // Storybookのダミーハンドラは空実装が前提のため許可する
+      "@typescript-eslint/no-empty-function": "off",
+      // Storybookのラッパーコンポーネントは無名関数が多いため許可する
+      "react/display-name": "off"
+    }
   },
   prettierConfig
 ])
