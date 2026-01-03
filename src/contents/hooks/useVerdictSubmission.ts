@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
@@ -22,19 +22,14 @@ export function useVerdictSubmission({
 }: UseVerdictSubmissionParams) {
   const [lastVerdict, setLastVerdict] = useState<Verdict>()
   const [lastEventId, setLastEventId] = useState<number>()
-  const [prevPair, setPrevPair] = useState(() => ({
-    currentVideoId,
-    opponentVideoId
-  }))
 
-  if (
-    prevPair.currentVideoId !== currentVideoId ||
-    prevPair.opponentVideoId !== opponentVideoId
-  ) {
-    setPrevPair({ currentVideoId, opponentVideoId })
+  // props 由来の動画ペア変更に合わせて状態をリセットするため useEffect で同期する
+  useEffect(() => {
+    // 動画ペアが変わったら前の評価状態をクリア
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLastVerdict(undefined)
     setLastEventId(undefined)
-  }
+  }, [currentVideoId, opponentVideoId])
 
   const submitVerdict = useCallback(
     async (verdict: Verdict) => {
