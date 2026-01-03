@@ -32,9 +32,12 @@ export function useOpponentSelection({
     }
     previousCurrentVideoIdRef.current = currentVideoId
 
-    // ピン状態が最優先
+    // 複雑な優先度ロジック:
+    // 1. ピン優先 → 2. 直前の動画 → 3. 手動選択維持 → 4. 派生状態
+    // この同期は外部システム(recent window)との整合性維持のために必要
     if (pinnedOpponentVideoId) {
       if (opponentVideoId !== pinnedOpponentVideoId) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setOpponentVideoId(pinnedOpponentVideoId)
       }
       return
