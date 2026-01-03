@@ -1,6 +1,6 @@
 import type { NcCategories } from "../../lib/types"
 
-export type CategoryOption = {
+export interface CategoryOption {
   id: string
   name: string
 }

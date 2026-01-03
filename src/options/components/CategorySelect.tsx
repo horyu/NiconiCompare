@@ -1,9 +1,9 @@
-type CategoryOption = {
+interface CategoryOption {
   id: string
   name: string
 }
 
-type CategorySelectProps = {
+interface CategorySelectProps {
   value: string
   options: CategoryOption[]
   onChange: (value: string) => void

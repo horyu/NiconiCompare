@@ -20,7 +20,7 @@ import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { writeSessionState } from "../utils/sessionStorage"
 import { EventsTab } from "./EventsTab"
 
-type EventSessionState = {
+interface EventSessionState {
   search: string
   verdict: string
   includeDeleted: boolean

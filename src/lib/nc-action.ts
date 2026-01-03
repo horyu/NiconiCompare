@@ -5,7 +5,7 @@ import type { BackgroundResponse } from "./messages"
 type ToastTone = "success" | "error"
 type ShowToast = (tone: ToastTone, text: string) => void
 
-type NcActionOptions<TResponse extends BackgroundResponse> = {
+interface NcActionOptions<TResponse extends BackgroundResponse> {
   context: string
   errorMessage: string
   successMessage?: string

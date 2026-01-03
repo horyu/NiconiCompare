@@ -14,7 +14,7 @@ import { VideosTab } from "./tabs/VideosTab"
 
 type TabKey = "videos" | "events" | "categories" | "settings" | "data"
 
-type Toast = {
+interface Toast {
   tone: "success" | "error"
   text: string
 }

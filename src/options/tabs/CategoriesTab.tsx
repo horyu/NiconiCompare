@@ -6,7 +6,7 @@ import { runNcAction } from "../../lib/nc-action"
 import { CategorySelect } from "../components/CategorySelect"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 
-type CategoriesTabProps = {
+interface CategoriesTabProps {
   snapshot: OptionsSnapshot
   refreshState: (silent?: boolean) => Promise<void>
   showToast: (tone: "success" | "error", text: string) => void

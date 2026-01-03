@@ -6,7 +6,7 @@ import { sendNcMessage } from "../../lib/messages"
 import { runNcAction } from "../../lib/nc-action"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 
-type DataTabProps = {
+interface DataTabProps {
   snapshot: OptionsSnapshot
   bytesInUse: number | null
   refreshState: (silent?: boolean) => Promise<void>

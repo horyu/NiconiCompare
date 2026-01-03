@@ -7,9 +7,12 @@ import {
 import { logger } from "../../lib/logger"
 import type { AuthorProfile, VideoSnapshot } from "../../lib/types"
 
-type VideoData = { video: VideoSnapshot; author: AuthorProfile }
+interface VideoData {
+  video: VideoSnapshot
+  author: AuthorProfile
+}
 
-type UseVideoObserverParams = {
+interface UseVideoObserverParams {
   enabled: boolean
   isReady: boolean
   onStatusMessage?: (message?: string) => void

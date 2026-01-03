@@ -1,6 +1,6 @@
 import type { NcVideos } from "../../lib/types"
 
-type EventVideoLabelProps = {
+interface EventVideoLabelProps {
   videoId: string
   video: NcVideos[string] | undefined
   authorName?: string

@@ -1,4 +1,4 @@
-type ExportMenuProps = {
+interface ExportMenuProps {
   open: boolean
   onToggle: () => void
   onExport: (format: "csv" | "tsv", withBom: boolean) => void

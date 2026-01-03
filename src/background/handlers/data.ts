@@ -9,13 +9,10 @@ import {
 } from "../../lib/constants"
 import { logger } from "../../lib/logger"
 import type {
-  NcAuthors,
-  NcCategories,
   NcEventsBucket,
   NcMeta,
   NcSettings,
   NcState,
-  NcVideos,
   StorageShape
 } from "../../lib/types"
 import { readAllStorage, setStorageData } from "../services/storage"
@@ -72,21 +69,20 @@ export async function handleExportData() {
 
 export async function handleImportData(data: Partial<StorageShape>) {
   const nextSettings = normalizeSettings(
-    (data[STORAGE_KEYS.settings] as NcSettings) ?? DEFAULT_SETTINGS
+    data[STORAGE_KEYS.settings] ?? DEFAULT_SETTINGS
   )
-  const nextEvents =
-    (data[STORAGE_KEYS.events] as NcEventsBucket) ?? DEFAULT_EVENTS_BUCKET
-  const rawState = (data[STORAGE_KEYS.state] as NcState) ?? DEFAULT_STATE
-  const rawMeta = (data[STORAGE_KEYS.meta] as NcMeta) ?? DEFAULT_META
+  const nextEvents = data[STORAGE_KEYS.events] ?? DEFAULT_EVENTS_BUCKET
+  const rawState = data[STORAGE_KEYS.state] ?? DEFAULT_STATE
+  const rawMeta = data[STORAGE_KEYS.meta] ?? DEFAULT_META
   const nextMeta: NcMeta = {
     ...DEFAULT_META,
     ...rawMeta,
     lastCleanupAt: Number(rawMeta.lastCleanupAt ?? 0)
   }
-  const nextVideos = (data[STORAGE_KEYS.videos] as NcVideos) ?? {}
-  const nextAuthors = (data[STORAGE_KEYS.authors] as NcAuthors) ?? {}
+  const nextVideos = data[STORAGE_KEYS.videos] ?? {}
+  const nextAuthors = data[STORAGE_KEYS.authors] ?? {}
   const nextCategories = normalizeCategories(
-    (data[STORAGE_KEYS.categories] as NcCategories) ?? DEFAULT_CATEGORIES
+    data[STORAGE_KEYS.categories] ?? DEFAULT_CATEGORIES
   )
 
   const eventItems = Array.isArray(nextEvents.items)

@@ -14,7 +14,7 @@ import type {
   VideoSnapshot
 } from "../../lib/types"
 
-type StateResponse = {
+interface StateResponse {
   settings: NcSettings
   state: NcState
   categories: NcCategories
@@ -41,7 +41,7 @@ export function useOverlayState() {
     if (!chrome.storage?.onChanged) return
 
     const handleStorageChange = (
-      changes: { [key: string]: chrome.storage.StorageChange },
+      changes: Record<string, chrome.storage.StorageChange>,
       areaName: string
     ) => {
       if (areaName !== "local") return

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
-type UseAutoCloseParams = {
+interface UseAutoCloseParams {
   autoCloseMs: number
   enabled: boolean
   forceKeepOpen: boolean

@@ -15,7 +15,7 @@ import { buildCategoryOptions } from "../utils/categories"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
 import { scrollIntoViewIfNeeded } from "../utils/scroll"
 
-type EventsTabProps = {
+interface EventsTabProps {
   snapshot: OptionsSnapshot
   eventShowThumbnails: boolean
   onToggleEventThumbnails: (checked: boolean) => void
@@ -23,7 +23,7 @@ type EventsTabProps = {
   showToast: (tone: "success" | "error", text: string) => void
 }
 
-type EventSessionState = {
+interface EventSessionState {
   search: string
   verdict: string
   includeDeleted: boolean
@@ -573,7 +573,7 @@ export const EventsTab = ({
   )
 }
 
-type ExportRow = {
+interface ExportRow {
   id: string
   occurredAt: string
   status: string
@@ -588,12 +588,12 @@ type ExportRow = {
   verdict: string
 }
 
-type ExportRowParams = {
+interface ExportRowParams {
   events: CompareEvent[]
   snapshot: OptionsSnapshot
 }
 
-type EventRowProps = {
+interface EventRowProps {
   event: CompareEvent
   showCategoryOps: boolean
   isBusy: boolean
@@ -743,7 +743,7 @@ const EventRow = ({
   )
 }
 
-type FilterEventsParams = {
+interface FilterEventsParams {
   events: CompareEvent[]
   includeDeleted: boolean
   verdict: string

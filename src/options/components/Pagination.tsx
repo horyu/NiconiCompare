@@ -1,4 +1,4 @@
-type PaginationProps = {
+interface PaginationProps {
   current: number
   total: number
   onChange: (next: number) => void

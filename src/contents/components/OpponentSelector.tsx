@@ -1,6 +1,6 @@
 import type { VideoSnapshot } from "../../lib/types"
 
-type OpponentSelectorProps = {
+interface OpponentSelectorProps {
   hasSelectableCandidates: boolean
   isPinned: boolean
   opponentVideoId?: string

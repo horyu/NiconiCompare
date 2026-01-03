@@ -3,7 +3,7 @@ import type { CompareEvent, NcVideos } from "../../lib/types"
 export function updateRecentWindow(
   current: string[],
   size: number,
-  candidates: Array<string | undefined>,
+  candidates: (string | undefined)[],
   videos: NcVideos
 ) {
   const maxSize = Math.max(1, size)

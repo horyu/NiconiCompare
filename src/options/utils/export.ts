@@ -1,5 +1,5 @@
 type ExportFormat = "csv" | "tsv"
-type ExportDownloadOptions = {
+interface ExportDownloadOptions {
   content: string
   format: ExportFormat
   withBom: boolean
@@ -7,7 +7,7 @@ type ExportDownloadOptions = {
   categoryName?: string
 }
 
-type DelimitedTextInput = {
+interface DelimitedTextInput {
   header: string[]
   rows: string[][]
   delimiter: string

@@ -7,22 +7,22 @@ import type {
   VideoSnapshot
 } from "./types"
 
-export type RegisterSnapshotMessage = {
+export interface RegisterSnapshotMessage {
   type: typeof MESSAGE_TYPES.registerSnapshot
   payload: { video: VideoSnapshot; author: AuthorProfile }
 }
 
-export type UpdateCurrentVideoMessage = {
+export interface UpdateCurrentVideoMessage {
   type: typeof MESSAGE_TYPES.updateCurrentVideo
   payload: { videoId: string }
 }
 
-export type UpdatePinnedOpponentMessage = {
+export interface UpdatePinnedOpponentMessage {
   type: typeof MESSAGE_TYPES.updatePinnedOpponent
   payload: { videoId?: string }
 }
 
-export type RecordEventMessage = {
+export interface RecordEventMessage {
   type: typeof MESSAGE_TYPES.recordEvent
   payload: {
     currentVideoId: string
@@ -32,69 +32,69 @@ export type RecordEventMessage = {
   }
 }
 
-export type DeleteEventMessage = {
+export interface DeleteEventMessage {
   type: typeof MESSAGE_TYPES.deleteEvent
   payload: {
     eventId: number
   }
 }
 
-export type RestoreEventMessage = {
+export interface RestoreEventMessage {
   type: typeof MESSAGE_TYPES.restoreEvent
   payload: {
     eventId: number
   }
 }
 
-export type PurgeEventMessage = {
+export interface PurgeEventMessage {
   type: typeof MESSAGE_TYPES.purgeEvent
   payload: {
     eventId: number
   }
 }
 
-export type DeleteAllDataMessage = {
+export interface DeleteAllDataMessage {
   type: typeof MESSAGE_TYPES.deleteAllData
 }
 
-export type ToggleOverlayMessage = {
+export interface ToggleOverlayMessage {
   type: typeof MESSAGE_TYPES.toggleOverlay
   payload: { enabled: boolean }
 }
 
-export type UpdateSettingsMessage = {
+export interface UpdateSettingsMessage {
   type: typeof MESSAGE_TYPES.updateSettings
   payload: Partial<NcSettings>
 }
 
-export type MetaActionMessage = {
+export interface MetaActionMessage {
   type: typeof MESSAGE_TYPES.metaAction
   payload: { action: "cleanup" }
 }
 
-export type RebuildRatingsMessage = {
+export interface RebuildRatingsMessage {
   type: typeof MESSAGE_TYPES.rebuildRatings
 }
 
-export type ExportDataMessage = {
+export interface ExportDataMessage {
   type: typeof MESSAGE_TYPES.exportData
 }
 
-export type ImportDataMessage = {
+export interface ImportDataMessage {
   type: typeof MESSAGE_TYPES.importData
   payload: {
     data: Partial<StorageShape>
   }
 }
 
-export type CreateCategoryMessage = {
+export interface CreateCategoryMessage {
   type: typeof MESSAGE_TYPES.createCategory
   payload: {
     name: string
   }
 }
 
-export type UpdateCategoryNameMessage = {
+export interface UpdateCategoryNameMessage {
   type: typeof MESSAGE_TYPES.updateCategoryName
   payload: {
     categoryId: string
@@ -102,7 +102,7 @@ export type UpdateCategoryNameMessage = {
   }
 }
 
-export type DeleteCategoryMessage = {
+export interface DeleteCategoryMessage {
   type: typeof MESSAGE_TYPES.deleteCategory
   payload: {
     categoryId: string
@@ -110,28 +110,28 @@ export type DeleteCategoryMessage = {
   }
 }
 
-export type ReorderCategoriesMessage = {
+export interface ReorderCategoriesMessage {
   type: typeof MESSAGE_TYPES.reorderCategories
   payload: {
     order: string[]
   }
 }
 
-export type UpdateOverlayVisibleIdsMessage = {
+export interface UpdateOverlayVisibleIdsMessage {
   type: typeof MESSAGE_TYPES.updateOverlayVisibleIds
   payload: {
     overlayVisibleIds: string[]
   }
 }
 
-export type UpdateActiveCategoryMessage = {
+export interface UpdateActiveCategoryMessage {
   type: typeof MESSAGE_TYPES.updateActiveCategory
   payload: {
     categoryId: string
   }
 }
 
-export type BulkMoveEventsMessage = {
+export interface BulkMoveEventsMessage {
   type: typeof MESSAGE_TYPES.bulkMoveEvents
   payload: {
     eventIds: number[]
@@ -139,7 +139,7 @@ export type BulkMoveEventsMessage = {
   }
 }
 
-export type RequestStateMessage = {
+export interface RequestStateMessage {
   type: typeof MESSAGE_TYPES.requestState
 }
 

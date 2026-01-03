@@ -21,7 +21,7 @@ import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { writeSessionState } from "../utils/sessionStorage"
 import { VideosTab } from "./VideosTab"
 
-type VideoSessionState = {
+interface VideoSessionState {
   search: string
   author: string
   categoryId: string

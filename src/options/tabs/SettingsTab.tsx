@@ -12,7 +12,7 @@ import { runNcAction } from "../../lib/nc-action"
 import type { NcSettings } from "../../lib/types"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 
-type SettingsTabProps = {
+interface SettingsTabProps {
   snapshot: OptionsSnapshot
   refreshState: (silent?: boolean) => Promise<void>
   showToast: (tone: "success" | "error", text: string) => void

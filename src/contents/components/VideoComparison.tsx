@@ -3,7 +3,7 @@ import type { ReactNode } from "react"
 import type { VideoSnapshot } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
 
-type VideoComparisonProps = {
+interface VideoComparisonProps {
   currentVideoId?: string
   opponentVideoId?: string
   opponentSelector: ReactNode

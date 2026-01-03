@@ -1,6 +1,6 @@
 import type { Verdict } from "../../lib/types"
 
-type VerdictButtonsProps = {
+interface VerdictButtonsProps {
   canSubmit: boolean
   lastVerdict?: Verdict
   onSubmit: (verdict: Verdict) => void

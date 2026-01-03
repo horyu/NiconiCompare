@@ -19,7 +19,7 @@ import type {
   NcVideos
 } from "../../lib/types"
 
-export type StorageDataByKey = {
+export interface StorageDataByKey {
   settings: NcSettings
   state: NcState
   videos: NcVideos

@@ -1,6 +1,6 @@
 export type Verdict = "better" | "same" | "worse"
 
-export type VideoSnapshot = {
+export interface VideoSnapshot {
   videoId: string
   title: string
   authorUrl: string
@@ -8,13 +8,13 @@ export type VideoSnapshot = {
   capturedAt: number
 }
 
-export type AuthorProfile = {
+export interface AuthorProfile {
   authorUrl: string
   name: string
   capturedAt: number
 }
 
-export type CompareEvent = {
+export interface CompareEvent {
   id: number
   timestamp: number
   currentVideoId: string
@@ -24,7 +24,7 @@ export type CompareEvent = {
   categoryId: string
 }
 
-export type RatingSnapshot = {
+export interface RatingSnapshot {
   videoId: string
   rating: number
   rd: number
@@ -32,7 +32,7 @@ export type RatingSnapshot = {
   updatedFromEventId: number
 }
 
-export type NcSettings = {
+export interface NcSettings {
   recentWindowSize: number
   popupRecentCount: number
   overlayAndCaptureEnabled: boolean
@@ -46,26 +46,26 @@ export type NcSettings = {
   }
 }
 
-export type NcState = {
+export interface NcState {
   currentVideoId: string
   pinnedOpponentVideoId: string
   recentWindow: string[]
 }
 
-export type NcEventsBucket = {
+export interface NcEventsBucket {
   items: CompareEvent[]
   nextId: number
 }
 
 export type NcRatings = Record<string, Record<string, RatingSnapshot>>
 
-export type Category = {
+export interface Category {
   id: string
   name: string
   createdAt: number
 }
 
-export type NcCategories = {
+export interface NcCategories {
   items: Record<string, Category>
   order: string[]
   overlayVisibleIds: string[]
@@ -74,13 +74,13 @@ export type NcCategories = {
 export type NcVideos = Record<string, VideoSnapshot>
 export type NcAuthors = Record<string, AuthorProfile>
 
-export type NcMeta = {
+export interface NcMeta {
   lastReplayEventId: number
   schemaVersion: string
   lastCleanupAt: number
 }
 
-export type StorageShape = {
+export interface StorageShape {
   nc_settings: NcSettings
   nc_state: NcState
   nc_videos: NcVideos

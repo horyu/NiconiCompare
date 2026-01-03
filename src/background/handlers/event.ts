@@ -18,7 +18,7 @@ import {
 } from "../utils/rating-helpers"
 import { updateRecentWindow } from "../utils/recent-window"
 
-type RecordEventPayload = {
+interface RecordEventPayload {
   currentVideoId: string
   opponentVideoId: string
   verdict: Verdict

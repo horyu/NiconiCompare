@@ -1,13 +1,13 @@
 import { handleUIError } from "./error-handler"
 import type { AuthorProfile, VideoSnapshot } from "./types"
 
-type LdAuthor = {
+interface LdAuthor {
   "@id"?: string
   url?: string
   name?: string
 }
 
-type LdVideoObject = {
+interface LdVideoObject {
   "@type"?: string
   author?: LdAuthor | LdAuthor[]
   identifier?: string
@@ -32,7 +32,7 @@ const asLdVideoObject = (value: unknown): LdVideoObject | undefined =>
 /**
  * Video data extracted from JSON-LD
  */
-export type VideoData = {
+export interface VideoData {
   video: VideoSnapshot
   author: AuthorProfile
 }
@@ -40,7 +40,7 @@ export type VideoData = {
 /**
  * Callbacks for observer events
  */
-export type ObserverCallbacks = {
+export interface ObserverCallbacks {
   onVideoDataChange: (data: VideoData) => void
   onError: (message: string) => void
 }
@@ -113,7 +113,7 @@ export function extractVideoDataFromLdJson(): VideoData | undefined {
             .find((item) => item?.["@type"] === "VideoObject")
         : asLdVideoObject(parsed)
 
-      if (!videoObject || videoObject["@type"] !== "VideoObject") continue
+      if (videoObject?.["@type"] !== "VideoObject") continue
 
       const authorData = Array.isArray(videoObject.author)
         ? asLdAuthor(videoObject.author[0])

@@ -14,7 +14,7 @@ import type {
 } from "../lib/types"
 import { createWatchUrl } from "../lib/url"
 
-type PopupSnapshot = {
+interface PopupSnapshot {
   settings: NcSettings
   events: NcEventsBucket
   meta: NcMeta

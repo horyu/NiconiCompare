@@ -12,13 +12,13 @@ import { buildCategoryOptions } from "../utils/categories"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
 import { scrollIntoViewIfNeeded } from "../utils/scroll"
 
-type VideosTabProps = {
+interface VideosTabProps {
   snapshot: OptionsSnapshot
   refreshState: (silent?: boolean) => Promise<void>
   showToast: (tone: "success" | "error", text: string) => void
 }
 
-type VideoSessionState = {
+interface VideoSessionState {
   search: string
   author: string
   categoryId: string
@@ -384,7 +384,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
   )
 }
 
-type ExportRow = {
+interface ExportRow {
   videoId: string
   thumbnailUrl: string
   videoUrl: string
@@ -399,7 +399,7 @@ type ExportRow = {
   lastVerdictAt: string
 }
 
-type ExportRowParams = {
+interface ExportRowParams {
   videos: VideoSnapshot[]
   snapshot: OptionsSnapshot
   ratingsByCategory: Record<string, RatingSnapshot>
@@ -410,7 +410,7 @@ type ExportRowParams = {
   >
 }
 
-type VideoRowProps = {
+interface VideoRowProps {
   video: VideoSnapshot
   rating?: RatingSnapshot
   authorName?: string
@@ -474,7 +474,7 @@ const VideoRow = ({
   )
 }
 
-type FilterVideosParams = {
+interface FilterVideosParams {
   videos: OptionsSnapshot["videos"]
   authors: OptionsSnapshot["authors"]
   ratingsByCategory: Record<string, RatingSnapshot>

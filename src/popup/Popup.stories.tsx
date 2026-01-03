@@ -15,7 +15,7 @@ import type {
 } from "../lib/types"
 import Popup from "./index"
 
-type PopupData = {
+interface PopupData {
   settings: typeof DEFAULT_SETTINGS
   events: NcEventsBucket
   meta: NcMeta

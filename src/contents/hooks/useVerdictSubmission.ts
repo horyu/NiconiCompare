@@ -7,7 +7,7 @@ import type { Verdict } from "../../lib/types"
 
 export const RETRY_MESSAGE = "保存に失敗しました。再度お試しください。"
 
-type UseVerdictSubmissionParams = {
+interface UseVerdictSubmissionParams {
   currentVideoId?: string
   opponentVideoId?: string
   refreshState: () => Promise<void>

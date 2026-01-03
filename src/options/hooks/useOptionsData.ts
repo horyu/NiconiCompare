@@ -14,7 +14,7 @@ import type {
   NcVideos
 } from "../../lib/types"
 
-export type OptionsSnapshot = {
+export interface OptionsSnapshot {
   settings: NcSettings
   state: NcState
   videos: NcVideos
@@ -25,7 +25,7 @@ export type OptionsSnapshot = {
   categories: NcCategories
 }
 
-type UseOptionsDataResult = {
+interface UseOptionsDataResult {
   snapshot?: OptionsSnapshot
   loading: boolean
   error?: string

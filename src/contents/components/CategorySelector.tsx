@@ -1,6 +1,6 @@
 import type { NcCategories } from "../../lib/types"
 
-type CategorySelectorProps = {
+interface CategorySelectorProps {
   categories: NcCategories
   activeCategoryId: string
   onChange: (categoryId: string) => void
