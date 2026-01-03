@@ -68,20 +68,16 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
   )
   const [videoPage, setVideoPage] = useState(initialState.page)
   const paginationTopRef = useRef<HTMLDivElement | null>(null)
-  const shouldResetPageRef = useRef(false)
 
   // 無効なカテゴリIDの場合はデフォルトに置き換え
   const effectiveCategoryId = snapshot.categories.items[videoCategoryId]
     ? videoCategoryId
     : snapshot.categories.defaultId
 
-  useEffect(() => {
-    if (!shouldResetPageRef.current) {
-      shouldResetPageRef.current = true
-      return
-    }
+  // フィルタ変更時にページを1にリセット
+  const resetToFirstPage = useCallback(() => {
     setVideoPage(1)
-  }, [videoSearch, videoAuthor, videoSort, videoSortOrder, effectiveCategoryId])
+  }, [])
 
   useEffect(() => {
     persistState({
@@ -212,6 +208,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
 
   const handleCategoryChange = (categoryId: string) => {
     setVideoCategoryId(categoryId)
+    resetToFirstPage()
   }
 
   const handlePageChange = (nextPage: number) => {
@@ -255,7 +252,10 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
           検索
           <input
             value={videoSearch}
-            onChange={(event) => setVideoSearch(event.target.value)}
+            onChange={(event) => {
+              setVideoSearch(event.target.value)
+              resetToFirstPage()
+            }}
             className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             placeholder="タイトル・IDで検索"
           />
@@ -269,6 +269,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
               onChange={(event) => {
                 const next = event.target.value.trim()
                 setVideoAuthor(next.length === 0 ? "all" : next)
+                resetToFirstPage()
               }}
               className="border border-slate-200 rounded-md px-2 py-1 w-full bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               placeholder="全て / 投稿者を入力"
@@ -276,7 +277,10 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
             {videoAuthor !== "all" && (
               <button
                 type="button"
-                onClick={() => setVideoAuthor("all")}
+                onClick={() => {
+                  setVideoAuthor("all")
+                  resetToFirstPage()
+                }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 bg-white px-1 text-base leading-none z-10 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
                 aria-label="投稿者フィルタをクリア">
                 ×
@@ -302,7 +306,10 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
           ソート
           <select
             value={videoSort}
-            onChange={(event) => setVideoSort(event.target.value)}
+            onChange={(event) => {
+              setVideoSort(event.target.value)
+              resetToFirstPage()
+            }}
             className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
             <option value="title">タイトル</option>
             <option value="rating">Rating</option>
@@ -317,9 +324,10 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
           並び順
           <button
             type="button"
-            onClick={() =>
+            onClick={() => {
               setVideoSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
-            }
+              resetToFirstPage()
+            }}
             className="border border-slate-200 rounded-md px-2 py-1 text-left bg-white text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
             {videoSortOrder === "asc" ? "昇順" : "降順"}
           </button>

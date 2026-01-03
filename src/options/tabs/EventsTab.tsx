@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { EVENT_PAGE_SIZE, MESSAGE_TYPES } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
@@ -81,7 +81,6 @@ export const EventsTab = ({
   )
   const [eventPage, setEventPage] = useState(initialState.page)
   const paginationTopRef = useRef<HTMLDivElement | null>(null)
-  const shouldResetPageRef = useRef(false)
   const [eventBusyId, setEventBusyId] = useState<number | null>(null)
   const [moveTargets, setMoveTargets] = useState<Record<number, string>>({})
   const [bulkMoveTargetId, setBulkMoveTargetId] = useState(
@@ -92,13 +91,9 @@ export const EventsTab = ({
     (option) => option.id !== eventCategoryId
   )
 
-  useEffect(() => {
-    if (!shouldResetPageRef.current) {
-      shouldResetPageRef.current = true
-      return
-    }
+  const resetToFirstPage = useCallback(() => {
     setEventPage(1)
-  }, [eventSearch, eventVerdict, eventIncludeDeleted, eventCategoryId])
+  }, [])
 
   useEffect(() => {
     persistState({
@@ -179,6 +174,7 @@ export const EventsTab = ({
   // Handlers
   const handleCategoryChange = (categoryId: string) => {
     setEventCategoryId(categoryId)
+    resetToFirstPage()
   }
 
   const handleExport = (format: "csv" | "tsv", withBom: boolean) => {
@@ -404,7 +400,10 @@ export const EventsTab = ({
           検索
           <input
             value={eventSearch}
-            onChange={(event) => setEventSearch(event.target.value)}
+            onChange={(event) => {
+              setEventSearch(event.target.value)
+              resetToFirstPage()
+            }}
             className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             placeholder="ID・タイトル・動画ID・投稿者で検索"
           />
@@ -413,7 +412,10 @@ export const EventsTab = ({
           評価
           <select
             value={eventVerdict}
-            onChange={(event) => setEventVerdict(event.target.value)}
+            onChange={(event) => {
+              setEventVerdict(event.target.value)
+              resetToFirstPage()
+            }}
             className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
             <option value="all">全て</option>
             <option value="better">勝ち</option>
@@ -434,7 +436,10 @@ export const EventsTab = ({
           <input
             type="checkbox"
             checked={eventIncludeDeleted}
-            onChange={(event) => setEventIncludeDeleted(event.target.checked)}
+            onChange={(event) => {
+              setEventIncludeDeleted(event.target.checked)
+              resetToFirstPage()
+            }}
           />
           無効化済みも表示
         </label>

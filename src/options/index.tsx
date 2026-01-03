@@ -31,14 +31,15 @@ export default function OptionsPage() {
   const { snapshot, loading, error, bytesInUse, refreshState } =
     useOptionsData()
   const [toast, setToast] = useState<Toast | null>(null)
-  const [activeTab, setActiveTab] = useState<TabKey>("videos")
+  const [activeTab, setActiveTabState] = useState<TabKey>("videos")
   const showToast = useCallback((tone: Toast["tone"], text: string) => {
     setToast({ tone, text })
   }, [])
 
-  useEffect(() => {
+  const setActiveTab = useCallback((tab: TabKey) => {
+    setActiveTabState(tab)
     setToast(null)
-  }, [activeTab])
+  }, [])
 
   useEffect(() => {
     const root = document.documentElement
