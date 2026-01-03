@@ -36,14 +36,6 @@ export default function OptionsPage() {
     setToast({ tone, text })
   }, [])
 
-  const [eventShowThumbnails, setEventShowThumbnails] = useState(true)
-
-  useEffect(() => {
-    if (!snapshot) {
-      return
-    }
-    setEventShowThumbnails(snapshot.settings.showEventThumbnails)
-  }, [snapshot])
   useEffect(() => {
     setToast(null)
   }, [activeTab])
@@ -66,8 +58,7 @@ export default function OptionsPage() {
   }, [])
 
   const handleToggleEventThumbnails = async (checked: boolean) => {
-    setEventShowThumbnails(checked)
-    const response = await runNcAction(
+    await runNcAction(
       () =>
         sendNcMessage({
           type: MESSAGE_TYPES.updateSettings,
@@ -80,9 +71,6 @@ export default function OptionsPage() {
         refreshState: () => refreshState(true)
       }
     )
-    if (!response) {
-      setEventShowThumbnails(snapshot?.settings.showEventThumbnails ?? true)
-    }
   }
 
   if (loading) {
@@ -164,7 +152,7 @@ export default function OptionsPage() {
         {activeTab === "events" && (
           <EventsTab
             snapshot={snapshot}
-            eventShowThumbnails={eventShowThumbnails}
+            eventShowThumbnails={snapshot?.settings.showEventThumbnails ?? true}
             onToggleEventThumbnails={handleToggleEventThumbnails}
             refreshState={refreshState}
             showToast={showToast}

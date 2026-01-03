@@ -70,19 +70,24 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
   const paginationTopRef = useRef<HTMLDivElement | null>(null)
   const shouldResetPageRef = useRef(false)
 
+  // 無効なカテゴリIDの場合はデフォルトに置き換え
+  const effectiveCategoryId = snapshot.categories.items[videoCategoryId]
+    ? videoCategoryId
+    : snapshot.categories.defaultId
+
   useEffect(() => {
     if (!shouldResetPageRef.current) {
       shouldResetPageRef.current = true
       return
     }
     setVideoPage(1)
-  }, [videoSearch, videoAuthor, videoSort, videoSortOrder, videoCategoryId])
+  }, [videoSearch, videoAuthor, videoSort, videoSortOrder, effectiveCategoryId])
 
   useEffect(() => {
     persistState({
       search: videoSearch,
       author: videoAuthor,
-      categoryId: videoCategoryId,
+      categoryId: effectiveCategoryId,
       sort: videoSort,
       order: videoSortOrder,
       page: videoPage
@@ -94,14 +99,8 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
     videoSort,
     videoSortOrder,
     videoPage,
-    videoCategoryId
+    effectiveCategoryId
   ])
-
-  useEffect(() => {
-    if (!snapshot.categories.items[videoCategoryId]) {
-      setVideoCategoryId(snapshot.categories.defaultId)
-    }
-  }, [videoCategoryId, snapshot.categories])
 
   const authorOptions = useMemo(() => {
     return Object.values(snapshot.authors).sort((a, b) =>
@@ -114,9 +113,9 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
       buildLastEventByVideo(
         snapshot.events.items,
         snapshot.categories.defaultId,
-        videoCategoryId
+        effectiveCategoryId
       ),
-    [snapshot.events.items, snapshot.categories.defaultId, videoCategoryId]
+    [snapshot.events.items, snapshot.categories.defaultId, effectiveCategoryId]
   )
 
   const verdictCountsByVideo = useMemo(
@@ -124,9 +123,9 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
       buildVerdictCountsByVideo(
         snapshot.events.items,
         snapshot.categories.defaultId,
-        videoCategoryId
+        effectiveCategoryId
       ),
-    [snapshot.events.items, snapshot.categories.defaultId, videoCategoryId]
+    [snapshot.events.items, snapshot.categories.defaultId, effectiveCategoryId]
   )
 
   const filteredVideos = useMemo(
@@ -134,7 +133,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
       filterVideos({
         videos: snapshot.videos,
         authors: snapshot.authors,
-        ratingsByCategory: snapshot.ratings[videoCategoryId] ?? {},
+        ratingsByCategory: snapshot.ratings[effectiveCategoryId] ?? {},
         lastEventByVideo,
         verdictCountsByVideo,
         search: videoSearch,
@@ -146,7 +145,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
       snapshot.videos,
       snapshot.authors,
       snapshot.ratings,
-      videoCategoryId,
+      effectiveCategoryId,
       lastEventByVideo,
       verdictCountsByVideo,
       videoSearch,
@@ -170,7 +169,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
   const hasMissingAuthorData =
     snapshot.events.items.length > 0 &&
     Object.keys(snapshot.authors).length === 0
-  const ratingsByCategory = snapshot.ratings[videoCategoryId] ?? {}
+  const ratingsByCategory = snapshot.ratings[effectiveCategoryId] ?? {}
   const handleExport = (format: "csv" | "tsv", withBom: boolean) => {
     const exportRows = buildExportRows({
       videos: filteredVideos,
@@ -293,7 +292,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
         <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           Rating表示カテゴリ
           <CategorySelect
-            value={videoCategoryId}
+            value={effectiveCategoryId}
             onChange={handleCategoryChange}
             options={categorySelectOptions}
             className="w-full max-w-full"

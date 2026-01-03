@@ -21,23 +21,22 @@ export function useOpponentSelection({
   const hasSelectableCandidates = selectableWindow.length > 0
   const isPinned = !!pinnedOpponentVideoId
 
+  // ピン状態が優先され、なければselectable候補から自動選択
+  const derivedOpponent =
+    pinnedOpponentVideoId || selectableWindow[0] || undefined
+
   useEffect(() => {
     const currentChanged = previousCurrentVideoIdRef.current !== currentVideoId
     if (currentChanged && previousCurrentVideoIdRef.current) {
       pendingPreviousVideoIdRef.current = previousCurrentVideoIdRef.current
     }
+    previousCurrentVideoIdRef.current = currentVideoId
 
+    // ピン状態が最優先
     if (pinnedOpponentVideoId) {
       if (opponentVideoId !== pinnedOpponentVideoId) {
         setOpponentVideoId(pinnedOpponentVideoId)
       }
-      previousCurrentVideoIdRef.current = currentVideoId
-      return
-    }
-
-    if (selectableWindow.length === 0) {
-      setOpponentVideoId(undefined)
-      previousCurrentVideoIdRef.current = currentVideoId
       return
     }
 
@@ -48,24 +47,26 @@ export function useOpponentSelection({
         ? pendingPrevious
         : undefined
 
-    const shouldSelectPrevious =
-      previousSelectable && opponentVideoId !== previousSelectable
-    if (
-      currentChanged ||
-      !opponentVideoId ||
-      !selectableWindow.includes(opponentVideoId) ||
-      shouldSelectPrevious
-    ) {
-      const nextOpponent = previousSelectable ?? selectableWindow[0]
-      setOpponentVideoId(nextOpponent)
-      // 直前の動画が選択された場合のみクリア
-      if (previousSelectable) {
-        pendingPreviousVideoIdRef.current = null
-      }
+    if (previousSelectable) {
+      setOpponentVideoId(previousSelectable)
+      pendingPreviousVideoIdRef.current = null
+      return
     }
 
-    previousCurrentVideoIdRef.current = currentVideoId
-  }, [currentVideoId, opponentVideoId, pinnedOpponentVideoId, selectableWindow])
+    // 手動選択を優先: opponentVideoIdが有効ならそのまま維持
+    if (opponentVideoId && selectableWindow.includes(opponentVideoId)) {
+      return
+    }
+
+    // それ以外は派生状態を適用
+    setOpponentVideoId(derivedOpponent)
+  }, [
+    currentVideoId,
+    opponentVideoId,
+    pinnedOpponentVideoId,
+    selectableWindow,
+    derivedOpponent
+  ])
 
   return {
     hasSelectableCandidates,
