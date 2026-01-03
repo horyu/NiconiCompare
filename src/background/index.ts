@@ -9,7 +9,7 @@ import {
 } from "../lib/constants"
 import { handleBackgroundError } from "../lib/error-handler"
 import type { Message } from "../lib/messages"
-import type { NcCategories, NcSettings, NcState } from "../lib/types"
+import type { NcState } from "../lib/types"
 import {
   handleBulkMoveEvents,
   handleCreateCategory,

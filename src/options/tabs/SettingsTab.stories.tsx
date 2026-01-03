@@ -57,6 +57,7 @@ const withUnsavedSettings = () => {
         inputs.forEach((input, index) => {
           const value = values[index]
           if (!value) return
+          // eslint-disable-next-line @typescript-eslint/unbound-method
           const setter = Object.getOwnPropertyDescriptor(
             HTMLInputElement.prototype,
             "value"
