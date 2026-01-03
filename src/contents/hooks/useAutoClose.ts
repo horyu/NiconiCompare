@@ -15,7 +15,7 @@ export function useAutoClose({
   isHovered,
   isReady
 }: UseAutoCloseParams) {
-  const [showControls, setShowControls] = useState(true)
+  const [timedOut, setTimedOut] = useState(false)
   const autoCloseTimerRef = useRef<number | undefined>(undefined)
 
   const clearAutoCloseTimer = useCallback(() => {
@@ -30,42 +30,45 @@ export function useAutoClose({
     const timeout = autoCloseMs ?? 2000
     autoCloseTimerRef.current = window.setTimeout(() => {
       if (!isHovered) {
-        setShowControls(false)
+        setTimedOut(true)
       }
       autoCloseTimerRef.current = undefined
     }, timeout)
   }, [autoCloseMs, clearAutoCloseTimer, isHovered])
 
+  const showControls =
+    forceKeepOpen || (isReady && enabled && (isHovered || !timedOut))
+
+  // props 由来の条件変化に合わせてリセットするため useEffect で同期する
   useEffect(() => {
-    if (forceKeepOpen) {
-      setShowControls(true)
+    if (forceKeepOpen || !enabled || !isReady || isHovered) {
+      clearAutoCloseTimer()
+      // 表示条件が変わった時はタイムアウト状態を必ず解除
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setTimedOut(false)
+    }
+  }, [clearAutoCloseTimer, enabled, forceKeepOpen, isHovered, isReady])
+
+  useEffect(() => {
+    // タイマーをクリアする条件: forceKeepOpen, 準備未完了, ホバー中
+    if (forceKeepOpen || !isReady || !enabled || isHovered) {
       clearAutoCloseTimer()
       return
     }
 
-    if (!isReady || !enabled) {
-      setShowControls(false)
-      clearAutoCloseTimer()
+    // タイムアウト済みなら何もしない
+    if (timedOut) {
       return
     }
 
-    if (isHovered) {
-      clearAutoCloseTimer()
-      setShowControls(true)
-      return
-    }
-
-    if (!showControls) {
-      return
-    }
-
+    // それ以外はタイマーを開始
     scheduleAutoClose()
   }, [
     enabled,
     forceKeepOpen,
     isHovered,
     isReady,
-    showControls,
+    timedOut,
     clearAutoCloseTimer,
     scheduleAutoClose
   ])
