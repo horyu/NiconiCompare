@@ -8,19 +8,27 @@ import storybook from "eslint-plugin-storybook"
 import { defineConfig } from "eslint/config"
 import tseslint from "typescript-eslint"
 
+// To debug config:
+// pnpm exec eslint --inspect-config
+
 export default defineConfig([
   {
+    name: "Global Ignores",
     ignores: [
       "build/**",
       ".output/**",
       ".wxt/**",
-      "node_modules/**",
       "dist/**",
+      "storybook-static/**",
       "*.js",
-      "!eslint.config.js"
+      "*.mjs",
+      "*.cjs",
+      "!.prettierrc.mjs",
+      "!eslint.config.mjs"
     ]
   },
   {
+    name: "TypeScript Files",
     files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
       parserOptions: {
@@ -34,12 +42,22 @@ export default defineConfig([
       }
     }
   },
-  eslint.configs.recommended,
+  {
+    name: "Base ESLint Rules",
+    ...eslint.configs.recommended
+  },
   tseslint.configs.recommendedTypeChecked,
   tseslint.configs.stylisticTypeChecked,
-  reactPlugin.configs.flat["recommended"],
-  reactHooks.configs.flat["recommended-latest"],
   {
+    name: "React Recommended Rules",
+    ...reactPlugin.configs.flat["recommended"]
+  },
+  {
+    name: "React Hooks Recommended Rules",
+    ...reactHooks.configs.flat["recommended-latest"]
+  },
+  {
+    name: "TypeScript React Overrides",
     rules: {
       // JSX属性やプロパティに渡すハンドラはPromiseを返しても問題にならないため許容する
       "@typescript-eslint/no-misused-promises": [
@@ -60,11 +78,12 @@ export default defineConfig([
     }
   },
   {
-    files: ["**/*.test.ts", "**/*.test.tsx"],
-    ...vitest.configs.recommended
+    ...vitest.configs.recommended,
+    files: ["**/*.test.ts", "**/*.test.tsx"]
   },
   storybook.configs["flat/recommended"],
   {
+    name: "Storybook Stories Overrides",
     files: ["**/*.stories.ts", "**/*.stories.tsx"],
     rules: {
       // Storybookのダミーハンドラは空実装が前提のため許可する
@@ -73,5 +92,8 @@ export default defineConfig([
       "react/display-name": "off"
     }
   },
-  prettierConfig
+  {
+    name: "Prettier Config",
+    ...prettierConfig
+  }
 ])
