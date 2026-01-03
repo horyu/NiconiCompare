@@ -4,6 +4,7 @@ import vitest from "@vitest/eslint-plugin"
 import prettierConfig from "eslint-config-prettier"
 import reactPlugin from "eslint-plugin-react"
 import reactHooks from "eslint-plugin-react-hooks"
+import storybook from "eslint-plugin-storybook"
 import { defineConfig } from "eslint/config"
 import tseslint from "typescript-eslint"
 
@@ -62,6 +63,7 @@ export default defineConfig([
     files: ["**/*.test.ts", "**/*.test.tsx"],
     ...vitest.configs.recommended
   },
+  storybook.configs["flat/recommended"],
   {
     files: ["**/*.stories.ts", "**/*.stories.tsx"],
     rules: {
