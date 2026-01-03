@@ -1,12 +1,9 @@
-import { useCallback, useRef } from "react"
+import { useCallback, useState } from "react"
 
 import { readSessionState, writeSessionState } from "../utils/sessionStorage"
 
 export const useSessionState = <T>(key: string, fallback: T) => {
-  const initialStateRef = useRef<T | undefined>(undefined)
-  if (typeof initialStateRef.current === "undefined") {
-    initialStateRef.current = readSessionState(key, fallback)
-  }
+  const [initialState] = useState<T>(() => readSessionState(key, fallback))
 
   const persistState = useCallback(
     (state: T) => {
@@ -15,5 +12,5 @@ export const useSessionState = <T>(key: string, fallback: T) => {
     [key]
   )
 
-  return { initialState: initialStateRef.current, persistState }
+  return { initialState, persistState }
 }
