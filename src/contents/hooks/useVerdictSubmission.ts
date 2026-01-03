@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
@@ -22,11 +22,19 @@ export function useVerdictSubmission({
 }: UseVerdictSubmissionParams) {
   const [lastVerdict, setLastVerdict] = useState<Verdict>()
   const [lastEventId, setLastEventId] = useState<number>()
+  const [prevPair, setPrevPair] = useState(() => ({
+    currentVideoId,
+    opponentVideoId
+  }))
 
-  useEffect(() => {
+  if (
+    prevPair.currentVideoId !== currentVideoId ||
+    prevPair.opponentVideoId !== opponentVideoId
+  ) {
+    setPrevPair({ currentVideoId, opponentVideoId })
     setLastVerdict(undefined)
     setLastEventId(undefined)
-  }, [currentVideoId, opponentVideoId])
+  }
 
   const submitVerdict = useCallback(
     async (verdict: Verdict) => {
