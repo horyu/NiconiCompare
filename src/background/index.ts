@@ -44,10 +44,10 @@ import { getRawStorageData, setStorageData } from "./services/storage"
 import { normalizeSettings } from "./utils/normalize"
 
 if (chrome?.alarms) {
-  chrome.alarms.create("nc.autoCleanup", { periodInMinutes: 60 * 24 })
+  void chrome.alarms.create("nc.autoCleanup", { periodInMinutes: 60 * 24 })
   chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === "nc.autoCleanup") {
-      runAutoCleanupIfNeeded().catch((error) =>
+      void runAutoCleanupIfNeeded().catch((error) =>
         handleBackgroundError(error, "bg:background:autoCleanup.alarm")
       )
     }
@@ -55,18 +55,18 @@ if (chrome?.alarms) {
 }
 
 chrome.runtime.onInstalled.addListener(() => {
-  initializeBackground("onInstalled")
+  void initializeBackground("onInstalled")
 })
 
 chrome.runtime.onStartup?.addListener(() => {
-  initializeBackground("onStartup")
+  void initializeBackground("onStartup")
 })
 
-initializeBackground("startup")
+void initializeBackground("startup")
 
 chrome.runtime.onMessage.addListener(
   (message: Message, _sender, sendResponse) => {
-    ;(async () => {
+    void (async () => {
       try {
         switch (message.type) {
           case MESSAGE_TYPES.registerSnapshot:

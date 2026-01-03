@@ -21,24 +21,21 @@ vi.mock("./error-handler", async () => {
 
 describe("runNcAction", () => {
   it("成功時にフックとトーストが呼ばれること", async () => {
-    const action = vi
-      .fn<Promise<BackgroundResponse<{ ok: number }>>, []>()
+    const action: () => Promise<BackgroundResponse<{ ok: number }>> = vi
+      .fn()
       .mockResolvedValue({ ok: true, data: { ok: 1 } })
     const onSuccess = vi.fn()
     const refreshState = vi.fn()
     const showToast = vi.fn()
 
-    const result = await runNcAction<BackgroundResponse<{ ok: number }>>(
-      action,
-      {
-        context: "ui:test:success",
-        errorMessage: "fail",
-        successMessage: "ok",
-        showToast,
-        refreshState,
-        onSuccess
-      }
-    )
+    const result = await runNcAction(action, {
+      context: "ui:test:success",
+      errorMessage: "fail",
+      successMessage: "ok",
+      showToast,
+      refreshState,
+      onSuccess
+    })
 
     expect(result?.ok).toBe(true)
     expect(onSuccess).toHaveBeenCalled()

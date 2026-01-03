@@ -66,12 +66,12 @@ export const useOptionsData = (): UseOptionsDataResult => {
   }, [])
 
   useEffect(() => {
-    refreshState()
+    void refreshState()
   }, [refreshState])
 
   useEffect(() => {
     const handler = () => {
-      refreshState(true)
+      void refreshState(true)
     }
     chrome.storage?.onChanged?.addListener(handler)
     return () => {

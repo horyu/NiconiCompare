@@ -107,7 +107,7 @@ export function useOverlayState() {
   }, [loadVideoSnapshots])
 
   useEffect(() => {
-    refreshState()
+    void refreshState()
   }, [refreshState])
 
   return {

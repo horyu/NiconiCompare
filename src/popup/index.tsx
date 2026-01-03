@@ -28,7 +28,7 @@ export default function Popup() {
   const [error, setError] = useState<string>()
 
   useEffect(() => {
-    refreshState()
+    void refreshState()
   }, [])
 
   const refreshState = async () => {
