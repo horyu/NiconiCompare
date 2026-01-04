@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client"
 
 import Popup from "../../popup"
 
-const container = document.getElementById("app")
+const container = document.querySelector("#app")
 
 if (container) {
   createRoot(container).render(

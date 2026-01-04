@@ -1,3 +1,4 @@
+// oxlint-disable-file max-lines
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { EVENT_PAGE_SIZE, MESSAGE_TYPES } from "../../lib/constants"
@@ -224,7 +225,7 @@ export const EventsTab = ({
     if (!confirmed) {
       return
     }
-    const response = await runNcAction(
+    await runNcAction(
       () =>
         sendNcMessage({
           type: MESSAGE_TYPES.bulkMoveEvents,
@@ -241,9 +242,6 @@ export const EventsTab = ({
         refreshState: () => refreshState(true)
       }
     )
-    if (!response) {
-      return
-    }
   }
 
   const handleMoveEvent = async (eventId: number, targetCategoryId: string) => {

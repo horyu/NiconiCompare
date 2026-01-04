@@ -3,8 +3,8 @@
   "plugins": ["eslint", "oxc", "promise", "react", "react-perf", "typescript", "unicorn", "vitest"],
   "categories": {
     "correctness": "error",
-    "suspicious": "warn"
-    // "pedantic": "warn",
+    "suspicious": "warn",
+    "pedantic": "warn"
     // "perf": "warn",
     // "style": "warn",
     // "restriction": "error",
@@ -19,7 +19,13 @@
   "rules": {
     // suspicious
     "no-array-sort": "off",
-    "react-in-jsx-scope": "off"
+    "react-in-jsx-scope": "off",
+    // pedantic
+    "max-lines-per-function": "off",
+    "max-lines": "off",
+    "no-inline-comments": "off",
+    "no-negated-condition": "off",
+    "no-useless-undefined": "off",
   },
   "overrides": [
     //   {

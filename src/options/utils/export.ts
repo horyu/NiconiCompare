@@ -32,9 +32,9 @@ export const buildExportFilename = (
   categoryName?: string
 ) => {
   const now = new Date()
-  const stamp = `${now.getFullYear()}${pad2(now.getMonth() + 1)}${pad2(
-    now.getDate()
-  )}${pad2(now.getHours())}${pad2(now.getMinutes())}${pad2(now.getSeconds())}`
+  const stamp = `${now.getFullYear()}${pad2(now.getMonth() + 1)}${pad2(now.getDate())}${pad2(
+    now.getHours()
+  )}${pad2(now.getMinutes())}${pad2(now.getSeconds())}`
   const categorySuffix =
     categoryName !== undefined
       ? `-${sanitizeFilenameSegment(categoryName)}`
@@ -69,10 +69,10 @@ const escapeField = (value: string, delimiter: string) => {
     text.includes("\r") ||
     text.includes('"')
   ) {
-    return `"${text.replace(/"/g, '""')}"`
+    return `"${text.replaceAll('"', '""')}"`
   }
   return text
 }
 
 const sanitizeFilenameSegment = (value: string) =>
-  value.replace(/[\\/:*?"<>|]/g, "")
+  value.replaceAll(/[\\/:*?"<>|]/g, "")

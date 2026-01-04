@@ -127,7 +127,7 @@ export const DataTab = ({
     try {
       const text = await file.text()
       const data = JSON.parse(text) as Record<string, unknown>
-      const response = await runNcAction(
+      await runNcAction(
         () =>
           sendNcMessage({
             type: MESSAGE_TYPES.importData,
@@ -147,9 +147,6 @@ export const DataTab = ({
           }
         }
       )
-      if (!response) {
-        return
-      }
     } catch (error) {
       handleUIError(error, "ui:options:data:import", showToast)
     } finally {

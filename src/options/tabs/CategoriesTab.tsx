@@ -14,7 +14,7 @@ interface CategoriesTabProps {
 
 const isValidCategoryName = (value: string) => {
   const trimmed = value.trim()
-  if (trimmed.length < 1 || trimmed.length > 50) {
+  if (trimmed.length === 0 || trimmed.length > 50) {
     return false
   }
   if (/[\\/:*?"<>|]/.test(trimmed)) {
@@ -42,7 +42,7 @@ export const CategoriesTab = ({
       showToast("error", "カテゴリ名は1〜50文字で入力してください。")
       return
     }
-    const response = await runNcAction(
+    await runNcAction(
       () =>
         sendNcMessage({
           type: MESSAGE_TYPES.createCategory,
@@ -57,9 +57,6 @@ export const CategoriesTab = ({
         onSuccess: () => setNewCategoryName("")
       }
     )
-    if (!response) {
-      return
-    }
   }
 
   const handleUpdateName = async (categoryId: string, nextName: string) => {
@@ -67,7 +64,7 @@ export const CategoriesTab = ({
       showToast("error", "カテゴリ名は1〜50文字で入力してください。")
       return
     }
-    const response = await runNcAction(
+    await runNcAction(
       () =>
         sendNcMessage({
           type: MESSAGE_TYPES.updateCategoryName,
@@ -81,9 +78,6 @@ export const CategoriesTab = ({
         refreshState: () => refreshState(true)
       }
     )
-    if (!response) {
-      return
-    }
   }
 
   const handleDeleteCategory = async (
@@ -103,7 +97,7 @@ export const CategoriesTab = ({
     if (!confirmed) {
       return
     }
-    const response = await runNcAction(
+    await runNcAction(
       () =>
         sendNcMessage({
           type: MESSAGE_TYPES.deleteCategory,
@@ -117,9 +111,6 @@ export const CategoriesTab = ({
         refreshState: () => refreshState(true)
       }
     )
-    if (!response) {
-      return
-    }
   }
 
   const handleToggleOverlayVisible = async (
@@ -130,7 +121,7 @@ export const CategoriesTab = ({
     const next = checked
       ? Array.from(new Set([...current, categoryId]))
       : current.filter((id) => id !== categoryId)
-    const response = await runNcAction(
+    await runNcAction(
       () =>
         sendNcMessage({
           type: MESSAGE_TYPES.updateOverlayVisibleIds,
@@ -143,9 +134,6 @@ export const CategoriesTab = ({
         refreshState: () => refreshState(true)
       }
     )
-    if (!response) {
-      return
-    }
   }
 
   const handleMove = async (categoryId: string, direction: -1 | 1) => {
@@ -158,7 +146,7 @@ export const CategoriesTab = ({
     const nextOrder = [...order]
     const [removed] = nextOrder.splice(index, 1)
     nextOrder.splice(targetIndex, 0, removed)
-    const response = await runNcAction(
+    await runNcAction(
       () =>
         sendNcMessage({
           type: MESSAGE_TYPES.reorderCategories,
@@ -171,9 +159,6 @@ export const CategoriesTab = ({
         refreshState: () => refreshState(true)
       }
     )
-    if (!response) {
-      return
-    }
   }
 
   const categoryOptions = orderedCategories.map((category) => ({

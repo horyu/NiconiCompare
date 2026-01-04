@@ -20,6 +20,6 @@ export const writeSessionState = (key: string, value: unknown) => {
     }
     sessionStorage.setItem(key, JSON.stringify(value))
   } catch {
-    return
+    // noop
   }
 }

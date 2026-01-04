@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client"
 
 import OptionsPage from "../../options"
 
-const container = document.getElementById("app")
+const container = document.querySelector("#app")
 
 if (container) {
   createRoot(container).render(
