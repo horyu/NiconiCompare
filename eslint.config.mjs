@@ -2,6 +2,7 @@
 import eslint from "@eslint/js"
 import vitest from "@vitest/eslint-plugin"
 import prettierConfig from "eslint-config-prettier"
+import oxlint from "eslint-plugin-oxlint"
 import reactPlugin from "eslint-plugin-react"
 import reactHooks from "eslint-plugin-react-hooks"
 import storybook from "eslint-plugin-storybook"
@@ -23,7 +24,6 @@ export default defineConfig([
       "*.js",
       "*.mjs",
       "*.cjs",
-      "!.prettierrc.mjs",
       "!eslint.config.mjs"
     ]
   },
@@ -95,5 +95,6 @@ export default defineConfig([
   {
     name: "Prettier Config",
     ...prettierConfig
-  }
+  },
+  ...oxlint.buildFromOxlintConfigFile("./.oxlintrc.json")
 ])

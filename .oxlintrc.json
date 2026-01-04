@@ -1,0 +1,59 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "oxc", "promise", "react", "react-perf", "typescript", "unicorn", "vitest"],
+  "categories": {
+    "correctness": "error"
+    // "suspicious": "warn",
+    // "pedantic": "warn",
+    // "perf": "warn",
+    // "style": "warn",
+    // "restriction": "error",
+    // "nursery": "warn"
+  },
+  "env": {
+    "builtin": true,
+    "browser": true,
+    "webextensions": true
+  },
+  "ignorePatterns": ["*.js", "*.mjs", "*.cjs", "!.prettierrc.mjs", "!eslint.config.mjs"]
+  // "rules": {
+  // },
+  // "overrides": [
+  //   {
+  //     "files": ["**/*.ts", "**/*.tsx"],
+  //     "rules": {
+  //       "@typescript-eslint/no-misused-promises": [
+  //         "error",
+  //         {
+  //           "checksVoidReturn": {
+  //             "attributes": false,
+  //             "properties": false
+  //           }
+  //         }
+  //       ],
+  //       "@typescript-eslint/prefer-nullish-coalescing": [
+  //         "error",
+  //         {
+  //           "ignorePrimitives": {
+  //             "string": true
+  //           }
+  //         }
+  //       ],
+  //       "react/jsx-filename-extension": [
+  //         "error",
+  //         {
+  //           "extensions": [".tsx"]
+  //         }
+  //       ]
+  //     }
+  //   },
+  //   {
+  //     "files": ["**/*.stories.ts", "**/*.stories.tsx"],
+  //     "rules": {
+  //       "react-hooks/rules-of-hooks": "off",
+  //       "import/no-anonymous-default-export": "off",
+  //       "no-empty-function": "off"
+  //     }
+  //   }
+  // ]
+}
