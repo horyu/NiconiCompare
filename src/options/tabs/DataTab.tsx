@@ -5,6 +5,7 @@ import { handleUIError } from "../../lib/error-handler"
 import { sendNcMessage } from "../../lib/messages"
 import { runNcAction } from "../../lib/nc-action"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
+import { pad2 } from "../utils/date"
 
 interface DataTabProps {
   snapshot: OptionsSnapshot
@@ -92,7 +93,6 @@ export const DataTab = ({
       const blob = new Blob([data], { type: "application/json" })
       const url = URL.createObjectURL(blob)
       const now = new Date()
-      const pad2 = (value: number) => value.toString().padStart(2, "0")
       const filename = `NiconiCompareData-${now.getFullYear()}${pad2(
         now.getMonth() + 1
       )}${pad2(now.getDate())}${pad2(now.getHours())}${pad2(

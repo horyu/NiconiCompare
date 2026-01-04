@@ -1,3 +1,5 @@
+import { pad2 } from "./date"
+
 type ExportFormat = "csv" | "tsv"
 interface ExportDownloadOptions {
   content: string
@@ -30,7 +32,6 @@ export const buildExportFilename = (
   categoryName?: string
 ) => {
   const now = new Date()
-  const pad2 = (value: number) => value.toString().padStart(2, "0")
   const stamp = `${now.getFullYear()}${pad2(now.getMonth() + 1)}${pad2(
     now.getDate()
   )}${pad2(now.getHours())}${pad2(now.getMinutes())}${pad2(now.getSeconds())}`

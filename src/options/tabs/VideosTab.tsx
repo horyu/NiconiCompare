@@ -609,6 +609,7 @@ const getVideoSorter = ({
   const compareByRating = (left: VideoItem, right: VideoItem) =>
     (ratingsByCategory[right.videoId]?.rating ?? 0) -
     (ratingsByCategory[left.videoId]?.rating ?? 0)
+  // oxlint-disable-next-line consistent-function-scoping 一貫性のために無視
   const compareByTitle = (left: VideoItem, right: VideoItem) =>
     left.title.localeCompare(right.title)
   const compareByRd = (left: VideoItem, right: VideoItem) =>
