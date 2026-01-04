@@ -1,7 +1,7 @@
 import { produce } from "immer"
 
 import { withStorageUpdates } from "../services/storage"
-import { updateRecentWindow } from "../utils/recent-window"
+import { updateRecentWindow } from "../utils/recentWindow"
 
 export async function handleUpdateCurrentVideo(videoId: string) {
   await withStorageUpdates({

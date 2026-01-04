@@ -2,7 +2,7 @@ import { produce } from "immer"
 
 import type { NcEventsBucket } from "../../lib/types"
 import { withStorageUpdates } from "../services/storage"
-import { rebuildRatingsFromEvents } from "../utils/rating-helpers"
+import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
 
 export async function handleDeleteEvent(eventId: number) {
   const result = await withStorageUpdates({

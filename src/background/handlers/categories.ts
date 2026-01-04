@@ -3,7 +3,7 @@ import { produce } from "immer"
 import { normalizeCategories } from "../../lib/categories"
 import { DEFAULT_CATEGORY_ID } from "../../lib/constants"
 import { withStorageUpdates } from "../services/storage"
-import { rebuildRatingsFromEvents } from "../utils/rating-helpers"
+import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
 
 export async function handleCreateCategory(name: string) {
   const result = await withStorageUpdates({

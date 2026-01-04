@@ -1,4 +1,4 @@
-import { handleUIError } from "./error-handler"
+import { handleUIError } from "./errorHandler"
 import type { AuthorProfile, VideoSnapshot } from "./types"
 
 interface LdAuthor {
@@ -59,7 +59,7 @@ export function observeLdJsonChanges(
   if (!head) {
     handleUIError(
       "document.head is missing; ld+json observer disabled.",
-      "ui:dom-observer:missing-head"
+      "ui:domObserver:missing-head"
     )
     callbacks.onError("動画情報を取得できません")
     return undefined
@@ -159,7 +159,7 @@ export function extractVideoDataFromLdJson(): VideoData | undefined {
 
       return { video, author }
     } catch (error) {
-      handleUIError(error, "ui:dom-observer:parse-ld-json")
+      handleUIError(error, "ui:domObserver:parse-ld-json")
     }
   }
   return undefined

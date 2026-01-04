@@ -1,4 +1,4 @@
-import { handleUIError, NcError } from "./error-handler"
+import { handleUIError, NcError } from "./errorHandler"
 import { logger } from "./logger"
 import type { BackgroundResponse } from "./messages"
 

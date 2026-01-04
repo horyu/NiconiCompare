@@ -7,7 +7,7 @@ import {
   DEFAULT_STATE,
   MESSAGE_TYPES
 } from "../lib/constants"
-import { handleBackgroundError } from "../lib/error-handler"
+import { handleBackgroundError } from "../lib/errorHandler"
 import type { Message } from "../lib/messages"
 import type { NcState } from "../lib/types"
 import {
@@ -29,7 +29,7 @@ import {
   handleDeleteEvent,
   handlePurgeEvent,
   handleRestoreEvent
-} from "./handlers/event-lifecycle"
+} from "./handlers/eventLifecycle"
 import { handleMetaAction } from "./handlers/meta"
 import { handleRebuildRatings } from "./handlers/ratings"
 import { handleToggleOverlay, handleUpdateSettings } from "./handlers/settings"

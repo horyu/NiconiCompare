@@ -1,9 +1,9 @@
 import { useRef, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
-import { handleUIError } from "../../lib/error-handler"
+import { handleUIError } from "../../lib/errorHandler"
 import { sendNcMessage } from "../../lib/messages"
-import { runNcAction } from "../../lib/nc-action"
+import { runNcAction } from "../../lib/ncAction"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { pad2 } from "../utils/date"
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
-import { handleUIError } from "../../lib/error-handler"
+import { handleUIError } from "../../lib/errorHandler"
 import { sendNcMessage } from "../../lib/messages"
 import type {
   NcAuthors,

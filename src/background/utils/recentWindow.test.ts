@@ -4,7 +4,7 @@ import type { CompareEvent, NcVideos } from "../../lib/types"
 import {
   rebuildRecentWindowFromEvents,
   updateRecentWindow
-} from "./recent-window"
+} from "./recentWindow"
 
 describe("updateRecentWindow", () => {
   const videos: NcVideos = {

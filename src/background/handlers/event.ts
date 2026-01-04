@@ -15,8 +15,8 @@ import { withStorageUpdates } from "../services/storage"
 import {
   getOrCreateRatingSnapshot,
   rebuildRatingsFromEvents
-} from "../utils/rating-helpers"
-import { updateRecentWindow } from "../utils/recent-window"
+} from "../utils/ratingHelpers"
+import { updateRecentWindow } from "../utils/recentWindow"
 
 interface RecordEventPayload {
   currentVideoId: string

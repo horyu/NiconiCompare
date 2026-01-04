@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { EVENT_PAGE_SIZE, MESSAGE_TYPES } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
-import { runNcAction } from "../../lib/nc-action"
+import { runNcAction } from "../../lib/ncAction"
 import type { CompareEvent, Verdict } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
 import { CategorySelect } from "../components/CategorySelect"

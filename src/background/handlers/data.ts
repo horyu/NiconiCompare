@@ -17,8 +17,8 @@ import type {
 } from "../../lib/types"
 import { readAllStorage, setStorageData } from "../services/storage"
 import { normalizeSettings } from "../utils/normalize"
-import { rebuildRatingsFromEvents } from "../utils/rating-helpers"
-import { rebuildRecentWindowFromEvents } from "../utils/recent-window"
+import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
+import { rebuildRecentWindowFromEvents } from "../utils/recentWindow"
 
 export async function handleDeleteAllData() {
   await setStorageData({

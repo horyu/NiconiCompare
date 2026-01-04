@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
-import { runNcAction } from "../../lib/nc-action"
+import { runNcAction } from "../../lib/ncAction"
 import type { Verdict } from "../../lib/types"
 
 export const RETRY_MESSAGE = "保存に失敗しました。再度お試しください。"

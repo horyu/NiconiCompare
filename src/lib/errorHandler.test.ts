@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { handleBackgroundError, handleUIError, NcError } from "./error-handler"
+import { handleBackgroundError, handleUIError, NcError } from "./errorHandler"
 import { logger } from "./logger"
 
 vi.mock("./logger", () => ({

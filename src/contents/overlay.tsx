@@ -2,7 +2,7 @@ import { useCallback, useState } from "react"
 
 import { MESSAGE_TYPES } from "../lib/constants"
 import { sendNcMessage } from "../lib/messages"
-import { runNcAction } from "../lib/nc-action"
+import { runNcAction } from "../lib/ncAction"
 import type { AuthorProfile, VideoSnapshot } from "../lib/types"
 import { CategorySelector } from "./components/CategorySelector"
 import { OpponentSelector } from "./components/OpponentSelector"

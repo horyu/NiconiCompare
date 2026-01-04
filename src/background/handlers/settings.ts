@@ -1,8 +1,8 @@
 import type { NcSettings } from "../../lib/types"
 import { getStorageData, setStorageData } from "../services/storage"
 import { normalizeSettings } from "../utils/normalize"
-import { rebuildRatingsFromEvents } from "../utils/rating-helpers"
-import { rebuildRecentWindowFromEvents } from "../utils/recent-window"
+import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
+import { rebuildRecentWindowFromEvents } from "../utils/recentWindow"
 
 export async function handleToggleOverlay(enabled: boolean) {
   const { settings } = await getStorageData(["settings"])

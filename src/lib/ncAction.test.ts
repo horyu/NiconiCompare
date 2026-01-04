@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { handleUIError } from "./error-handler"
+import { handleUIError } from "./errorHandler"
 import type { BackgroundResponse } from "./messages"
-import { runNcAction } from "./nc-action"
+import { runNcAction } from "./ncAction"
 
 vi.mock("./logger", () => ({
   logger: {
@@ -10,9 +10,9 @@ vi.mock("./logger", () => ({
   }
 }))
 
-vi.mock("./error-handler", async () => {
+vi.mock("./errorHandler", async () => {
   const actual =
-    await vi.importActual<typeof import("./error-handler")>("./error-handler")
+    await vi.importActual<typeof import("./errorHandler")>("./errorHandler")
   return {
     ...actual,
     handleUIError: vi.fn()

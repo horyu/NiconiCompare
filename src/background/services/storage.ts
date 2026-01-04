@@ -6,7 +6,7 @@ import {
   DEFAULT_STATE,
   STORAGE_KEYS
 } from "../../lib/constants"
-import { handleBackgroundError } from "../../lib/error-handler"
+import { handleBackgroundError } from "../../lib/errorHandler"
 import { logger } from "../../lib/logger"
 import type {
   NcAuthors,

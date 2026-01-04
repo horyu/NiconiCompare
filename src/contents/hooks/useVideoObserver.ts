@@ -3,7 +3,7 @@ import { useEffect } from "react"
 import {
   extractVideoDataFromLdJson,
   observeLdJsonChanges
-} from "../../lib/dom-observer"
+} from "../../lib/domObserver"
 import { logger } from "../../lib/logger"
 import type { AuthorProfile, VideoSnapshot } from "../../lib/types"
 
