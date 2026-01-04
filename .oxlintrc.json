@@ -1,11 +1,11 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["eslint", "oxc", "promise", "react", "react-perf", "typescript", "unicorn", "vitest"],
+  "plugins": ["eslint", "oxc", "promise", "react", "typescript", "unicorn", "vitest"],
   "categories": {
     "correctness": "error",
     "suspicious": "warn",
-    "pedantic": "warn"
-    // "perf": "warn",
+    "pedantic": "warn",
+    "perf": "warn",
     // "style": "warn",
     // "restriction": "error",
     // "nursery": "warn"
