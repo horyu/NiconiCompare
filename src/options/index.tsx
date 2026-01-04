@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 
 import "../style.css"
-
 import { MESSAGE_TYPES } from "../lib/constants"
 import { sendNcMessage } from "../lib/messages"
 import { runNcAction } from "../lib/nc-action"

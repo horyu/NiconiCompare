@@ -3,7 +3,6 @@ import { createShadowRootUi } from "wxt/utils/content-script-ui/shadow-root"
 import { defineContentScript } from "wxt/utils/define-content-script"
 
 import "../style.css"
-
 import Overlay from "../contents/overlay"
 
 export default defineContentScript({
