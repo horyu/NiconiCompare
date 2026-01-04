@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState } from "react"
+import {
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction
+} from "react"
 
 interface UseOpponentSelectionParams {
   currentVideoId: string
@@ -6,11 +12,19 @@ interface UseOpponentSelectionParams {
   recentWindow: string[]
 }
 
+interface UseOpponentSelectionResult {
+  hasSelectableCandidates: boolean
+  isPinned: boolean
+  opponentVideoId: string | undefined
+  selectableWindow: string[]
+  setOpponentVideoId: Dispatch<SetStateAction<string | undefined>>
+}
+
 export function useOpponentSelection({
   currentVideoId,
   pinnedOpponentVideoId,
   recentWindow
-}: UseOpponentSelectionParams) {
+}: UseOpponentSelectionParams): UseOpponentSelectionResult {
   const [opponentVideoId, setOpponentVideoId] = useState<string | undefined>(
     undefined
   )

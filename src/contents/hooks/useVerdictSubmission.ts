@@ -14,12 +14,18 @@ interface UseVerdictSubmissionParams {
   onStatusMessage?: (message?: string) => void
 }
 
+interface UseVerdictSubmissionResult {
+  lastVerdict: Verdict | undefined
+  lastEventId: number | undefined
+  submitVerdict: (verdict: Verdict) => Promise<void>
+}
+
 export function useVerdictSubmission({
   currentVideoId,
   opponentVideoId,
   refreshState,
   onStatusMessage
-}: UseVerdictSubmissionParams) {
+}: UseVerdictSubmissionParams): UseVerdictSubmissionResult {
   const [lastVerdict, setLastVerdict] = useState<Verdict>()
   const [lastEventId, setLastEventId] = useState<number>()
 
@@ -32,7 +38,7 @@ export function useVerdictSubmission({
   }, [currentVideoId, opponentVideoId])
 
   const submitVerdict = useCallback(
-    async (verdict: Verdict) => {
+    async (verdict: Verdict): Promise<void> => {
       if (lastVerdict === verdict) {
         if (!lastEventId) {
           setLastVerdict(undefined)

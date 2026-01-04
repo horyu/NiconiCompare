@@ -190,7 +190,7 @@ chrome.runtime.onMessage.addListener(
   }
 )
 
-async function ensureDefaults() {
+async function ensureDefaults(): Promise<void> {
   const result = await getRawStorageData([
     "settings",
     "state",
@@ -257,7 +257,7 @@ async function ensureDefaults() {
   }
 }
 
-async function initializeBackground(context: string) {
+async function initializeBackground(context: string): Promise<void> {
   try {
     await ensureDefaults()
     await runAutoCleanupIfNeeded()

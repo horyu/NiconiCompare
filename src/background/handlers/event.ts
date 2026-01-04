@@ -25,7 +25,9 @@ interface RecordEventPayload {
   eventId?: number
 }
 
-export async function handleRecordEvent(payload: RecordEventPayload) {
+export async function handleRecordEvent(
+  payload: RecordEventPayload
+): Promise<number> {
   const result = await withStorageUpdates({
     keys: ["events", "state", "settings", "ratings", "videos"],
     context: "bg:events:record",
@@ -79,6 +81,9 @@ export async function handleRecordEvent(payload: RecordEventPayload) {
     }
   })
 
+  if (result === undefined) {
+    throw new Error("Failed to record event")
+  }
   return result
 }
 

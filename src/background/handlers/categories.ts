@@ -5,7 +5,7 @@ import { DEFAULT_CATEGORY_ID } from "../../lib/constants"
 import { withStorageUpdates } from "../services/storage"
 import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
 
-export async function handleCreateCategory(name: string) {
+export async function handleCreateCategory(name: string): Promise<string> {
   const result = await withStorageUpdates({
     keys: ["categories"],
     context: "bg:categories:create",
@@ -29,7 +29,7 @@ export async function handleCreateCategory(name: string) {
 export async function handleUpdateCategoryName(
   categoryId: string,
   name: string
-) {
+): Promise<void> {
   await withStorageUpdates({
     keys: ["categories"],
     context: "bg:categories:updateName",
@@ -49,7 +49,7 @@ export async function handleUpdateCategoryName(
 export async function handleDeleteCategory(
   categoryId: string,
   moveToCategoryId?: string
-) {
+): Promise<void> {
   if (categoryId === DEFAULT_CATEGORY_ID) {
     throw new Error("Default category cannot be deleted")
   }
@@ -115,7 +115,7 @@ export async function handleDeleteCategory(
   })
 }
 
-export async function handleReorderCategories(order: string[]) {
+export async function handleReorderCategories(order: string[]): Promise<void> {
   await withStorageUpdates({
     keys: ["categories"],
     context: "bg:categories:reorder",
@@ -147,7 +147,7 @@ export async function handleReorderCategories(order: string[]) {
 
 export async function handleUpdateOverlayVisibleIds(
   overlayVisibleIds: string[]
-) {
+): Promise<void> {
   await withStorageUpdates({
     keys: ["categories"],
     context: "bg:categories:updateOverlayVisibleIds",
@@ -171,7 +171,9 @@ export async function handleUpdateOverlayVisibleIds(
   })
 }
 
-export async function handleUpdateActiveCategory(categoryId: string) {
+export async function handleUpdateActiveCategory(
+  categoryId: string
+): Promise<void> {
   await withStorageUpdates({
     keys: ["categories", "settings"],
     context: "bg:categories:updateActive",
@@ -198,7 +200,7 @@ export async function handleUpdateActiveCategory(categoryId: string) {
 export async function handleBulkMoveEvents(
   eventIds: number[],
   targetCategoryId: string
-) {
+): Promise<void> {
   await withStorageUpdates({
     keys: ["categories", "events", "settings"],
     context: "bg:categories:bulkMove",

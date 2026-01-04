@@ -1,10 +1,16 @@
+import type { ReactElement } from "react"
+
 interface ExportMenuProps {
   open: boolean
   onToggle: () => void
   onExport: (format: "csv" | "tsv", withBom: boolean) => void
 }
 
-export const ExportMenu = ({ open, onToggle, onExport }: ExportMenuProps) => {
+export const ExportMenu = ({
+  open,
+  onToggle,
+  onExport
+}: ExportMenuProps): ReactElement => {
   return (
     <div className="relative">
       <button

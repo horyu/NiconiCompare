@@ -5,7 +5,7 @@ export function updateRecentWindow(
   size: number,
   candidates: (string | undefined)[],
   videos: NcVideos
-) {
+): string[] {
   const maxSize = Math.max(1, size)
   const result: string[] = []
   const seen = new Set<string>()
@@ -39,7 +39,7 @@ export function rebuildRecentWindowFromEvents(
   events: CompareEvent[],
   size: number,
   videos: NcVideos
-) {
+): string[] {
   if (size <= 0) {
     return []
   }

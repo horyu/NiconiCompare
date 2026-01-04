@@ -68,11 +68,11 @@ export function observeLdJsonChanges(
   // Internal state for debouncing (encapsulated in closure)
   let isScheduled = false
 
-  const scheduleLdJsonProcessing = () => {
+  const scheduleLdJsonProcessing = (): void => {
     if (isScheduled) return
     isScheduled = true
 
-    const runner = () => {
+    const runner = (): void => {
       isScheduled = false
       const videoData = extractVideoDataFromLdJson()
       if (videoData) {

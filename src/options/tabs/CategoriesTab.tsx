@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useMemo, useState, type ReactElement } from "react"
 
 import { DEFAULT_CATEGORY_ID, MESSAGE_TYPES } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
@@ -12,7 +12,7 @@ interface CategoriesTabProps {
   showToast: (tone: "success" | "error", text: string) => void
 }
 
-const isValidCategoryName = (value: string) => {
+const isValidCategoryName = (value: string): boolean => {
   const trimmed = value.trim()
   if (trimmed.length === 0 || trimmed.length > 50) {
     return false
@@ -27,7 +27,7 @@ export const CategoriesTab = ({
   snapshot,
   refreshState,
   showToast
-}: CategoriesTabProps) => {
+}: CategoriesTabProps): ReactElement => {
   const [newCategoryName, setNewCategoryName] = useState("")
   const [moveTargets, setMoveTargets] = useState<Record<string, string>>({})
 
@@ -37,7 +37,7 @@ export const CategoriesTab = ({
       .filter(Boolean)
   }, [snapshot.categories])
 
-  const handleCreateCategory = async () => {
+  const handleCreateCategory = async (): Promise<void> => {
     if (!isValidCategoryName(newCategoryName)) {
       showToast("error", "カテゴリ名は1〜50文字で入力してください。")
       return
@@ -59,7 +59,10 @@ export const CategoriesTab = ({
     )
   }
 
-  const handleUpdateName = async (categoryId: string, nextName: string) => {
+  const handleUpdateName = async (
+    categoryId: string,
+    nextName: string
+  ): Promise<void> => {
     if (!isValidCategoryName(nextName)) {
       showToast("error", "カテゴリ名は1〜50文字で入力してください。")
       return
@@ -83,7 +86,7 @@ export const CategoriesTab = ({
   const handleDeleteCategory = async (
     categoryId: string,
     moveToCategoryId?: string
-  ) => {
+  ): Promise<void> => {
     const target = snapshot.categories.items[categoryId]
     const targetName = target?.name ?? categoryId
     const moveTargetName = moveToCategoryId
@@ -116,7 +119,7 @@ export const CategoriesTab = ({
   const handleToggleOverlayVisible = async (
     categoryId: string,
     checked: boolean
-  ) => {
+  ): Promise<void> => {
     const current = snapshot.categories.overlayVisibleIds
     const next = checked
       ? Array.from(new Set([...current, categoryId]))
@@ -136,7 +139,10 @@ export const CategoriesTab = ({
     )
   }
 
-  const handleMove = async (categoryId: string, direction: -1 | 1) => {
+  const handleMove = async (
+    categoryId: string,
+    direction: -1 | 1
+  ): Promise<void> => {
     const { order } = snapshot.categories
     const index = order.indexOf(categoryId)
     const targetIndex = index + direction

@@ -1,7 +1,7 @@
 export const scrollIntoViewIfNeeded = (
   target: HTMLElement | null,
   options?: ScrollIntoViewOptions
-) => {
+): void => {
   if (!target) {
     return
   }

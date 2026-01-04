@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useRef, useState, type ReactElement } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
 import { handleUIError } from "../../lib/errorHandler"
@@ -19,7 +19,7 @@ export const DataTab = ({
   bytesInUse,
   refreshState,
   showToast
-}: DataTabProps) => {
+}: DataTabProps): ReactElement => {
   const [deletingAll, setDeletingAll] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [importing, setImporting] = useState(false)
@@ -30,7 +30,7 @@ export const DataTab = ({
     ? new Date(snapshot.meta.lastCleanupAt).toLocaleString()
     : "未実行"
 
-  const handleCleanup = async () => {
+  const handleCleanup = async (): Promise<void> => {
     await runNcAction(
       () =>
         sendNcMessage({
@@ -45,7 +45,7 @@ export const DataTab = ({
     )
   }
 
-  const handleDeleteAllData = async () => {
+  const handleDeleteAllData = async (): Promise<void> => {
     const confirmed = confirm(
       "全データを削除します。設定・カテゴリ・評価履歴・レーティング・動画/投稿者データ・メタ情報を初期化します。続行しますか？"
     )
@@ -72,7 +72,7 @@ export const DataTab = ({
     }
   }
 
-  const handleExport = async () => {
+  const handleExport = async (): Promise<void> => {
     setExporting(true)
     try {
       const response = await runNcAction(
@@ -111,7 +111,7 @@ export const DataTab = ({
     }
   }
 
-  const handleImport = async () => {
+  const handleImport = async (): Promise<void> => {
     const file = importFileRef.current?.files?.[0]
     if (!file) {
       showToast("error", "インポートするJSONを選択してください。")

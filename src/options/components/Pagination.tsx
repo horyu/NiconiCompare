@@ -1,10 +1,16 @@
+import type { ReactElement } from "react"
+
 interface PaginationProps {
   current: number
   total: number
   onChange: (next: number) => void
 }
 
-export const Pagination = ({ current, total, onChange }: PaginationProps) => {
+export const Pagination = ({
+  current,
+  total,
+  onChange
+}: PaginationProps): ReactElement => {
   const canGoPrev = current > 1
   const canGoNext = current < total
   const pageOptions = Array.from({ length: total }, (_, index) => index + 1)

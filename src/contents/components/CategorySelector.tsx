@@ -1,3 +1,5 @@
+import type { ReactElement } from "react"
+
 import type { NcCategories } from "../../lib/types"
 
 interface CategorySelectorProps {
@@ -10,7 +12,7 @@ export function CategorySelector({
   categories,
   activeCategoryId,
   onChange
-}: CategorySelectorProps) {
+}: CategorySelectorProps): ReactElement {
   const visibleIds =
     categories.overlayVisibleIds.length > 0
       ? categories.overlayVisibleIds

@@ -1,3 +1,5 @@
+import type { ReactElement } from "react"
+
 import type { VideoSnapshot } from "../../lib/types"
 
 interface OpponentSelectorProps {
@@ -20,8 +22,8 @@ export function OpponentSelector({
   onTogglePinned,
   selectableWindow,
   videoSnapshots
-}: OpponentSelectorProps) {
-  const formatVideoLabel = (videoId?: string) => {
+}: OpponentSelectorProps): ReactElement {
+  const formatVideoLabel = (videoId?: string): string => {
     if (!videoId) return ""
     const snapshot = videoSnapshots[videoId]
     if (snapshot?.title) {

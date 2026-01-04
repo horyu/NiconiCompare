@@ -1,7 +1,7 @@
 import { getStorageData, setStorageData } from "../services/storage"
 import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
 
-export async function handleRebuildRatings() {
+export async function handleRebuildRatings(): Promise<void> {
   const { settings, events } = await getStorageData(["events", "settings"])
   const nextRatings = rebuildRatingsFromEvents(events.items, settings)
 

@@ -19,7 +19,7 @@ export const buildDelimitedText = ({
   header,
   rows,
   delimiter
-}: DelimitedTextInput) => {
+}: DelimitedTextInput): string => {
   const lines = [header, ...rows].map((cols) =>
     cols.map((value) => escapeField(value, delimiter)).join(delimiter)
   )
@@ -30,7 +30,7 @@ export const buildExportFilename = (
   prefix: string,
   format: ExportFormat,
   categoryName?: string
-) => {
+): string => {
   const now = new Date()
   const stamp = `${now.getFullYear()}${pad2(now.getMonth() + 1)}${pad2(now.getDate())}${pad2(
     now.getHours()
@@ -48,7 +48,7 @@ export const downloadDelimitedFile = ({
   withBom,
   filenamePrefix,
   categoryName
-}: ExportDownloadOptions) => {
+}: ExportDownloadOptions): void => {
   const payload = withBom && format === "csv" ? `\uFEFF${content}` : content
   const blob = new Blob([payload], {
     type: "text/plain;charset=utf-8"
@@ -61,7 +61,7 @@ export const downloadDelimitedFile = ({
   URL.revokeObjectURL(url)
 }
 
-const escapeField = (value: string, delimiter: string) => {
+const escapeField = (value: string, delimiter: string): string => {
   const text = value ?? ""
   if (
     text.includes(delimiter) ||
@@ -74,5 +74,5 @@ const escapeField = (value: string, delimiter: string) => {
   return text
 }
 
-const sanitizeFilenameSegment = (value: string) =>
+const sanitizeFilenameSegment = (value: string): string =>
   value.replaceAll(/[\\/:*?"<>|]/g, "")

@@ -24,7 +24,7 @@ export function useVideoObserver({
   isReady,
   onStatusMessage,
   onVideoChange
-}: UseVideoObserverParams) {
+}: UseVideoObserverParams): void {
   useEffect(() => {
     if (!isReady || !enabled) {
       return

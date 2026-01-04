@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ReactElement } from "react"
 
 import "../style.css"
 import { MESSAGE_TYPES } from "../lib/constants"
@@ -21,12 +21,12 @@ interface PopupSnapshot {
   categories: NcCategories
 }
 
-export default function Popup() {
+export default function Popup(): ReactElement {
   const [snapshot, setSnapshot] = useState<PopupSnapshot>()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>()
 
-  const refreshState = async () => {
+  const refreshState = async (): Promise<void> => {
     setLoading(true)
     const response = await runNcAction(
       () =>
@@ -54,7 +54,7 @@ export default function Popup() {
     void refreshState()
   }, [])
 
-  const toggleOverlay = async (enabled: boolean) => {
+  const toggleOverlay = async (enabled: boolean): Promise<void> => {
     setError(undefined)
     const response = await runNcAction(
       () =>
@@ -173,7 +173,7 @@ function buildRecentEvents(
   limit: number,
   categoryId: string,
   defaultCategoryId: string
-) {
+): NcEventsBucket["items"] {
   return [...events.items]
     .filter((event) => !event.disabled)
     .filter((event) => (event.categoryId ?? defaultCategoryId) === categoryId)
@@ -181,7 +181,7 @@ function buildRecentEvents(
     .slice(0, Math.max(1, limit))
 }
 
-function labelVerdict(verdict: string) {
+function labelVerdict(verdict: string): string {
   switch (verdict) {
     case "better":
       return ">"
@@ -197,7 +197,7 @@ function labelVerdict(verdict: string) {
 function renderVideoCard(
   video: PopupSnapshot["videos"][string] | undefined,
   videoId: string
-) {
+): ReactElement {
   const thumbnailUrl = video?.thumbnailUrls?.[0]
   const watchUrl = createWatchUrl(videoId)
   return (

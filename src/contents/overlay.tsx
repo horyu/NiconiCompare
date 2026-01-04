@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useState, type ReactElement } from "react"
 
 import { MESSAGE_TYPES } from "../lib/constants"
 import { sendNcMessage } from "../lib/messages"
@@ -22,7 +22,7 @@ const keepOverlayEnvValue = String(
 )
 const forceKeepOverlayOpen = keepOverlayEnvValue.toLowerCase() === "true"
 
-export default function Overlay() {
+export default function Overlay(): ReactElement | null {
   const [isHovered, setIsHovered] = useState(false)
   const {
     currentVideoId,

@@ -15,7 +15,8 @@ import type {
   NcAuthors,
   NcRatings,
   NcVideos,
-  RatingSnapshot
+  RatingSnapshot,
+  VideoSnapshot
 } from "../../lib/types"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { writeSessionState } from "../utils/sessionStorage"
@@ -51,7 +52,11 @@ const baseSnapshot: OptionsSnapshot = {
   categories: { ...DEFAULT_CATEGORIES }
 }
 
-const createVideo = (videoId: string, title: string, authorUrl: string) => ({
+const createVideo = (
+  videoId: string,
+  title: string,
+  authorUrl: string
+): VideoSnapshot => ({
   videoId,
   title,
   authorUrl,

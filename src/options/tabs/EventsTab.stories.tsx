@@ -151,7 +151,7 @@ const withSessionState = (state: Partial<EventSessionState>) => {
   )
 }
 
-const withLoadingOverlay = (Story: () => ReactElement) => (
+const withLoadingOverlay = (Story: () => ReactElement): ReactElement => (
   <div className="relative">
     <Story />
     <div className="absolute inset-0 bg-white/70 flex items-center justify-center text-sm font-semibold text-slate-700">

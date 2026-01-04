@@ -14,7 +14,11 @@ export function useAutoClose({
   forceKeepOpen,
   isHovered,
   isReady
-}: UseAutoCloseParams) {
+}: UseAutoCloseParams): {
+  clearAutoCloseTimer: () => void
+  scheduleAutoClose: () => void
+  showControls: boolean
+} {
   const [timedOut, setTimedOut] = useState(false)
   const autoCloseTimerRef = useRef<number | undefined>(undefined)
 

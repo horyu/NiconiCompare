@@ -14,7 +14,7 @@ export class NcError extends Error {
 type ToastTone = "success" | "error"
 type ShowToast = (tone: ToastTone, text: string) => void
 
-export function handleBackgroundError(error: unknown, context: string) {
+export function handleBackgroundError(error: unknown, context: string): void {
   logger.error(`[${context}]`, error)
 }
 
@@ -23,7 +23,7 @@ export function handleUIError(
   context: string,
   showToast?: ShowToast,
   userMessage?: string
-) {
+): void {
   logger.error(`[${context}]`, error)
 
   if (!showToast) {

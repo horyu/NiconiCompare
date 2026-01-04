@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState, type ReactElement } from "react"
 
 import "../style.css"
 import { MESSAGE_TYPES } from "../lib/constants"
@@ -26,7 +26,7 @@ const TAB_LABELS: { key: TabKey; label: string }[] = [
   { key: "data", label: "データ操作" }
 ]
 
-export default function OptionsPage() {
+export default function OptionsPage(): ReactElement {
   const { snapshot, loading, error, bytesInUse, refreshState } =
     useOptionsData()
   const [toast, setToast] = useState<Toast | null>(null)
@@ -57,7 +57,9 @@ export default function OptionsPage() {
     }
   }, [])
 
-  const handleToggleEventThumbnails = async (checked: boolean) => {
+  const handleToggleEventThumbnails = async (
+    checked: boolean
+  ): Promise<void> => {
     await runNcAction(
       () =>
         sendNcMessage({

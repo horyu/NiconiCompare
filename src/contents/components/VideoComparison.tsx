@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import type { ReactElement, ReactNode } from "react"
 
 import type { VideoSnapshot } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
@@ -15,8 +15,8 @@ export function VideoComparison({
   opponentVideoId,
   opponentSelector,
   videoSnapshots
-}: VideoComparisonProps) {
-  const formatVideoLabel = (videoId?: string) => {
+}: VideoComparisonProps): ReactElement {
+  const formatVideoLabel = (videoId?: string): string => {
     if (!videoId) return ""
     const snapshot = videoSnapshots[videoId]
     if (snapshot?.title) {
@@ -25,7 +25,7 @@ export function VideoComparison({
     return videoId
   }
 
-  const getThumbnailUrl = (videoId?: string) => {
+  const getThumbnailUrl = (videoId?: string): string | undefined => {
     if (!videoId) return undefined
     return videoSnapshots[videoId]?.thumbnailUrls?.[0]
   }

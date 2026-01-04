@@ -39,7 +39,16 @@
     ],
     "unicorn/numeric-separators-style": "error",
     "unicorn/prefer-logical-operator-over-ternary": "error",
-    "unicorn/switch-case-braces": ["error", "avoid"]
+    "unicorn/switch-case-braces": ["error", "avoid"],
+    // restriction
+    "typescript/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": true,
+        "allowDirectConstAssertionInArrowFunctions": true,
+        "allowTypedFunctionExpressions": true
+      }
+    ]
   },
   "overrides": [
     //   {

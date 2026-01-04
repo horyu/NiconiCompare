@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement
+} from "react"
 
 import { VIDEO_PAGE_SIZE } from "../../lib/constants"
 import type { RatingSnapshot, VideoSnapshot } from "../../lib/types"
@@ -51,7 +58,7 @@ const DEFAULT_VIDEO_SESSION_STATE: VideoSessionState = {
   page: 1
 }
 
-export const VideosTab = ({ snapshot }: VideosTabProps) => {
+export const VideosTab = ({ snapshot }: VideosTabProps): ReactElement => {
   const { initialState, persistState } = useSessionState(
     SESSION_KEY,
     DEFAULT_VIDEO_SESSION_STATE
@@ -166,7 +173,7 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
     snapshot.events.items.length > 0 &&
     Object.keys(snapshot.authors).length === 0
   const ratingsByCategory = snapshot.ratings[effectiveCategoryId] ?? {}
-  const handleExport = (format: "csv" | "tsv", withBom: boolean) => {
+  const handleExport = (format: "csv" | "tsv", withBom: boolean): void => {
     const exportRows = buildExportRows({
       videos: filteredVideos,
       snapshot,
@@ -206,12 +213,12 @@ export const VideosTab = ({ snapshot }: VideosTabProps) => {
 
   const categorySelectOptions = buildCategoryOptions(snapshot.categories)
 
-  const handleCategoryChange = (categoryId: string) => {
+  const handleCategoryChange = (categoryId: string): void => {
     setVideoCategoryId(categoryId)
     resetToFirstPage()
   }
 
-  const handlePageChange = (nextPage: number) => {
+  const handlePageChange = (nextPage: number): void => {
     if (nextPage === videoPage) {
       return
     }
@@ -431,7 +438,7 @@ const VideoRow = ({
   authorName,
   verdictCounts,
   lastVerdictAt
-}: VideoRowProps) => {
+}: VideoRowProps): ReactElement => {
   const verdictTotal =
     verdictCounts.wins + verdictCounts.draws + verdictCounts.losses
   return (
@@ -500,7 +507,7 @@ const buildLastEventByVideo = (
   events: OptionsSnapshot["events"]["items"],
   defaultCategoryId: string,
   categoryId: string
-) => {
+): Map<string, number> => {
   const map = new Map<string, number>()
   for (const event of events) {
     if (event.disabled) continue
@@ -522,10 +529,12 @@ const buildVerdictCountsByVideo = (
   events: OptionsSnapshot["events"]["items"],
   defaultCategoryId: string,
   categoryId: string
-) => {
+): Map<string, { wins: number; draws: number; losses: number }> => {
   const map = new Map<string, { wins: number; draws: number; losses: number }>()
 
-  const ensure = (videoId: string) => {
+  const ensure = (
+    videoId: string
+  ): { wins: number; draws: number; losses: number } => {
     const current = map.get(videoId)
     if (current) {
       return current
@@ -567,7 +576,7 @@ const filterVideos = ({
   author,
   sort,
   order
-}: FilterVideosParams) => {
+}: FilterVideosParams): VideoSnapshot[] => {
   const normalizedSearch = search.trim().toLowerCase()
   const filtered = Object.values(videos).filter((video) => {
     const hasRating = Boolean(ratingsByCategory[video.videoId])
@@ -604,21 +613,21 @@ const getVideoSorter = ({
     string,
     { wins: number; draws: number; losses: number }
   >
-}) => {
+}): ((left: VideoSnapshot, right: VideoSnapshot) => number) => {
   type VideoItem = VideoSnapshot
-  const compareByRating = (left: VideoItem, right: VideoItem) =>
+  const compareByRating = (left: VideoItem, right: VideoItem): number =>
     (ratingsByCategory[right.videoId]?.rating ?? 0) -
     (ratingsByCategory[left.videoId]?.rating ?? 0)
   // oxlint-disable-next-line consistent-function-scoping 一貫性のために無視
-  const compareByTitle = (left: VideoItem, right: VideoItem) =>
+  const compareByTitle = (left: VideoItem, right: VideoItem): number =>
     left.title.localeCompare(right.title)
-  const compareByRd = (left: VideoItem, right: VideoItem) =>
+  const compareByRd = (left: VideoItem, right: VideoItem): number =>
     (ratingsByCategory[right.videoId]?.rd ?? 0) -
     (ratingsByCategory[left.videoId]?.rd ?? 0)
-  const compareByLastVerdict = (left: VideoItem, right: VideoItem) =>
+  const compareByLastVerdict = (left: VideoItem, right: VideoItem): number =>
     (lastEventByVideo.get(right.videoId) ?? 0) -
     (lastEventByVideo.get(left.videoId) ?? 0)
-  const compareByEvalCount = (left: VideoItem, right: VideoItem) => {
+  const compareByEvalCount = (left: VideoItem, right: VideoItem): number => {
     const leftCounts = verdictCountsByVideo.get(left.videoId)
     const rightCounts = verdictCountsByVideo.get(right.videoId)
     const leftTotal = leftCounts
@@ -629,10 +638,10 @@ const getVideoSorter = ({
       : 0
     return rightTotal - leftTotal
   }
-  const compareByWins = (left: VideoItem, right: VideoItem) =>
+  const compareByWins = (left: VideoItem, right: VideoItem): number =>
     (verdictCountsByVideo.get(right.videoId)?.wins ?? 0) -
     (verdictCountsByVideo.get(left.videoId)?.wins ?? 0)
-  const compareByLosses = (left: VideoItem, right: VideoItem) =>
+  const compareByLosses = (left: VideoItem, right: VideoItem): number =>
     (verdictCountsByVideo.get(right.videoId)?.losses ?? 0) -
     (verdictCountsByVideo.get(left.videoId)?.losses ?? 0)
 

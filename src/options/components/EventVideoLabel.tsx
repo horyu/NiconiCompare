@@ -1,3 +1,5 @@
+import type { ReactElement } from "react"
+
 import type { NcVideos } from "../../lib/types"
 
 interface EventVideoLabelProps {
@@ -12,7 +14,7 @@ export const EventVideoLabel = ({
   video,
   authorName,
   showThumbnail
-}: EventVideoLabelProps) => {
+}: EventVideoLabelProps): ReactElement => {
   const thumbnailUrl = video?.thumbnailUrls?.[0]
   if (!video) {
     return (

@@ -19,7 +19,7 @@ const resolveLogLevel = (): LogLevel => {
 
 const currentLevel = resolveLogLevel()
 
-const shouldLog = (level: LogLevel) =>
+const shouldLog = (level: LogLevel): boolean =>
   LOG_LEVELS[level] <= LOG_LEVELS[currentLevel]
 
 export const logger = {

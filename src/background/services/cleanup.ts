@@ -2,7 +2,7 @@ import { getStorageData, setStorageData } from "./storage"
 
 const AUTO_CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000
 
-export async function runAutoCleanupIfNeeded() {
+export async function runAutoCleanupIfNeeded(): Promise<void> {
   const { meta } = await getStorageData(["meta"])
   const lastCleanupAt = Number(meta.lastCleanupAt ?? 0)
   if (Date.now() - lastCleanupAt >= AUTO_CLEANUP_INTERVAL_MS) {
@@ -10,7 +10,7 @@ export async function runAutoCleanupIfNeeded() {
   }
 }
 
-export async function performCleanup() {
+export async function performCleanup(): Promise<void> {
   const { events, videos, authors, ratings, meta, state } =
     await getStorageData([
       "events",

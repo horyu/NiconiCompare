@@ -13,7 +13,7 @@ export const readSessionState = <T>(key: string, fallback: T): T => {
   }
 }
 
-export const writeSessionState = (key: string, value: unknown) => {
+export const writeSessionState = (key: string, value: unknown): void => {
   try {
     if (typeof sessionStorage === "undefined") {
       return

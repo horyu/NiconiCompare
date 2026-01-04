@@ -4,7 +4,7 @@ import type { NcEventsBucket } from "../../lib/types"
 import { withStorageUpdates } from "../services/storage"
 import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
 
-export async function handleDeleteEvent(eventId: number) {
+export async function handleDeleteEvent(eventId: number): Promise<boolean> {
   const result = await withStorageUpdates({
     keys: ["events", "settings", "meta"],
     context: "bg:events:delete",
@@ -40,7 +40,7 @@ export async function handleDeleteEvent(eventId: number) {
   return result ?? false
 }
 
-export async function handleRestoreEvent(eventId: number) {
+export async function handleRestoreEvent(eventId: number): Promise<boolean> {
   const result = await withStorageUpdates({
     keys: ["events", "settings"],
     context: "bg:events:restore",
@@ -75,7 +75,7 @@ export async function handleRestoreEvent(eventId: number) {
   return result ?? false
 }
 
-export async function handlePurgeEvent(eventId: number) {
+export async function handlePurgeEvent(eventId: number): Promise<boolean> {
   const result = await withStorageUpdates({
     keys: ["events", "settings", "meta"],
     context: "bg:events:purge",

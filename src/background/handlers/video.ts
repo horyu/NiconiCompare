@@ -3,7 +3,7 @@ import { produce } from "immer"
 import { withStorageUpdates } from "../services/storage"
 import { updateRecentWindow } from "../utils/recentWindow"
 
-export async function handleUpdateCurrentVideo(videoId: string) {
+export async function handleUpdateCurrentVideo(videoId: string): Promise<void> {
   await withStorageUpdates({
     keys: ["state", "settings", "videos"],
     context: "bg:video:updateCurrent",
@@ -29,7 +29,9 @@ export async function handleUpdateCurrentVideo(videoId: string) {
   })
 }
 
-export async function handleUpdatePinnedOpponent(videoId?: string) {
+export async function handleUpdatePinnedOpponent(
+  videoId?: string
+): Promise<void> {
   await withStorageUpdates({
     keys: ["state", "videos"],
     context: "bg:video:updatePinned",

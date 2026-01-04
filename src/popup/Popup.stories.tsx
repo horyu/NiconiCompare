@@ -109,7 +109,7 @@ const withPopupData =
     return <Story />
   }
 
-const withPopupFrame = (Story: () => ReactElement) => (
+const withPopupFrame = (Story: () => ReactElement): ReactElement => (
   <div className="bg-white p-4 rounded-lg border border-slate-200 max-w-[360px]">
     <Story />
   </div>

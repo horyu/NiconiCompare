@@ -73,13 +73,14 @@ export const useOptionsData = (): UseOptionsDataResult => {
   }, [refreshState])
 
   useEffect(() => {
-    const handler = () => {
+    const handler = (): void => {
       void refreshState(true)
     }
     chrome.storage?.onChanged?.addListener(handler)
-    return () => {
+    const cleanup = (): void => {
       chrome.storage?.onChanged?.removeListener(handler)
     }
+    return cleanup
   }, [refreshState])
 
   return { snapshot, loading, error, bytesInUse, refreshState }

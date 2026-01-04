@@ -1,3 +1,5 @@
+import type { ReactElement } from "react"
+
 interface CategoryOption {
   id: string
   name: string
@@ -19,7 +21,7 @@ export const CategorySelect = ({
   disabled = false,
   size = "md",
   className
-}: CategorySelectProps) => {
+}: CategorySelectProps): ReactElement => {
   const baseClass =
     "border border-slate-200 rounded-md px-2 py-1 truncate bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
   const sizeClass = size === "sm" ? "text-xs" : "text-sm"

@@ -4,7 +4,7 @@ import { getStorageData, setStorageData } from "../services/storage"
 export async function handleRegisterSnapshot(payload: {
   video: VideoSnapshot
   author: AuthorProfile
-}) {
+}): Promise<void> {
   const { videos, authors } = await getStorageData(["videos", "authors"])
 
   await setStorageData({

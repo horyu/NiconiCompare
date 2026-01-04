@@ -4,7 +4,7 @@ import { normalizeSettings } from "../utils/normalize"
 import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
 import { rebuildRecentWindowFromEvents } from "../utils/recentWindow"
 
-export async function handleToggleOverlay(enabled: boolean) {
+export async function handleToggleOverlay(enabled: boolean): Promise<void> {
   const { settings } = await getStorageData(["settings"])
 
   if (settings.overlayAndCaptureEnabled === enabled) {
@@ -19,7 +19,9 @@ export async function handleToggleOverlay(enabled: boolean) {
   })
 }
 
-export async function handleUpdateSettings(partial: Partial<NcSettings>) {
+export async function handleUpdateSettings(
+  partial: Partial<NcSettings>
+): Promise<void> {
   const {
     settings: currentSettings,
     events,

@@ -20,7 +20,7 @@ import { normalizeSettings } from "../utils/normalize"
 import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
 import { rebuildRecentWindowFromEvents } from "../utils/recentWindow"
 
-export async function handleDeleteAllData() {
+export async function handleDeleteAllData(): Promise<void> {
   await setStorageData({
     settings: DEFAULT_SETTINGS,
     state: DEFAULT_STATE,
@@ -33,7 +33,7 @@ export async function handleDeleteAllData() {
   })
 }
 
-export async function handleExportData() {
+export async function handleExportData(): Promise<StorageShape> {
   try {
     const data = await readAllStorage()
     logger.debug("[bg:data:export] snapshot counts", {
@@ -67,7 +67,9 @@ export async function handleExportData() {
   }
 }
 
-export async function handleImportData(data: Partial<StorageShape>) {
+export async function handleImportData(
+  data: Partial<StorageShape>
+): Promise<void> {
   const nextSettings = normalizeSettings(
     data[STORAGE_KEYS.settings] ?? DEFAULT_SETTINGS
   )

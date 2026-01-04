@@ -1,3 +1,5 @@
+import type { ReactElement } from "react"
+
 import type { Verdict } from "../../lib/types"
 
 interface VerdictButtonsProps {
@@ -10,8 +12,8 @@ export function VerdictButtons({
   canSubmit,
   lastVerdict,
   onSubmit
-}: VerdictButtonsProps) {
-  const getVerdictButtonClass = (verdict: Verdict) =>
+}: VerdictButtonsProps): ReactElement {
+  const getVerdictButtonClass = (verdict: Verdict): string =>
     [
       "px-3 py-1.5 rounded disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap w-full text-[14px]",
       lastVerdict === verdict

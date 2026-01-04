@@ -1,5 +1,12 @@
 // oxlint-disable-file max-lines
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement
+} from "react"
 
 import { EVENT_PAGE_SIZE, MESSAGE_TYPES } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
@@ -63,7 +70,7 @@ export const EventsTab = ({
   onToggleEventThumbnails,
   refreshState,
   showToast
-}: EventsTabProps) => {
+}: EventsTabProps): ReactElement => {
   const { initialState, persistState } = useSessionState(
     SESSION_KEY,
     DEFAULT_EVENT_SESSION_STATE
@@ -162,7 +169,7 @@ export const EventsTab = ({
     Math.ceil(filteredEvents.length / EVENT_PAGE_SIZE)
   )
 
-  const handlePageChange = (nextPage: number) => {
+  const handlePageChange = (nextPage: number): void => {
     if (nextPage === eventPage) {
       return
     }
@@ -173,12 +180,12 @@ export const EventsTab = ({
   }
 
   // Handlers
-  const handleCategoryChange = (categoryId: string) => {
+  const handleCategoryChange = (categoryId: string): void => {
     setEventCategoryId(categoryId)
     resetToFirstPage()
   }
 
-  const handleExport = (format: "csv" | "tsv", withBom: boolean) => {
+  const handleExport = (format: "csv" | "tsv", withBom: boolean): void => {
     const exportRows = buildExportRows({ events: filteredEvents, snapshot })
     const delimiter = format === "csv" ? "," : "\t"
     const content = buildDelimitedText({
@@ -210,7 +217,7 @@ export const EventsTab = ({
     setExportMenuOpen(false)
   }
 
-  const handleBulkMove = async (targetCategoryId: string) => {
+  const handleBulkMove = async (targetCategoryId: string): Promise<void> => {
     if (!targetCategoryId) {
       return
     }
@@ -244,7 +251,10 @@ export const EventsTab = ({
     )
   }
 
-  const handleMoveEvent = async (eventId: number, targetCategoryId: string) => {
+  const handleMoveEvent = async (
+    eventId: number,
+    targetCategoryId: string
+  ): Promise<void> => {
     if (!targetCategoryId) {
       return
     }
@@ -275,7 +285,7 @@ export const EventsTab = ({
   const handleEventVerdictChange = async (
     target: CompareEvent,
     verdict: Verdict
-  ) => {
+  ): Promise<void> => {
     if (target.disabled) {
       return
     }
@@ -305,7 +315,7 @@ export const EventsTab = ({
     }
   }
 
-  const handleDeleteEvent = async (eventId: number) => {
+  const handleDeleteEvent = async (eventId: number): Promise<void> => {
     setEventBusyId(eventId)
     try {
       await runNcAction(
@@ -327,7 +337,7 @@ export const EventsTab = ({
     }
   }
 
-  const handleRestoreEvent = async (eventId: number) => {
+  const handleRestoreEvent = async (eventId: number): Promise<void> => {
     setEventBusyId(eventId)
     try {
       await runNcAction(
@@ -349,7 +359,7 @@ export const EventsTab = ({
     }
   }
 
-  const handlePurgeEvent = async (eventId: number) => {
+  const handlePurgeEvent = async (eventId: number): Promise<void> => {
     const confirmed = confirm(
       "無効化済み評価を削除します。元に戻せません。続行しますか？"
     )
@@ -638,7 +648,7 @@ const EventRow = ({
   onDeleteEvent,
   onRestoreEvent,
   onPurgeEvent
-}: EventRowProps) => {
+}: EventRowProps): ReactElement => {
   return (
     <div
       className={`grid ${
@@ -766,7 +776,7 @@ const filterEvents = ({
   search,
   videos,
   authors
-}: FilterEventsParams) => {
+}: FilterEventsParams): CompareEvent[] => {
   const normalizedSearch = search.trim().toLowerCase()
   const filtered = events.filter((event) => {
     if (!includeDeleted && event.disabled) {

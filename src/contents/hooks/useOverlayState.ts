@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type Dispatch,
+  type SetStateAction
+} from "react"
 
 import { normalizeCategories } from "../../lib/categories"
 import {
@@ -20,7 +26,22 @@ interface StateResponse {
   categories: NcCategories
 }
 
-export function useOverlayState() {
+interface OverlayStateResult {
+  currentVideoId: string
+  isReady: boolean
+  overlaySettings: NcSettings
+  pinnedOpponentVideoId: string
+  recentWindow: string[]
+  refreshState: () => Promise<void>
+  setCurrentVideoId: Dispatch<SetStateAction<string>>
+  setPinnedOpponentVideoId: Dispatch<SetStateAction<string>>
+  setStatusMessage: Dispatch<SetStateAction<string | undefined>>
+  statusMessage: string | undefined
+  videoSnapshots: Record<string, VideoSnapshot>
+  categories: NcCategories
+}
+
+export function useOverlayState(): OverlayStateResult {
   const [currentVideoId, setCurrentVideoId] = useState<string>("")
   const [recentWindow, setRecentWindow] = useState<string[]>([])
   const [pinnedOpponentVideoId, setPinnedOpponentVideoId] = useState<string>("")
@@ -43,7 +64,7 @@ export function useOverlayState() {
     const handleStorageChange = (
       changes: Record<string, chrome.storage.StorageChange>,
       areaName: string
-    ) => {
+    ): void => {
       if (areaName !== "local") return
 
       if (changes[STORAGE_KEYS.settings]?.newValue) {
@@ -69,7 +90,10 @@ export function useOverlayState() {
     }
 
     chrome.storage.onChanged.addListener(handleStorageChange)
-    return () => chrome.storage.onChanged.removeListener(handleStorageChange)
+    const cleanup = (): void => {
+      chrome.storage.onChanged.removeListener(handleStorageChange)
+    }
+    return cleanup
   }, [])
 
   const loadVideoSnapshots = useCallback(async () => {

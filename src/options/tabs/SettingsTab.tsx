@@ -1,4 +1,10 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
+import {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactElement
+} from "react"
 
 import {
   DEFAULT_SETTINGS,
@@ -22,7 +28,7 @@ export const SettingsTab = ({
   snapshot,
   refreshState,
   showToast
-}: SettingsTabProps) => {
+}: SettingsTabProps): ReactElement => {
   const [settingsForm, setSettingsForm] = useState({
     recentWindowSize: "5",
     popupRecentCount: "5",
@@ -47,11 +53,11 @@ export const SettingsTab = ({
 
   const handleSettingsChange =
     (field: keyof typeof settingsForm) =>
-    (event: ChangeEvent<HTMLInputElement>) => {
+    (event: ChangeEvent<HTMLInputElement>): void => {
       setSettingsForm((prev) => ({ ...prev, [field]: event.target.value }))
     }
 
-  const applySettingsToForm = (settings: NcSettings) => {
+  const applySettingsToForm = (settings: NcSettings): void => {
     setSettingsForm({
       recentWindowSize: String(settings.recentWindowSize),
       popupRecentCount: String(settings.popupRecentCount),
@@ -74,7 +80,7 @@ export const SettingsTab = ({
     settingsForm.glickoVolatility !==
       String(snapshot.settings.glicko.volatility)
 
-  const saveSettings = async () => {
+  const saveSettings = async (): Promise<boolean> => {
     setSavingSettings(true)
     try {
       const payload: Partial<NcSettings> = {
@@ -114,20 +120,20 @@ export const SettingsTab = ({
     }
   }
 
-  const handleSettingsSubmit = async (event: FormEvent) => {
+  const handleSettingsSubmit = async (event: FormEvent): Promise<void> => {
     event.preventDefault()
     await saveSettings()
   }
 
-  const handleDiscardSettings = () => {
+  const handleDiscardSettings = (): void => {
     applySettingsToForm(snapshot.settings)
   }
 
-  const handleResetSettings = () => {
+  const handleResetSettings = (): void => {
     applySettingsToForm(DEFAULT_SETTINGS)
   }
 
-  const handleRebuildRatings = async () => {
+  const handleRebuildRatings = async (): Promise<void> => {
     if (hasUnsavedSettings) return
     setRebuildingRatings(true)
     try {
