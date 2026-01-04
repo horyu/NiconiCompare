@@ -39,3 +39,7 @@ web-ext.config.ts
 # typescript
 .tsbuildinfo
 *.tsbuildinfo
+
+# vscode
+.vscode/*
+!.vscode/extensions.json
