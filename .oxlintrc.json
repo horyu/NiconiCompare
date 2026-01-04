@@ -1,4 +1,5 @@
 {
+  // Rules checked up to: https://github.com/oxc-project/oxc-project.github.io/blob/a85089acb4493ad7b954dc12d8a8d1dbe179ea78/src/docs/guide/usage/linter/generated-rules.md
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["eslint", "oxc", "promise", "react", "typescript", "unicorn", "vitest"],
   "categories": {
@@ -64,34 +65,6 @@
     "unicorn/no-array-reduce": "off"
   },
   "overrides": [
-    //   {
-    //     "files": ["**/*.ts", "**/*.tsx"],
-    //     "rules": {
-    //       "@typescript-eslint/no-misused-promises": [
-    //         "error",
-    //         {
-    //           "checksVoidReturn": {
-    //             "attributes": false,
-    //             "properties": false
-    //           }
-    //         }
-    //       ],
-    //       "@typescript-eslint/prefer-nullish-coalescing": [
-    //         "error",
-    //         {
-    //           "ignorePrimitives": {
-    //             "string": true
-    //           }
-    //         }
-    //       ],
-    //       "react/jsx-filename-extension": [
-    //         "error",
-    //         {
-    //           "extensions": [".tsx"]
-    //         }
-    //       ]
-    //     }
-    //   },
     {
       "files": ["**/*.test.ts", "**/*.test.tsx"],
       "rules": {
@@ -105,9 +78,6 @@
       "rules": {
         // 適当な数値を書くことが多い
         "unicorn/numeric-separators-style": "off"
-        // "react-hooks/rules-of-hooks": "off",
-        // "import/no-anonymous-default-export": "off",
-        // "no-empty-function": "off"
       }
     }
   ]
