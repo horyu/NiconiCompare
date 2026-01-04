@@ -24,6 +24,7 @@ export function VerdictButtons({
   return (
     <div className="grid grid-cols-[105px_70px_105px] gap-2 items-center">
       <button
+        type="button"
         onClick={() => onSubmit("better")}
         aria-pressed={lastVerdict === "better"}
         disabled={!canSubmit}
@@ -31,6 +32,7 @@ export function VerdictButtons({
         再生中の動画
       </button>
       <button
+        type="button"
         onClick={() => onSubmit("same")}
         aria-pressed={lastVerdict === "same"}
         disabled={!canSubmit}
@@ -38,6 +40,7 @@ export function VerdictButtons({
         引き分け
       </button>
       <button
+        type="button"
         onClick={() => onSubmit("worse")}
         aria-pressed={lastVerdict === "worse"}
         disabled={!canSubmit}

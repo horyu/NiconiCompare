@@ -5,6 +5,7 @@ import { defineContentScript } from "wxt/utils/define-content-script"
 import "../style.css"
 import Overlay from "../contents/overlay"
 
+// oxlint-disable-next-line only-export-components
 export default defineContentScript({
   matches: ["https://www.nicovideo.jp/watch/*"],
   cssInjectionMode: "ui",

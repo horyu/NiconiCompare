@@ -23,22 +23,22 @@ const shouldLog = (level: LogLevel): boolean =>
   LOG_LEVELS[level] <= LOG_LEVELS[currentLevel]
 
 export const logger = {
-  error: (...args: unknown[]) => {
+  error: (...args: unknown[]): void => {
     if (shouldLog("error")) {
       console.error(...args)
     }
   },
-  warn: (...args: unknown[]) => {
+  warn: (...args: unknown[]): void => {
     if (shouldLog("warn")) {
       console.warn(...args)
     }
   },
-  info: (...args: unknown[]) => {
+  info: (...args: unknown[]): void => {
     if (shouldLog("info")) {
       console.info(...args)
     }
   },
-  debug: (...args: unknown[]) => {
+  debug: (...args: unknown[]): void => {
     if (shouldLog("debug")) {
       console.debug(...args)
     }

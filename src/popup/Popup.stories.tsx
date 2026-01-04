@@ -98,11 +98,12 @@ const withPopupData =
     }
     windowWithChrome.chrome = {
       runtime: {
-        sendMessage: () =>
-          Promise.resolve({
+        sendMessage: () => {
+          return Promise.resolve({
             ok: true,
             data
           })
+        }
       }
     } as unknown as typeof chrome
 

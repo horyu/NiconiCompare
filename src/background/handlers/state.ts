@@ -7,10 +7,11 @@ import {
   DEFAULT_STATE
 } from "../../lib/constants"
 import { logger } from "../../lib/logger"
+import type { StorageDataByKey } from "../services/storage"
 import { readAllStorage, setStorageData } from "../services/storage"
 import { normalizeSettings } from "../utils/normalize"
 
-export async function readStateSnapshot() {
+export async function readStateSnapshot(): Promise<StorageDataByKey> {
   try {
     const data = await readAllStorage()
     const settings = normalizeSettings(data.settings)

@@ -6,8 +6,8 @@
     "suspicious": "warn",
     "pedantic": "warn",
     "perf": "warn",
-    "style": "off" // 無効にするルールが多いため、個別にルールを有効化する
-    // "restriction": "error",
+    "style": "off", // 無効にするルールが多いため、個別にルールを有効化する
+    "restriction": "error"
     // "nursery": "warn"
   },
   "env": {
@@ -41,6 +41,16 @@
     "unicorn/prefer-logical-operator-over-ternary": "error",
     "unicorn/switch-case-braces": ["error", "avoid"],
     // restriction
+    "eslint/no-alert": "off",
+    "eslint/no-console": "off",
+    "eslint/no-empty-function": "off",
+    "eslint/no-plusplus": "off",
+    "eslint/no-undefined": "off",
+    "eslint/no-void": "off",
+    "oxc/no-async-await": "off",
+    "oxc/no-optional-chaining": "off",
+    "oxc/no-rest-spread-properties": "off",
+    "react/jsx-filename-extension": ["error", { "extensions": [".tsx"] }],
     "typescript/explicit-function-return-type": [
       "error",
       {
@@ -48,7 +58,10 @@
         "allowDirectConstAssertionInArrowFunctions": true,
         "allowTypedFunctionExpressions": true
       }
-    ]
+    ],
+    "typescript/no-dynamic-delete": "off",
+    "unicorn/no-array-for-each": "off",
+    "unicorn/no-array-reduce": "off"
   },
   "overrides": [
     //   {
