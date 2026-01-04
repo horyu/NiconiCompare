@@ -31,7 +31,7 @@ describe("normalizeSettings", () => {
 
     const high = {
       ...DEFAULT_SETTINGS,
-      overlayAutoCloseMs: MAX_OVERLAY_AUTO_CLOSE_MS + 10000
+      overlayAutoCloseMs: MAX_OVERLAY_AUTO_CLOSE_MS + 10_000
     }
     expect(normalizeSettings(high).overlayAutoCloseMs).toBe(
       MAX_OVERLAY_AUTO_CLOSE_MS

@@ -14,12 +14,7 @@ export async function readStateSnapshot() {
   try {
     const data = await readAllStorage()
     const settings = normalizeSettings(data.settings)
-    const state = data.state
-    const videos = data.videos
-    const events = data.events
-    const ratings = data.ratings
-    const meta = data.meta
-    const authors = data.authors
+    const { state, videos, events, ratings, meta, authors } = data
     const categories = normalizeCategories(data.categories)
     logger.debug("[bg:state:read] snapshot counts", {
       events: events.items.length,

@@ -1,4 +1,4 @@
-import { MESSAGE_TYPES } from "./constants"
+import type { MESSAGE_TYPES } from "./constants"
 import type {
   AuthorProfile,
   NcSettings,

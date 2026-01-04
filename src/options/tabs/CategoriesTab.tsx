@@ -137,10 +137,10 @@ export const CategoriesTab = ({
   }
 
   const handleMove = async (categoryId: string, direction: -1 | 1) => {
-    const order = snapshot.categories.order
+    const { order } = snapshot.categories
     const index = order.indexOf(categoryId)
     const targetIndex = index + direction
-    if (index < 0 || targetIndex < 0 || targetIndex >= order.length) {
+    if (index === -1 || targetIndex < 0 || targetIndex >= order.length) {
       return
     }
     const nextOrder = [...order]

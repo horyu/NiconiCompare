@@ -12,6 +12,7 @@ vi.mock("./logger", () => ({
 
 vi.mock("./errorHandler", async () => {
   const actual =
+    // oxlint-disable-next-line consistent-type-imports
     await vi.importActual<typeof import("./errorHandler")>("./errorHandler")
   return {
     ...actual,

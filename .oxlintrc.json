@@ -6,7 +6,7 @@
     "suspicious": "warn",
     "pedantic": "warn",
     "perf": "warn",
-    // "style": "warn",
+    "style": "off" // 無効にするルールが多いため、個別にルールを有効化する
     // "restriction": "error",
     // "nursery": "warn"
   },
@@ -26,6 +26,20 @@
     "no-inline-comments": "off",
     "no-negated-condition": "off",
     "no-useless-undefined": "off",
+    // style
+    "eslint/prefer-destructuring": "error",
+    "jest/require-hook": "off", // for override in test files
+    "typescript/consistent-type-imports": "error",
+    "unicorn/consistent-existence-index-check": "error",
+    "unicorn/filename-case": [
+      "error",
+      {
+        "cases": { "camelCase": true, "pascalCase": true }
+      }
+    ],
+    "unicorn/numeric-separators-style": "error",
+    "unicorn/prefer-logical-operator-over-ternary": "error",
+    "unicorn/switch-case-braces": ["error", "avoid"]
   },
   "overrides": [
     //   {
@@ -60,16 +74,19 @@
       "files": ["**/*.test.ts", "**/*.test.tsx"],
       "rules": {
         // テストでは関数スコープを気にする必要はない
-        "consistent-function-scoping": "off"
+        "consistent-function-scoping": "off",
+        "jest/require-hook": "error"
+      }
+    },
+    {
+      "files": ["**/*.stories.ts", "**/*.stories.tsx"],
+      "rules": {
+        // 適当な数値を書くことが多い
+        "unicorn/numeric-separators-style": "off"
+        // "react-hooks/rules-of-hooks": "off",
+        // "import/no-anonymous-default-export": "off",
+        // "no-empty-function": "off"
       }
     }
-    // {
-    //   "files": ["**/*.stories.ts", "**/*.stories.tsx"],
-    //   "rules": {
-    //     "react-hooks/rules-of-hooks": "off",
-    //     "import/no-anonymous-default-export": "off",
-    //     "no-empty-function": "off"
-    //   }
-    // }
   ]
 }

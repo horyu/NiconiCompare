@@ -34,11 +34,9 @@ export function OpponentSelector({
     <div className="w-full flex items-center gap-1">
       <label htmlFor="nc-select" className="relative flex-1 flex items-center">
         <span className="px-1.5 pr-6 rounded border border-white/30 bg-black/50 text-[14px] leading-[18px] overflow-hidden text-ellipsis whitespace-nowrap pointer-events-none w-full">
-          {opponentVideoId
-            ? opponentVideoId
-            : hasSelectableCandidates
-              ? "比較候補を選択してください"
-              : "比較候補なし"}
+          {opponentVideoId || hasSelectableCandidates
+            ? "比較候補を選択してください"
+            : "比較候補なし"}
         </span>
         <span className="absolute right-2 text-[10px] opacity-70 pointer-events-none">
           <span className="select-none">▼</span>

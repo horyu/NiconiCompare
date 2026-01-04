@@ -55,7 +55,7 @@ export interface ObserverCallbacks {
 export function observeLdJsonChanges(
   callbacks: ObserverCallbacks
 ): (() => void) | undefined {
-  const head = document.head
+  const { head } = document
   if (!head) {
     handleUIError(
       "document.head is missing; ld+json observer disabled.",
