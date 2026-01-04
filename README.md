@@ -25,8 +25,8 @@
 ```bash
 pnpm install          # 依存関係のインストール
 pnpm dev              # 開発サーバー起動
-pnpm fix              # コード自動修正（ESLint + Prettier）
-pnpm lint             # コード品質チェック（型・ESLint・Prettier）
+pnpm fix              # コード自動修正（ESLint + oxfmt）
+pnpm lint             # コード品質チェック（型・ESLint・oxfmt）
 pnpm build            # 本番ビルド
 ```
 

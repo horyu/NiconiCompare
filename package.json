@@ -20,8 +20,8 @@
     "types:check": "tsc --noEmit",
     "eslint": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "eslint:check": "eslint \"src/**/*.{ts,tsx}\"",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build"
   },
@@ -33,7 +33,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@ianvs/prettier-plugin-sort-imports": "4.7.0",
     "@storybook/addon-themes": "^10.1.11",
     "@storybook/react-vite": "^10.1.11",
     "@tailwindcss/vite": "^4.1.18",
@@ -54,7 +53,7 @@
     "eslint-plugin-storybook": "^10.1.11",
     "happy-dom": "^20.0.11",
     "npm-run-all": "^4.1.5",
-    "prettier": "3.7.4",
+    "oxfmt": "^0.21.0",
     "storybook": "^10.1.11",
     "tailwindcss": "^4.1.18",
     "typescript": "5.9.3",

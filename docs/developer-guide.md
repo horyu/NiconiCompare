@@ -28,15 +28,15 @@ mise install
 ```bash
 pnpm install
 pnpm approve-builds   # 初回のみ、esbuild/@parcel/watcher 等の build script を許可
-pnpm lint             # 型チェック + ESLint + Prettier チェック（並列実行）
-pnpm fix              # ESLint + Prettier 自動修正（並列実行）
+pnpm lint             # 型チェック + ESLint + oxfmt チェック（並列実行）
+pnpm fix              # ESLint + oxfmt 自動修正（並列実行）
 ```
 
 > `pnpm approve-builds` は対話式で、依存の build script 実行を明示的に承認する必要がある。`esbuild`、`@parcel/watcher`、`@swc/core` などが選択対象として表示されるので、画面の指示に従って次工程へ進むこと。
 
 **⚠️ コミット前の必須事項**:
 - **`pnpm fix`**: コード自動修正を実行
-- **`pnpm lint`**: 全チェック（型・ESLint・Prettier）に合格すること
+- **`pnpm lint`**: 全チェック（型・ESLint・oxfmt）に合格すること
 
 ### 1.3 環境変数の管理
 
@@ -60,7 +60,7 @@ pnpm fix              # ESLint + Prettier 自動修正（並列実行）
 - immer (Immutable state 更新)
 - **コード品質ツール**:
   - ESLint 9.39+ (TypeScript/React/React Hooks plugins)
-  - Prettier 3.2+ (コードフォーマッター)
+  - oxfmt (コードフォーマッター)
   - npm-run-all (並列スクリプト実行)
 - **UI開発**:
   - Storybook 10.1+ (React/Vite)
@@ -129,17 +129,17 @@ TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関�
   - `@typescript-eslint/no-explicit-any`: warn
   - `react-hooks/exhaustive-deps`: warn
 
-**Prettier**: コードフォーマッター (ESLint と競合しないよう eslint-config-prettier で調整済み)
+**oxfmt**: コードフォーマッター
 
 **実行コマンド**:
 ```bash
-pnpm lint              # 型チェック + ESLint + Prettier を並列実行
-pnpm fix               # ESLint + Prettier を自動修正モードで並列実行
+pnpm lint              # 型チェック + ESLint + oxfmt を並列実行
+pnpm fix               # ESLint + oxfmt を自動修正モードで並列実行
 pnpm eslint            # ESLint のみ（自動修正あり）
 pnpm eslint:check      # ESLint のみ（チェックのみ）
 pnpm types:check       # TypeScript 型チェックのみ
-pnpm format            # Prettier のみ（自動修正あり）
-pnpm format:check      # Prettier のみ（チェックのみ）
+pnpm format            # oxfmt のみ（自動修正あり）
+pnpm format:check      # oxfmt のみ（チェックのみ）
 pnpm storybook         # Storybook 開発サーバー
 pnpm storybook:build   # Storybook ビルド
 ```
