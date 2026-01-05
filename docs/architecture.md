@@ -20,7 +20,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
                     │ DOM監視 & メタデータ取得
                     ▼
 ┌─────────────────────────────────────────────────────────────┐
-│            Content Script (contents/)                       │
+│            Content Script (src/contents/)                   │
 │  - DOM Injection (オーバーレイパネル)                        │
 │  - JSON-LD パース → VideoSnapshot 生成                       │
 │  - 比較カードUI (React)                                      │
@@ -28,7 +28,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
                  │ sendNcMessage (src/lib/messages.ts)
                  ▼
 ┌─────────────────────────────────────────────────────────────┐
-│         Service Worker (background/)                        │
+│         Service Worker (src/background/)                    │
 │  - イベントログ管理 (CompareEvent)                            │
 │  - Glicko-2 計算エンジン                                     │
 │  - Storage I/O (chrome.storage.local)                       │
@@ -43,7 +43,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
                  ▲
                  │ chrome.storage.onChanged
 ┌────────────────┴─────────────────┬──────────────────────────┐
-│  Popup (popup/)                  │  Options (options/)      │
+│  Popup (src/popup/)              │  Options (src/options/)  │
 │  - 直近イベント表示              │  - 設定編集              │
 │  - overlayAndCaptureEnabled トグル │  - データ管理            │
 │                                 │  - Export/Import         │
@@ -60,7 +60,7 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 | **Options**        | 詳細設定、データ操作、一覧エクスポート/インポート | React 19.2, TypeScript            |
 | **Storage**        | 永続化層                                       | chrome.storage.local (Key-Value)  |
 
-Service Worker の内部構成は `background/handlers`（メッセージ単位の処理）、`background/services`（Storage/クリーンアップ）、`background/utils`（正規化・集約ロジック）に分離している。
+Service Worker の内部構成は `src/background/handlers`（メッセージ単位の処理）、`src/background/services`（Storage/クリーンアップ）、`src/background/utils`（正規化・集約ロジック）に分離している。
 メッセージ送信は `sendNcMessage` を介して型をチェックする。
 
 ---
@@ -409,7 +409,7 @@ async function saveCompareEvent(event: CompareEvent) {
 
 ### 7.1 権限最小化
 
-**manifest.json**:
+**wxt.config.ts の manifest**:
 
 ```json
 {
@@ -430,7 +430,7 @@ async function saveCompareEvent(event: CompareEvent) {
 
 ### 7.2 Content Security Policy (CSP)
 
-**manifest.json** (MV3 デフォルト):
+**wxt.config.ts の manifest** (MV3 デフォルト):
 
 ```json
 {
@@ -457,7 +457,7 @@ async function saveCompareEvent(event: CompareEvent) {
 
 **補足**: 書き込み失敗は即時フィードバックで扱い、リトライキューは採用しない。失敗を記録する追加ストレージを持つほどのデータ規模ではなく、失敗時はユーザーが直ちに再操作できるため。
 
-**共通ユーティリティ**: `src/lib/error-handler.ts`
+**共通ユーティリティ**: `src/lib/errorHandler.ts`
 - Background: `handleBackgroundError(error, context)` でログを統一
 - UI: `handleUIError(error, context, showToast?, userMessage?)` でログ + 通知
 - `NcError`: UI でユーザー向けメッセージを保持する例外（`userMessage` を表示）

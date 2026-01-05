@@ -27,16 +27,16 @@ mise install
 
 ```bash
 pnpm install
-pnpm approve-builds   # 初回のみ、esbuild/@parcel/watcher 等の build script を許可
-pnpm lint             # 型チェック + ESLint + oxfmt チェック（並列実行）
-pnpm fix              # ESLint + oxfmt 自動修正（並列実行）
+pnpm approve-builds   # 初回のみ、esbuild 等の build script を許可
+pnpm lint             # oxlint + ESLint
+pnpm fix              # oxfmt の整形 → oxlint + ESLint（自動修正あり）
 ```
 
-> `pnpm approve-builds` は対話式で、依存の build script 実行を明示的に承認する必要がある。`esbuild`、`@parcel/watcher`、`@swc/core` などが選択対象として表示されるので、画面の指示に従って次工程へ進むこと。
+> `pnpm approve-builds` は対話式で、依存の build script 実行を明示的に承認する必要がある。`esbuild` などが選択対象として表示されるので、画面の指示に従って次工程へ進むこと。
 
 **⚠️ コミット前の必須事項**:
 - **`pnpm fix`**: コード自動修正を実行
-- **`pnpm lint`**: 全チェック（型・ESLint・oxfmt）に合格すること
+- **`pnpm check`**: 型・lint・format のチェックに合格すること
 
 ### 1.3 環境変数の管理
 
@@ -55,11 +55,12 @@ pnpm fix              # ESLint + oxfmt 自動修正（並列実行）
 - WXT 0.20+ (MV3 拡張ビルド)
 - TypeScript 5+, React 19.2
 - Tailwind CSS v4 (@tailwindcss/vite 4.1)
-  - **設定**: `wxt.config.ts` の `vite.plugins` に `tailwindcss()` を追加（postcss.config.js 不要）
+- **設定**: `wxt.config.ts` の `vite.plugins` に `tailwindcss()` を追加
 - glicko2-lite (Glicko-2 レーティング計算)
 - immer (Immutable state 更新)
 - **コード品質ツール**:
   - ESLint 9.39+ (TypeScript/React/React Hooks plugins)
+  - oxlint (高速 Lint)
   - oxfmt (コードフォーマッター)
   - npm-run-all (並列スクリプト実行)
 - **UI開発**:
@@ -91,14 +92,20 @@ src/
 ├── contents/     # Content Script
 │   ├── components/ # Overlay components
 │   └── hooks/      # Overlay hooks
+├── entrypoints/  # WXT entrypoints
+│   ├── options/  # Options entry (HTML)
+│   ├── popup/    # Popup entry (HTML)
+│   ├── background.ts
+│   └── overlay.content.tsx
+├── lib/          # ユーティリティ
 ├── popup/        # Popup UI
 ├── options/      # Options UI
-│   ├── tabs/       # タブコンポーネント (Videos, Events, Settings, Data)
-│   ├── hooks/      # カスタムhooks (useOptionsData)
-│   ├── components/ # 共通コンポーネント (EventVideoLabel, Pagination)
-│   └── utils/      # ユーティリティ (sessionStorage)
-├── components/   # 共有コンポーネント
-└── lib/          # ユーティリティ
+│   ├── tabs/       # タブコンポーネント (Videos, Events, Categories, Settings, Data)
+│   ├── hooks/      # カスタムhooks (useOptionsData, useSessionState)
+│   ├── components/ # 共通コンポーネント (CategorySelect, EventVideoLabel, ExportMenu, Pagination)
+│   └── utils/      # ユーティリティ (categories, date, export, scroll, sessionStorage)
+├── style.css
+└── env.d.ts
 ```
 
 ### 2.2.1 カテゴリ機能のデータ概要
@@ -110,7 +117,7 @@ src/
 ### 2.3 コーディング規約
 
 TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関数/変数), snake_case (storage キー)
-- エラーハンドリングは `src/lib/error-handler.ts` を使用し、`console.error` の直書きは避ける
+- エラーハンドリングは `src/lib/errorHandler.ts` を使用し、`console.error` の直書きは避ける
 - エラー context は `bg:*`（background）/ `ui:*`（UI）のプレフィックスで統一する
 - background へのメッセージ送信は `sendNcMessage` を使用して型チェックする
 - UIコンポーネントを追加した場合や props が増えた場合は、Storybook の stories も更新する
@@ -133,13 +140,13 @@ TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関�
 
 **実行コマンド**:
 ```bash
-pnpm lint              # 型チェック + ESLint + oxfmt を並列実行
-pnpm fix               # ESLint + oxfmt を自動修正モードで並列実行
-pnpm eslint            # ESLint のみ（自動修正あり）
-pnpm eslint:check      # ESLint のみ（チェックのみ）
+pnpm fix               # oxfmt → oxlint + ESLint（自動修正あり）
+pnpm lint              # oxlint + ESLint（自動修正あり）
+pnpm lint:check        # oxlint + ESLint（チェックのみ）
 pnpm types:check       # TypeScript 型チェックのみ
 pnpm format            # oxfmt のみ（自動修正あり）
 pnpm format:check      # oxfmt のみ（チェックのみ）
+pnpm check             # types:check + lint:check + format:check
 pnpm storybook         # Storybook 開発サーバー
 pnpm storybook:build   # Storybook ビルド
 ```
@@ -147,7 +154,7 @@ pnpm storybook:build   # Storybook ビルド
 **開発フロー**:
 1. コード編集
 2. `pnpm fix` でコード自動修正
-3. `pnpm lint` で全チェック合格を確認
+3. `pnpm check` で全チェック合格を確認
 4. コミット
 
 ## 2.5 UI テーマ
@@ -168,7 +175,7 @@ Storybook は UI プレビュー用途で導入済み。
 ## 4. ビルド
 
 ```bash
-pnpm lint   # ビルド前に型/フォーマット崩れがないかを確認
+pnpm check  # ビルド前に型/リント/フォーマット崩れがないかを確認
 pnpm build
 ```
 

@@ -25,12 +25,13 @@
 ```bash
 pnpm install          # 依存関係のインストール
 pnpm dev              # 開発サーバー起動
-pnpm fix              # コード自動修正（ESLint + oxfmt）
-pnpm lint             # コード品質チェック（型・ESLint・oxfmt）
+pnpm fix              # コード自動修正（oxfmt + oxlint + ESLint）
+pnpm lint             # コード品質チェック（oxlint + ESLint）
+pnpm check            # 型・lint・format のチェック
 pnpm build            # 本番ビルド
 ```
 
-**⚠️ コミット前に必ず実行**: `pnpm fix` → `pnpm lint` で全チェック合格を確認すること
+**⚠️ コミット前に必ず実行**: `pnpm fix` → `pnpm check` で全チェック合格を確認すること
 
 ## ⚠️ 免責事項
 
