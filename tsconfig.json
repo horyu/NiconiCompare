@@ -3,7 +3,6 @@
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "types": ["react", "react-dom", "chrome"]
   },
   "exclude": ["node_modules"]
