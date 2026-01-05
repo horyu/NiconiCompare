@@ -96,5 +96,7 @@ export default defineConfig([
     name: "Prettier Config",
     ...prettierConfig
   },
+  // oxlint と重複しているルールを無効化
+  // https://github.com/oxc-project/eslint-plugin-oxlint?tab=readme-ov-file#eslint-plugin-oxlint
   ...oxlint.buildFromOxlintConfigFile("./.oxlintrc.json")
 ])
