@@ -27,6 +27,22 @@
     "no-inline-comments": "off",
     "no-negated-condition": "off",
     "no-useless-undefined": "off",
+    "typescript/no-confusing-void-expression": [
+      "error",
+      {
+        "ignoreArrowShorthand": true
+      }
+    ],
+    "typescript/no-misused-promises": [
+      "error",
+      {
+        "checksVoidReturn": {
+          "attributes": false
+        }
+      }
+    ],
+    "typescript/prefer-nullish-coalescing": "off",
+    "typescript/strict-boolean-expressions": "off",
     // style
     "eslint/prefer-destructuring": "error",
     "jest/require-hook": "off", // for override in test files
@@ -61,6 +77,12 @@
       }
     ],
     "typescript/no-dynamic-delete": "off",
+    "typescript/promise-function-async": [
+      "error",
+      {
+        "checkArrowFunctions": false
+      }
+    ],
     "unicorn/no-array-for-each": "off",
     "unicorn/no-array-reduce": "off"
   },
@@ -70,14 +92,18 @@
       "rules": {
         // テストでは関数スコープを気にする必要はない
         "consistent-function-scoping": "off",
-        "jest/require-hook": "error"
+        "jest/require-hook": "error",
+        // chrome API の型定義省力化用
+        "no-unsafe-type-assertion": "off"
       }
     },
     {
       "files": ["**/*.stories.ts", "**/*.stories.tsx"],
       "rules": {
         // 適当な数値を書くことが多い
-        "unicorn/numeric-separators-style": "off"
+        "unicorn/numeric-separators-style": "off",
+        // chrome API の型定義省力化用
+        "no-unsafe-type-assertion": "off"
       }
     }
   ]

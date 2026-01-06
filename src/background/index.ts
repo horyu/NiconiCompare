@@ -47,7 +47,7 @@ if (chrome?.alarms) {
   void chrome.alarms.create("nc.autoCleanup", { periodInMinutes: 60 * 24 })
   chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === "nc.autoCleanup") {
-      void runAutoCleanupIfNeeded().catch((error) =>
+      void runAutoCleanupIfNeeded().catch((error: unknown) =>
         handleBackgroundError(error, "bg:background:autoCleanup.alarm")
       )
     }

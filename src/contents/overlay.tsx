@@ -140,11 +140,18 @@ export default function Overlay(): ReactElement | null {
     ]
   )
 
+  const handleVideoChangeVoid = useCallback(
+    (videoData: { video: VideoSnapshot; author: AuthorProfile }) => {
+      void handleVideoChange(videoData)
+    },
+    [handleVideoChange]
+  )
+
   useVideoObserver({
     enabled: overlaySettings.overlayAndCaptureEnabled,
     isReady,
     onStatusMessage: setStatusMessage,
-    onVideoChange: handleVideoChange
+    onVideoChange: handleVideoChangeVoid
   })
 
   const togglePinnedOpponent = useCallback(async () => {

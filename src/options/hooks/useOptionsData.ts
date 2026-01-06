@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
 import { handleUIError } from "../../lib/errorHandler"
+import type { BackgroundResponse } from "../../lib/messages"
 import { sendNcMessage } from "../../lib/messages"
 import type {
   NcAuthors,
@@ -44,15 +45,15 @@ export const useOptionsData = (): UseOptionsDataResult => {
       setLoading(true)
       setError(undefined)
     }
-    const response = await sendNcMessage({
+    const response = await sendNcMessage<BackgroundResponse<OptionsSnapshot>>({
       type: MESSAGE_TYPES.requestState
     })
-    if (!response.ok) {
+    if (!response.ok || !response.data) {
       setError(response.error ?? "状態取得に失敗しました。")
       setLoading(false)
       return
     }
-    setSnapshot(response.data as OptionsSnapshot)
+    setSnapshot(response.data)
 
     try {
       const bytes = await chrome.storage.local.getBytesInUse()

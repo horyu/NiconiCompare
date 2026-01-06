@@ -28,7 +28,7 @@ export default function Popup(): ReactElement {
 
   const refreshState = async (): Promise<void> => {
     setLoading(true)
-    const response = await runNcAction(
+    const response = await runNcAction<PopupSnapshot>(
       () =>
         sendNcMessage({
           type: MESSAGE_TYPES.requestState
@@ -38,12 +38,12 @@ export default function Popup(): ReactElement {
         errorMessage: "状態取得に失敗しました"
       }
     )
-    if (!response) {
+    if (!response?.ok) {
       setError("状態取得に失敗しました")
       setLoading(false)
       return
     }
-    setSnapshot(response.data as PopupSnapshot)
+    setSnapshot(response.data)
     setLoading(false)
   }
 

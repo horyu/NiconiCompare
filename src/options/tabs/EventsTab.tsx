@@ -63,6 +63,9 @@ const DEFAULT_EVENT_SESSION_STATE: EventSessionState = {
   showCategoryOps: false,
   page: 1
 }
+const VERDICTS = ["better", "same", "worse"] as const
+const isVerdict = (value: string): value is Verdict =>
+  (VERDICTS as readonly string[]).includes(value)
 
 export const EventsTab = ({
   snapshot,
@@ -692,7 +695,12 @@ const EventRow = ({
       <select
         value={event.verdict}
         disabled={event.disabled || isBusy}
-        onChange={(e) => onVerdictChange(event, e.target.value as Verdict)}
+        onChange={(e) => {
+          const { value } = e.target
+          if (isVerdict(value)) {
+            onVerdictChange(event, value)
+          }
+        }}
         className="border border-slate-200 rounded-md px-2 py-1 text-sm bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
         <option value="better">勝ち</option>
         <option value="same">引き分け</option>

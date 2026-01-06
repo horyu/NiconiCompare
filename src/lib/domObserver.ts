@@ -183,5 +183,5 @@ function extractVideoIdFromUrl(target?: string): string | undefined {
     ? new URL(target)
     : new URL(target, window.location.origin)
   const segments = url.pathname.split("/")
-  return segments.pop() || segments.pop()
+  return segments.findLast((segment) => segment.length > 0)
 }

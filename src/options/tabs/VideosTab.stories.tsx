@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import type { ReactElement } from "react"
+import { type ReactElement, useEffect } from "react"
 
 import {
   DEFAULT_CATEGORIES,
@@ -212,15 +212,16 @@ const buildSnapshotForCategorySwitch = (): OptionsSnapshot => {
 }
 
 const withSessionState = (state: Partial<VideoSessionState>) => {
-  return (Story: () => ReactElement) => (
-    <>
-      {writeSessionState(SESSION_KEY, {
+  return (Story: () => ReactElement) => {
+    useEffect(() => {
+      writeSessionState(SESSION_KEY, {
         ...DEFAULT_SESSION_STATE,
         ...state
-      })}
-      <Story />
-    </>
-  )
+      })
+    }, [])
+
+    return <Story />
+  }
 }
 
 const meta: Meta<typeof VideosTab> = {

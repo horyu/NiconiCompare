@@ -14,10 +14,10 @@ interface NcActionOptions<TResponse extends BackgroundResponse> {
   onSuccess?: (response: TResponse) => Promise<void> | void
 }
 
-export async function runNcAction<TResponse extends BackgroundResponse>(
-  action: () => Promise<TResponse>,
-  options: NcActionOptions<TResponse>
-): Promise<Extract<TResponse, { ok: true }> | null> {
+export async function runNcAction<T>(
+  action: () => Promise<BackgroundResponse<T>>,
+  options: NcActionOptions<BackgroundResponse<T>>
+): Promise<Extract<BackgroundResponse<T>, { ok: true }> | null> {
   try {
     logger.info(`[${options.context}] action start`)
     const response = await action()
@@ -38,7 +38,7 @@ export async function runNcAction<TResponse extends BackgroundResponse>(
     if (options.successMessage && options.showToast) {
       options.showToast("success", options.successMessage)
     }
-    return response as Extract<TResponse, { ok: true }>
+    return response
   } catch (error) {
     handleUIError(error, options.context, options.showToast)
     return null

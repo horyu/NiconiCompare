@@ -126,12 +126,17 @@ export const DataTab = ({
     setImporting(true)
     try {
       const text = await file.text()
-      const data = JSON.parse(text) as Record<string, unknown>
+      const data = JSON.parse(text) as unknown
+      if (typeof data !== "object" || data === null || Array.isArray(data)) {
+        showToast("error", "無効なインポートデータです。")
+        throw new Error("invalid import payload")
+      }
       await runNcAction(
         () =>
           sendNcMessage({
             type: MESSAGE_TYPES.importData,
-            payload: { data }
+            // oxlint-disable-next-line no-unsafe-type-assertion
+            payload: { data: data as Record<string, unknown> }
           }),
         {
           context: "ui:options:data:import",

@@ -26,10 +26,12 @@ describe("sendNcMessage", () => {
     const sendMessage = vi
       .fn()
       .mockRejectedValue(new Error("Connection failed"))
-    const globalAny = globalThis as unknown as {
-      chrome: { runtime: { sendMessage: typeof sendMessage } }
+    const windowWithChrome = globalThis as typeof globalThis & {
+      chrome: typeof chrome
     }
-    globalAny.chrome = { runtime: { sendMessage } }
+    windowWithChrome.chrome = {
+      runtime: { sendMessage }
+    } as unknown as typeof chrome
 
     await expect(
       sendNcMessage({ type: MESSAGE_TYPES.requestState })

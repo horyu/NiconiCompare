@@ -12,6 +12,7 @@ import {
   MESSAGE_TYPES,
   STORAGE_KEYS
 } from "../../lib/constants"
+import type { BackgroundResponse } from "../../lib/messages"
 import { sendNcMessage } from "../../lib/messages"
 import type {
   NcCategories,
@@ -68,23 +69,25 @@ export function useOverlayState(): OverlayStateResult {
       if (areaName !== "local") return
 
       if (changes[STORAGE_KEYS.settings]?.newValue) {
-        const nextSettings = changes[STORAGE_KEYS.settings].newValue as
-          | NcSettings
-          | undefined
+        // oxlint-disable-next-line no-unsafe-type-assertion
+        const nextSettings = changes[STORAGE_KEYS.settings]
+          .newValue as NcSettings
         setOverlaySettings(nextSettings ?? DEFAULT_SETTINGS)
       }
 
       if (changes[STORAGE_KEYS.videos]?.newValue) {
-        const nextVideos = changes[STORAGE_KEYS.videos].newValue as
-          | Record<string, VideoSnapshot>
-          | undefined
+        // oxlint-disable-next-line no-unsafe-type-assertion
+        const nextVideos = changes[STORAGE_KEYS.videos].newValue as Record<
+          string,
+          VideoSnapshot
+        >
         setVideoSnapshots(nextVideos ?? {})
       }
 
       if (changes[STORAGE_KEYS.categories]?.newValue) {
-        const nextCategories = changes[STORAGE_KEYS.categories].newValue as
-          | NcCategories
-          | undefined
+        // oxlint-disable-next-line no-unsafe-type-assertion
+        const nextCategories = changes[STORAGE_KEYS.categories]
+          .newValue as NcCategories
         setCategories(normalizeCategories(nextCategories))
       }
     }
@@ -99,6 +102,7 @@ export function useOverlayState(): OverlayStateResult {
   const loadVideoSnapshots = useCallback(async () => {
     if (!chrome.storage?.local) return
     const result = await chrome.storage.local.get(STORAGE_KEYS.videos)
+    // oxlint-disable-next-line no-unsafe-type-assertion
     const nextVideos = result?.[STORAGE_KEYS.videos] as
       | Record<string, VideoSnapshot>
       | undefined
@@ -106,15 +110,16 @@ export function useOverlayState(): OverlayStateResult {
   }, [])
 
   const refreshState = useCallback(async () => {
-    const response = await sendNcMessage({
+    const response = await sendNcMessage<BackgroundResponse<StateResponse>>({
       type: MESSAGE_TYPES.requestState
     })
 
-    if (!response.ok) {
+    if (!response.ok || !response.data) {
       return
     }
 
-    const data = response.data as StateResponse
+    const { data } = response
+
     setOverlaySettings(data.settings)
     setRecentWindow(data.state.recentWindow)
     setCurrentVideoId(data.state.currentVideoId)

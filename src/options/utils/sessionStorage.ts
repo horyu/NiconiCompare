@@ -7,6 +7,7 @@ export const readSessionState = <T>(key: string, fallback: T): T => {
     if (!raw) {
       return fallback
     }
+    // oxlint-disable-next-line no-unsafe-type-assertion
     return JSON.parse(raw) as T
   } catch {
     return fallback

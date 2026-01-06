@@ -69,10 +69,12 @@ export async function getStorageData<K extends StorageKey>(
   const storageKeys = keys.map((key) => STORAGE_KEYS[key])
   const result = await storage.get(storageKeys)
 
+  // oxlint-disable-next-line no-unsafe-type-assertion
   const data = {} as Pick<StorageDataByKey, K>
   for (const key of keys) {
     const storageKey = STORAGE_KEYS[key]
     const value = result[storageKey]
+    // oxlint-disable-next-line no-unsafe-type-assertion
     data[key] = (value ?? DEFAULT_BY_KEY[key]) as StorageDataByKey[K]
   }
 
@@ -91,6 +93,7 @@ export async function getRawStorageData<K extends StorageKey>(
     const storageKey = STORAGE_KEYS[key]
     const value = result[storageKey]
     if (value !== undefined) {
+      // oxlint-disable-next-line no-unsafe-type-assertion
       data[key] = value as StorageDataByKey[K]
     }
   }
@@ -105,6 +108,7 @@ export async function setStorageData(
   const storageUpdates: Record<string, unknown> = {}
 
   for (const [key, value] of Object.entries(updates)) {
+    // oxlint-disable-next-line no-unsafe-type-assertion
     const storageKey = STORAGE_KEYS[key as StorageKey]
     storageUpdates[storageKey] = value
   }
