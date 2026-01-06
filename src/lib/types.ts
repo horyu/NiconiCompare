@@ -1,4 +1,5 @@
-export type Verdict = "better" | "same" | "worse"
+export const VERDICTS = ["better", "same", "worse"] as const
+export type Verdict = (typeof VERDICTS)[number]
 
 export interface VideoSnapshot {
   videoId: string

@@ -18,6 +18,7 @@ import type {
   NcState,
   NcVideos
 } from "../../lib/types"
+import type { Assert, Equals } from "../../lib/typeUtils"
 
 export interface StorageDataByKey {
   settings: NcSettings
@@ -43,7 +44,7 @@ const DEFAULT_BY_KEY: StorageDataByKey = {
   categories: DEFAULT_CATEGORIES
 }
 
-const ALL_STORAGE_KEYS: StorageKey[] = [
+const ALL_STORAGE_KEYS = [
   "settings",
   "state",
   "videos",
@@ -52,7 +53,14 @@ const ALL_STORAGE_KEYS: StorageKey[] = [
   "ratings",
   "meta",
   "categories"
-]
+] as const satisfies readonly StorageKey[]
+
+// 型レベルで ALL_STORAGE_KEYS がすべての StorageKey を含むことを保証
+type KeysFromObject = keyof StorageDataByKey
+type KeysFromArray = (typeof ALL_STORAGE_KEYS)[number]
+
+type _AssertAllStorageKeys = Assert<Equals<KeysFromArray, KeysFromObject>>
+const _assertAllStorageKeys: _AssertAllStorageKeys = true
 
 function ensureStorageAvailable(): chrome.storage.LocalStorageArea {
   const storage = chrome?.storage?.local
@@ -63,7 +71,7 @@ function ensureStorageAvailable(): chrome.storage.LocalStorageArea {
 }
 
 export async function getStorageData<K extends StorageKey>(
-  keys: K[]
+  keys: readonly K[]
 ): Promise<Pick<StorageDataByKey, K>> {
   const storage = ensureStorageAvailable()
   const storageKeys = keys.map((key) => STORAGE_KEYS[key])

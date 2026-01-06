@@ -12,6 +12,7 @@ import { EVENT_PAGE_SIZE, MESSAGE_TYPES } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
 import { runNcAction } from "../../lib/ncAction"
 import type { CompareEvent, Verdict } from "../../lib/types"
+import { VERDICTS } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
 import { CategorySelect } from "../components/CategorySelect"
 import { EventVideoLabel } from "../components/EventVideoLabel"
@@ -63,7 +64,6 @@ const DEFAULT_EVENT_SESSION_STATE: EventSessionState = {
   showCategoryOps: false,
   page: 1
 }
-const VERDICTS = ["better", "same", "worse"] as const
 const isVerdict = (value: string): value is Verdict =>
   (VERDICTS as readonly string[]).includes(value)
 

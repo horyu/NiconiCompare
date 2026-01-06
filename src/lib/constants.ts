@@ -3,7 +3,8 @@ import type {
   NcEventsBucket,
   NcMeta,
   NcSettings,
-  NcState
+  NcState,
+  StorageShape
 } from "./types"
 
 export const STORAGE_KEYS = {
@@ -15,7 +16,7 @@ export const STORAGE_KEYS = {
   ratings: "nc_ratings",
   meta: "nc_meta",
   categories: "nc_categories"
-} as const
+} as const satisfies Record<string, keyof StorageShape>
 
 export const DEFAULT_CATEGORY_ID = "00000000-0000-0000-0000-000000000000"
 export const DEFAULT_CATEGORY_NAME = "総合"
@@ -94,3 +95,5 @@ export const MESSAGE_TYPES = {
   updateActiveCategory: "nc/updateActiveCategory",
   bulkMoveEvents: "nc/bulkMoveEvents"
 } as const
+
+export type MessageType = (typeof MESSAGE_TYPES)[keyof typeof MESSAGE_TYPES]

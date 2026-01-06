@@ -6,6 +6,7 @@ import type {
   Verdict,
   VideoSnapshot
 } from "./types"
+import type { Assert, Equals } from "./typeUtils"
 
 export interface RegisterSnapshotMessage {
   type: typeof MESSAGE_TYPES.registerSnapshot
@@ -166,6 +167,15 @@ export type Message =
   | UpdateActiveCategoryMessage
   | BulkMoveEventsMessage
   | RequestStateMessage
+
+// Message ユニオン型が MESSAGE_TYPES のすべてのキーをカバーしていることを確認
+type MessageTypeValues = (typeof MESSAGE_TYPES)[keyof typeof MESSAGE_TYPES]
+type MessageUnionTypes = Message["type"]
+
+type _AssertAllMessageTypes = Assert<
+  Equals<MessageTypeValues, MessageUnionTypes>
+>
+const _assertAllMessageTypes: _AssertAllMessageTypes = true
 
 export type BackgroundResponse<TData = unknown> =
   | {
