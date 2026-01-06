@@ -18,7 +18,7 @@ interface LdVideoObject {
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null
+  typeof value === "object" && value !== null && !Array.isArray(value)
 
 const readString = (value: unknown): string | undefined =>
   typeof value === "string" ? value : undefined
