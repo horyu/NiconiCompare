@@ -52,13 +52,13 @@ NiconiCompare は、Chrome/Firefox Manifest V3 対応のブラウザ拡張機能
 
 ### 1.2 コンポーネント責務
 
-| コンポーネント     | 責務                                           | 技術スタック                        |
-| ------------------ | ---------------------------------------------- | ----------------------------------- |
-| **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得        | React 19.2, TypeScript, Tailwind CSS v4, WXT Content Script UI |
-| **Service Worker** | イベントログ管理、Glicko-2 計算、Storage I/O | TypeScript, chrome.storage API      |
-| **Popup**          | アクティブカテゴリの直近イベント表示、overlayAndCaptureEnabled トグル | React 19.2, TypeScript            |
-| **Options**        | 詳細設定、データ操作、一覧エクスポート/インポート | React 19.2, TypeScript            |
-| **Storage**        | 永続化層                                       | chrome.storage.local (Key-Value)  |
+| コンポーネント     | 責務                                                                  | 技術スタック                                                   |
+| ------------------ | --------------------------------------------------------------------- | -------------------------------------------------------------- |
+| **Content Script** | DOM 監視、オーバーレイ UI、JSON-LD 取得                               | React 19.2, TypeScript, Tailwind CSS v4, WXT Content Script UI |
+| **Service Worker** | イベントログ管理、Glicko-2 計算、Storage I/O                          | TypeScript, chrome.storage API                                 |
+| **Popup**          | アクティブカテゴリの直近イベント表示、overlayAndCaptureEnabled トグル | React 19.2, TypeScript                                         |
+| **Options**        | 詳細設定、データ操作、一覧エクスポート/インポート                     | React 19.2, TypeScript                                         |
+| **Storage**        | 永続化層                                                              | chrome.storage.local (Key-Value)                               |
 
 Service Worker の内部構成は `src/background/handlers`（メッセージ単位の処理）、`src/background/services`（Storage/クリーンアップ）、`src/background/utils`（正規化・集約ロジック）に分離している。
 メッセージ送信は `sendNcMessage` を介して型をチェックする。
@@ -287,21 +287,23 @@ Chrome Storage Local は、Key-Value 型のストレージ（JSON シリアラ�
 
 **キー命名規則**: プレフィックス `nc_` で名前空間を確保
 
-| Key           | Value 型                                | 推定サイズ |
-| ------------- | --------------------------------------- | ---------- |
-| `nc_settings` | Object                                  | ~2 KB      |
-| `nc_state`    | Object                                  | ~5 KB      |
-| `nc_videos`   | Map<string, VideoSnapshot>              | 500 B/件   |
-| `nc_authors`  | Map<string, AuthorProfile>              | 200 B/件   |
-| `nc_events`   | {items: CompareEvent[], nextId: number} | 150 B/件   |
-| `nc_ratings`  | Map<categoryId, Map<videoId, RatingSnapshot>> | 100 B/件   |
-| `nc_categories` | {items, order, overlayVisibleIds, defaultId} | ~2 KB |
-| `nc_meta`     | Object                                  | ~10 KB     |
+| Key             | Value 型                                      | 推定サイズ |
+| --------------- | --------------------------------------------- | ---------- |
+| `nc_settings`   | Object                                        | ~2 KB      |
+| `nc_state`      | Object                                        | ~5 KB      |
+| `nc_videos`     | Map<string, VideoSnapshot>                    | 500 B/件   |
+| `nc_authors`    | Map<string, AuthorProfile>                    | 200 B/件   |
+| `nc_events`     | {items: CompareEvent[], nextId: number}       | 150 B/件   |
+| `nc_ratings`    | Map<categoryId, Map<videoId, RatingSnapshot>> | 100 B/件   |
+| `nc_categories` | {items, order, overlayVisibleIds, defaultId}  | ~2 KB      |
+| `nc_meta`       | Object                                        | ~10 KB     |
 
 **nc_meta の主な用途**:
+
 - lastReplayEventId / lastCleanupAt などのメタ情報を保持
 
 **nc_categories の主な用途**:
+
 - カテゴリ一覧、表示順、オーバーレイ表示対象の管理
 - `nc_settings.activeCategoryId` と連携し、比較/ランキングのカテゴリを切り替える（切替はオーバーレイのみ）
 - オーバーレイで評価済み状態のままカテゴリを切り替えた場合、直近イベントを切替先カテゴリへ移動する
@@ -321,6 +323,7 @@ const updatedEvents = produce(events, (draft) => {
 ```
 
 **メリット**:
+
 - 複雑なネストしたオブジェクトの更新が直感的
 - 意図しない副作用を防止
 - リプレイやロールバックが容易
@@ -351,6 +354,7 @@ function normalizeSettings(settings: NcSettings): NcSettings {
 ```
 
 **バリデーション範囲**:
+
 - `recentWindowSize`: 1〜50 の整数
 - `overlayAutoCloseMs`: 0〜5000ms
 - `showEventThumbnails`: boolean
@@ -458,11 +462,13 @@ async function saveCompareEvent(event: CompareEvent) {
 **補足**: 書き込み失敗は即時フィードバックで扱い、リトライキューは採用しない。失敗を記録する追加ストレージを持つほどのデータ規模ではなく、失敗時はユーザーが直ちに再操作できるため。
 
 **共通ユーティリティ**: `src/lib/errorHandler.ts`
+
 - Background: `handleBackgroundError(error, context)` でログを統一
 - UI: `handleUIError(error, context, showToast?, userMessage?)` でログ + 通知
 - `NcError`: UI でユーザー向けメッセージを保持する例外（`userMessage` を表示）
 
 **コンテキスト文字列**:
+
 - 例: `options:events:purge`, `dom-observer:parse-ld-json`
 - ログの追跡性を上げるため、呼び出し元の機能を短く付与する
 

@@ -35,6 +35,7 @@ pnpm fix              # oxfmt の整形 → oxlint + ESLint（自動修正あり
 > `pnpm approve-builds` は対話式で、依存の build script 実行を明示的に承認する必要がある。`esbuild` などが選択対象として表示されるので、画面の指示に従って次工程へ進むこと。
 
 **⚠️ コミット前の必須事項**:
+
 - **`pnpm fix`**: コード自動修正を実行
 - **`pnpm check`**: 型・lint・format のチェックに合格すること
 
@@ -117,6 +118,7 @@ src/
 ### 2.3 コーディング規約
 
 TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関数/変数), snake_case (storage キー)
+
 - エラーハンドリングは `src/lib/errorHandler.ts` を使用し、`console.error` の直書きは避ける
 - エラー context は `bg:*`（background）/ `ui:*`（UI）のプレフィックスで統一する
 - background へのメッセージ送信は `sendNcMessage` を使用して型チェックする
@@ -125,6 +127,7 @@ TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関�
 ### 2.4 コード品質チェック
 
 **ESLint**: 静的解析によりコード品質を保証
+
 - **設定ファイル**: `eslint.config.mjs` (ESLint 9 flat config)
 - **有効なルール**:
   - TypeScript 推奨ルール (@typescript-eslint/recommended)
@@ -139,6 +142,7 @@ TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関�
 **oxfmt**: コードフォーマッター
 
 **実行コマンド**:
+
 ```bash
 pnpm fix               # oxfmt → oxlint + ESLint（自動修正あり）
 pnpm lint              # oxlint + ESLint（自動修正あり）
@@ -152,6 +156,7 @@ pnpm storybook:build   # Storybook ビルド
 ```
 
 **開発フロー**:
+
 1. コード編集
 2. `pnpm fix` でコード自動修正
 3. `pnpm check` で全チェック合格を確認

@@ -22,15 +22,15 @@ docs/
 
 ### 更新が必要な場合
 
-| 変更内容             | 更新対象文書                               |
-| -------------------- | ------------------------------------------ |
-| 新機能の追加         | spec.md, architecture.md                   |
-| 技術スタックの変更   | developer-guide.md, architecture.md        |
-| バグ修正             | 通常は不要（重大な設計変更を伴う場合のみ） |
-| UI/UX 変更           | spec.md                                    |
-| パフォーマンス最適化 | architecture.md, developer-guide.md        |
-| ビルド手順の変更     | developer-guide.md                         |
-| 開発ツール・lint設定の変更 | developer-guide.md                   |
+| 変更内容                   | 更新対象文書                               |
+| -------------------------- | ------------------------------------------ |
+| 新機能の追加               | spec.md, architecture.md                   |
+| 技術スタックの変更         | developer-guide.md, architecture.md        |
+| バグ修正                   | 通常は不要（重大な設計変更を伴う場合のみ） |
+| UI/UX 変更                 | spec.md                                    |
+| パフォーマンス最適化       | architecture.md, developer-guide.md        |
+| ビルド手順の変更           | developer-guide.md                         |
+| 開発ツール・lint設定の変更 | developer-guide.md                         |
 
 ### 更新時の注意事項
 
