@@ -43,6 +43,17 @@ export default defineConfig([
     }
   },
   {
+    name: "Storybook TypeScript Files",
+    files: [".storybook/**/*.ts", ".storybook/**/*.tsx"],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: "./tsconfig.json",
+        tsconfigRootDir: import.meta.dirname
+      }
+    }
+  },
+  {
     name: "Base ESLint Rules",
     ...eslint.configs.recommended
   },
