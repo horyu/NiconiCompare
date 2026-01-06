@@ -14,7 +14,7 @@
       ["external"],
       ["internal"],
       ["parent", "sibling", "index"],
-      ["style"],
+      ["style"]
     ],
     "ignoreCase": true,
     "newlinesBetween": true,

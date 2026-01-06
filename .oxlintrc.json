@@ -1,7 +1,15 @@
 {
   // Rules checked up to: https://github.com/oxc-project/oxc-project.github.io/blob/a85089acb4493ad7b954dc12d8a8d1dbe179ea78/src/docs/guide/usage/linter/generated-rules.md
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["eslint", "oxc", "promise", "react", "typescript", "unicorn", "vitest"],
+  "plugins": [
+    "eslint",
+    "oxc",
+    "promise",
+    "react",
+    "typescript",
+    "unicorn",
+    "vitest"
+  ],
   "categories": {
     "correctness": "error",
     "suspicious": "warn",
@@ -16,7 +24,7 @@
     "browser": true,
     "webextensions": true
   },
-  "ignorePatterns": ["*.js", "*.mjs", "*.cjs", "!.prettierrc.mjs", "!eslint.config.mjs"],
+  "ignorePatterns": ["*.js", "*.mjs", "*.cjs", "!eslint.config.mjs"],
   "rules": {
     // suspicious
     "no-array-sort": "off",

@@ -1,9 +1,11 @@
-import react from "@vitejs/plugin-react"
-import tailwindcss from "@tailwindcss/vite"
-import fs from "fs"
-import path from "path"
-import { fileURLToPath } from "url"
+import fs from "node:fs"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
+
 import type { StorybookConfig } from "@storybook/react-vite"
+import tailwindcss from "@tailwindcss/vite"
+import react from "@vitejs/plugin-react"
+import type { Plugin } from "vite"
 
 const config: StorybookConfig = {
   framework: "@storybook/react-vite",
@@ -13,7 +15,7 @@ const config: StorybookConfig = {
   // 却下案:
   // - preview.tsでstorybook.cssだけ読む → CSSが二重読み込みになり、prefers-color-schemeが勝つ
   // - 本体もclassベースに寄せる → 本体はOS判定を維持したい
-  async viteFinal(config) {
+  viteFinal(config) {
     const dirname = path.dirname(fileURLToPath(import.meta.url))
     const storybookStyle = path.resolve(dirname, "storybook.css")
     const replaceStylePlugin = {
@@ -25,7 +27,7 @@ const config: StorybookConfig = {
         }
         return fs.readFileSync(storybookStyle, "utf8")
       }
-    } satisfies import("vite").Plugin
+    } satisfies Plugin
     config.plugins = [
       replaceStylePlugin,
       tailwindcss(),
