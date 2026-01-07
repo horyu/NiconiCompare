@@ -173,8 +173,6 @@ pnpm storybook:build   # Storybook ビルド
 **現状**: テストは Vitest で実装済み。`pnpm test:run` を使用する。
 Storybook は UI プレビュー用途で導入済み。
 
-カバレッジ目標: 80%以上（テストセットアップ後）
-
 ---
 
 ## 4. ビルド
