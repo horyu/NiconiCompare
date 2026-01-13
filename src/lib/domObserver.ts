@@ -98,6 +98,7 @@ export function observeLdJsonChanges(
  *
  * @returns Video data if found, undefined otherwise
  */
+// oxlint-disable-next-line complexity
 export function extractVideoDataFromLdJson(): VideoData | undefined {
   const scripts = findLdJsonScripts()
   if (scripts.length === 0) return undefined

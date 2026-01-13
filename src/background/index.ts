@@ -66,6 +66,7 @@ void initializeBackground("startup")
 
 chrome.runtime.onMessage.addListener(
   (message: Message, _sender, sendResponse) => {
+    // oxlint-disable-next-line complexity
     void (async () => {
       try {
         switch (message.type) {
@@ -189,7 +190,7 @@ chrome.runtime.onMessage.addListener(
     return true
   }
 )
-
+// oxlint-disable-next-line complexity
 async function ensureDefaults(): Promise<void> {
   const result = await getRawStorageData([
     "settings",
