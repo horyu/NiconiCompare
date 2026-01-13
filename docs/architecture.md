@@ -151,14 +151,14 @@ NiconiCompare は厳密なイベント再生モデルではなく、**実用的�
 
 ```typescript
 type CompareEvent = {
-  id: number; // グローバル一意ID (nextIdから採番)
-  timestamp: number; // Unixタイムスタンプ（ミリ秒）
-  currentVideoId: string; // 比較対象 (現在動画)
-  opponentVideoId: string; // 比較対象 (選択動画)
-  verdict: "better" | "same" | "worse"; // currentVideo視点の評価
-  disabled: boolean; // 無効化フラグ
-  categoryId: string; // 比較カテゴリ
-};
+  id: number // グローバル一意ID (nextIdから採番)
+  timestamp: number // Unixタイムスタンプ（ミリ秒）
+  currentVideoId: string // 比較対象 (現在動画)
+  opponentVideoId: string // 比較対象 (選択動画)
+  verdict: "better" | "same" | "worse" // currentVideo視点の評価
+  disabled: boolean // 無効化フラグ
+  categoryId: string // 比較カテゴリ
+}
 ```
 
 ### 3.3 イベント ID 採番戦略
@@ -169,29 +169,29 @@ type CompareEvent = {
 
 ```typescript
 async function allocateEventId(): Promise<number> {
-  const MAX_RETRIES = 3;
+  const MAX_RETRIES = 3
   for (let i = 0; i < MAX_RETRIES; i++) {
     // [1] 現在のnextIdを読み取り
-    const { nc_events } = await chrome.storage.local.get("nc_events");
-    const currentNextId = nc_events.nextId;
+    const { nc_events } = await chrome.storage.local.get("nc_events")
+    const currentNextId = nc_events.nextId
 
     // [2] 新しいnextIdを書き込み (楽観的ロック)
-    const newNextId = currentNextId + 1;
+    const newNextId = currentNextId + 1
 
     // [3] 書き込み後に再取得して競合チェック
     await chrome.storage.local.set({
-      nc_events: { ...nc_events, nextId: newNextId },
-    });
+      nc_events: { ...nc_events, nextId: newNextId }
+    })
 
-    const { nc_events: updated } = await chrome.storage.local.get("nc_events");
+    const { nc_events: updated } = await chrome.storage.local.get("nc_events")
     if (updated.nextId === newNextId) {
-      return currentNextId; // 採番成功
+      return currentNextId // 採番成功
     }
 
     // 競合検出 → リトライ
-    console.warn(`ID collision detected, retrying... (${i + 1}/${MAX_RETRIES})`);
+    console.warn(`ID collision detected, retrying... (${i + 1}/${MAX_RETRIES})`)
   }
-  throw new Error("Failed to allocate event ID after max retries");
+  throw new Error("Failed to allocate event ID after max retries")
 }
 ```
 
@@ -215,17 +215,17 @@ Glicko-2 は、Glicko 評価システムの改良版で、以下の 3 つのパ�
 
 ```typescript
 type GlickoPlayer = {
-  rating: number;
-  rd: number;
-  volatility: number;
-};
+  rating: number
+  rd: number
+  volatility: number
+}
 
 function updateRatings(
   currentVideo: GlickoPlayer,
   opponentVideo: GlickoPlayer,
   verdict: "better" | "same" | "worse"
 ): { left: GlickoPlayer; right: GlickoPlayer } {
-  const outcome = verdict === "better" ? 1 : verdict === "worse" ? 0 : 0.5;
+  const outcome = verdict === "better" ? 1 : verdict === "worse" ? 0 : 0.5
 
   // Glicko-2アルゴリズム適用
   const leftResult = rate(
@@ -234,7 +234,7 @@ function updateRatings(
     currentVideo.volatility,
     [[opponentVideo.rating, opponentVideo.rd, outcome]],
     { rating: 1500, tau: 0.5 }
-  );
+  )
 
   const rightResult = rate(
     opponentVideo.rating,
@@ -242,7 +242,7 @@ function updateRatings(
     opponentVideo.volatility,
     [[currentVideo.rating, currentVideo.rd, 1 - outcome]],
     { rating: 1500, tau: 0.5 }
-  );
+  )
 
   return {
     left: {
@@ -255,7 +255,7 @@ function updateRatings(
       rd: rightResult.rd,
       volatility: rightResult.vol
     }
-  };
+  }
 }
 ```
 
@@ -371,15 +371,18 @@ async function saveCompareEvent(event: CompareEvent) {
   const { nc_events, nc_videos, nc_authors } = await chrome.storage.local.get([
     "nc_events",
     "nc_videos",
-    "nc_authors",
-  ]);
+    "nc_authors"
+  ])
 
   // 複数キーを1回のsetでまとめて書き込み
   await chrome.storage.local.set({
-    nc_events: { items: [...nc_events.items, event], nextId: nc_events.nextId + 1 },
+    nc_events: {
+      items: [...nc_events.items, event],
+      nextId: nc_events.nextId + 1
+    },
     nc_videos: { ...nc_videos, [event.currentVideoId]: newSnapshot },
-    nc_authors: { ...nc_authors, [newSnapshot.authorUrl]: newProfile },
-  });
+    nc_authors: { ...nc_authors, [newSnapshot.authorUrl]: newProfile }
+  })
 }
 ```
 
@@ -519,8 +522,8 @@ async function saveCompareEvent(event: CompareEvent) {
 
 ```typescript
 interface RatingPlugin {
-  name: string;
-  calculate(events: CompareEvent[]): Map<string, number>;
+  name: string
+  calculate(events: CompareEvent[]): Map<string, number>
 }
 
 // Elo, TrueSkill等を追加可能

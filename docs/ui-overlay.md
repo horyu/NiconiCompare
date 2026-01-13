@@ -17,16 +17,20 @@
 ## コンポーネント構造
 
 ```tsx
-<Overlay> // WXT content-script UI React Component
+<Overlay>
+  {" "}
+  // WXT content-script UI React Component
   <div className="fixed top-0 right-0 z-[2147483647] ...">
     <CategorySelector />
     <strong>NiconiCompare</strong>
     {displayStatus && <span>{displayStatus}</span>}
     {showControls && (
-      <div> // verdict buttons + video comparison grid
-        <button onClick={submitVerdict('better')}>再生中の動画</button>
-        <button onClick={submitVerdict('same')}>引き分け</button>
-        <button onClick={submitVerdict('worse')}>選択中の動画</button>
+      <div>
+        {" "}
+        // verdict buttons + video comparison grid
+        <button onClick={submitVerdict("better")}>再生中の動画</button>
+        <button onClick={submitVerdict("same")}>引き分け</button>
+        <button onClick={submitVerdict("worse")}>選択中の動画</button>
         // Video thumbnails + labels + custom select
         <button onClick={togglePinnedOpponent}>🔒/🔓</button>
       </div>
