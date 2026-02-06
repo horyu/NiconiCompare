@@ -2,7 +2,7 @@ import {
   useEffect,
   useState,
   type ChangeEvent,
-  type FormEvent,
+  type SyntheticEvent,
   type ReactElement
 } from "react"
 
@@ -120,7 +120,9 @@ export const SettingsTab = ({
     }
   }
 
-  const handleSettingsSubmit = async (event: FormEvent): Promise<void> => {
+  const handleSettingsSubmit = async (
+    event: SyntheticEvent<HTMLFormElement>
+  ): Promise<void> => {
     event.preventDefault()
     await saveSettings()
   }
