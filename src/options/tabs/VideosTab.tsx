@@ -432,6 +432,7 @@ interface VideoRowProps {
   lastVerdictAt?: number
 }
 
+// oxlint-disable-next-line react/no-multi-comp
 const VideoRow = ({
   video,
   rating,

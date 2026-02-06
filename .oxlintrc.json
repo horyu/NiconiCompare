@@ -110,6 +110,8 @@
       "rules": {
         // 適当な数値を書くことが多い
         "unicorn/numeric-separators-style": "off",
+        // Storybook は displayName を付けないケースが多い
+        "react/display-name": "off",
         // chrome API の型定義省力化用
         "no-unsafe-type-assertion": "off"
       }

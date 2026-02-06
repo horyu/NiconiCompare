@@ -631,6 +631,7 @@ interface EventRowProps {
   onPurgeEvent: (eventId: number) => void
 }
 
+// oxlint-disable-next-line react/no-multi-comp
 const EventRow = ({
   event,
   showCategoryOps,
