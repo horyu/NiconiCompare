@@ -53,7 +53,7 @@
     "eslint-plugin-storybook": "^10.2.6",
     "happy-dom": "^20.5.0",
     "npm-run-all": "^4.1.5",
-    "oxfmt": "^0.26.0",
+    "oxfmt": "^0.28.0",
     "oxlint": "^1.43.0",
     "oxlint-tsgolint": "^0.11.4",
     "storybook": "^10.2.6",
