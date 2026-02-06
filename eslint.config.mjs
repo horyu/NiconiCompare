@@ -98,9 +98,7 @@ export default defineConfig([
     files: ["**/*.stories.ts", "**/*.stories.tsx"],
     rules: {
       // Storybookのダミーハンドラは空実装が前提のため許可する
-      "@typescript-eslint/no-empty-function": "off",
-      // Storybookのラッパーコンポーネントは無名関数が多いため許可する
-      "react/display-name": "off"
+      "@typescript-eslint/no-empty-function": "off"
     }
   },
   {
