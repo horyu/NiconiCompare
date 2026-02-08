@@ -22,10 +22,14 @@ export async function runNcAction<T>(
     logger.info(`[${options.context}] action start`)
     const response = await action()
     if (!response.ok) {
+      const userMessage =
+        typeof response.error === "string" && response.error.trim().length > 0
+          ? response.error
+          : options.errorMessage
       throw new NcError(
         response.error ?? "request failed",
         options.context,
-        options.errorMessage
+        userMessage
       )
     }
     logger.info(`[${options.context}] action success`)

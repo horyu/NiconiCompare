@@ -20,6 +20,67 @@ import { normalizeSettings } from "../utils/normalize"
 import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
 import { rebuildRecentWindowFromEvents } from "../utils/recentWindow"
 
+const SEMVER_PATTERN = /^(\d+)\.(\d+)\.(\d+)$/
+const CURRENT_SCHEMA_VERSION = DEFAULT_META.schemaVersion
+const INVALID_SCHEMA_MESSAGE =
+  "インポートデータが不正です。アプリのエクスポート機能で出力したJSONをそのまま使用してください。"
+
+function parseSchemaVersion(version: string): [number, number, number] {
+  const matched = SEMVER_PATTERN.exec(version)
+  if (!matched) {
+    throw new Error(INVALID_SCHEMA_MESSAGE)
+  }
+  return [Number(matched[1]), Number(matched[2]), Number(matched[3])]
+}
+
+function compareSchemaVersion(left: string, right: string): number {
+  const leftParts = parseSchemaVersion(left)
+  const rightParts = parseSchemaVersion(right)
+  for (let i = 0; i < leftParts.length; i++) {
+    if (leftParts[i] > rightParts[i]) {
+      return 1
+    }
+    if (leftParts[i] < rightParts[i]) {
+      return -1
+    }
+  }
+  return 0
+}
+
+function resolveImportSchemaVersion(meta?: Partial<NcMeta>): string {
+  if (
+    meta &&
+    "schemaVersion" in meta &&
+    meta.schemaVersion !== undefined &&
+    typeof meta.schemaVersion !== "string"
+  ) {
+    throw new Error(INVALID_SCHEMA_MESSAGE)
+  }
+
+  const rawVersion =
+    typeof meta?.schemaVersion === "string" ? meta.schemaVersion.trim() : ""
+
+  if (!rawVersion) {
+    if (meta?.schemaVersion !== undefined) {
+      throw new Error(INVALID_SCHEMA_MESSAGE)
+    }
+    return CURRENT_SCHEMA_VERSION
+  }
+
+  const compared = compareSchemaVersion(rawVersion, CURRENT_SCHEMA_VERSION)
+  if (compared > 0) {
+    throw new Error(
+      `インポートデータの schemaVersion (${rawVersion}) は現在の対応バージョン (${CURRENT_SCHEMA_VERSION}) より新しいため読み込めません。`
+    )
+  }
+  if (compared < 0) {
+    throw new Error(
+      `インポートデータの schemaVersion (${rawVersion}) は古く、現在のバージョン (${CURRENT_SCHEMA_VERSION}) へのマイグレーションが未実装です。`
+    )
+  }
+  return rawVersion
+}
+
 export async function handleDeleteAllData(): Promise<void> {
   await setStorageData({
     settings: DEFAULT_SETTINGS,
@@ -76,9 +137,11 @@ export async function handleImportData(
   const nextEvents = data[STORAGE_KEYS.events] ?? DEFAULT_EVENTS_BUCKET
   const rawState = data[STORAGE_KEYS.state] ?? DEFAULT_STATE
   const rawMeta = data[STORAGE_KEYS.meta] ?? DEFAULT_META
+  const schemaVersion = resolveImportSchemaVersion(rawMeta)
   const nextMeta: NcMeta = {
     ...DEFAULT_META,
     ...rawMeta,
+    schemaVersion,
     lastCleanupAt: Number(rawMeta.lastCleanupAt ?? 0)
   }
   const nextVideos = data[STORAGE_KEYS.videos] ?? {}

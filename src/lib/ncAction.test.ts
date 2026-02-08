@@ -53,7 +53,27 @@ describe("runNcAction", () => {
     })
 
     expect(result).toBeNull()
-    expect(handleUIError).toHaveBeenCalled()
+    expect(handleUIError).toHaveBeenCalledWith(
+      expect.objectContaining({ userMessage: "nope" }),
+      "ui:test:fail",
+      undefined
+    )
+  })
+
+  it("失敗レスポンスで error が空の場合は既定メッセージを使うこと", async () => {
+    const action = vi.fn().mockResolvedValue({ ok: false, error: "" })
+
+    const result = await runNcAction(action, {
+      context: "ui:test:fail-empty",
+      errorMessage: "fail"
+    })
+
+    expect(result).toBeNull()
+    expect(handleUIError).toHaveBeenCalledWith(
+      expect.objectContaining({ userMessage: "fail" }),
+      "ui:test:fail-empty",
+      undefined
+    )
   })
 
   it("例外発生時はエラーハンドリングされること", async () => {
