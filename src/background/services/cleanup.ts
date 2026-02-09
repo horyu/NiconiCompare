@@ -46,15 +46,14 @@ export async function performCleanup(): Promise<void> {
     }
   })
 
-  Object.values(videos).forEach((video) => {
+  const cleanedVideos = Object.fromEntries(
+    Object.entries(videos).filter(([videoId]) => referencedVideos.has(videoId))
+  )
+  Object.values(cleanedVideos).forEach((video) => {
     if (video.authorUrl) {
       referencedAuthors.add(video.authorUrl)
     }
   })
-
-  const cleanedVideos = Object.fromEntries(
-    Object.entries(videos).filter(([videoId]) => referencedVideos.has(videoId))
-  )
   const cleanedRatings = Object.fromEntries(
     Object.entries(ratings).map(([categoryId, categoryRatings]) => [
       categoryId,
