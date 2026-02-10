@@ -1,3 +1,4 @@
+import { OVERLAY_STATUS_MESSAGES } from "./constants"
 import { handleUIError } from "./errorHandler"
 import type { AuthorProfile, VideoSnapshot } from "./types"
 
@@ -61,7 +62,7 @@ export function observeLdJsonChanges(
       "document.head is missing; ld+json observer disabled.",
       "ui:domObserver:missing-head"
     )
-    callbacks.onError("動画情報を取得できません")
+    callbacks.onError(OVERLAY_STATUS_MESSAGES.jsonLdUnavailable)
     return undefined
   }
 

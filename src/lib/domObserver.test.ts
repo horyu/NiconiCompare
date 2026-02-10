@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+import { OVERLAY_STATUS_MESSAGES } from "./constants"
 import type { VideoData } from "./domObserver"
 import { extractVideoDataFromLdJson, observeLdJsonChanges } from "./domObserver"
 
@@ -154,7 +155,9 @@ describe("observeLdJsonChanges", () => {
       const cleanup = observeLdJsonChanges({ onVideoDataChange, onError })
 
       expect(cleanup).toBeUndefined()
-      expect(onError).toHaveBeenCalledWith("動画情報を取得できません")
+      expect(onError).toHaveBeenCalledWith(
+        OVERLAY_STATUS_MESSAGES.jsonLdUnavailable
+      )
     } finally {
       // 元に戻す
       Object.defineProperty(document, "head", {

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import type { StorageDataByKey } from "./storage"
 import { performCleanup } from "./cleanup"
+import type { StorageDataByKey } from "./storage"
 
 const { getStorageDataMock, setStorageDataMock } = vi.hoisted(() => ({
   getStorageDataMock: vi.fn(),

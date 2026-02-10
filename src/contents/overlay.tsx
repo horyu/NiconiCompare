@@ -1,9 +1,10 @@
 import { useCallback, useState, type ReactElement } from "react"
 
-import { MESSAGE_TYPES } from "../lib/constants"
+import { MESSAGE_TYPES, OVERLAY_STATUS_MESSAGES } from "../lib/constants"
 import { sendNcMessage } from "../lib/messages"
 import { runNcAction } from "../lib/ncAction"
 import type { AuthorProfile, VideoSnapshot } from "../lib/types"
+import { getWatchVideoIdFromPathname } from "../lib/url"
 import { CategorySelector } from "./components/CategorySelector"
 import { OpponentSelector } from "./components/OpponentSelector"
 import { VerdictButtons } from "./components/VerdictButtons"
@@ -21,6 +22,39 @@ const keepOverlayEnvValue = String(
   import.meta.env.WXT_PUBLIC_KEEP_OVERLAY_OPEN ?? ""
 )
 const forceKeepOverlayOpen = keepOverlayEnvValue.toLowerCase() === "true"
+
+function isJsonLdFallbackStatus(statusMessage: string): boolean {
+  return (
+    statusMessage === OVERLAY_STATUS_MESSAGES.jsonLdLoading ||
+    statusMessage === OVERLAY_STATUS_MESSAGES.jsonLdUnavailable
+  )
+}
+
+function resolveStatusState({
+  currentPageVideoId,
+  currentVideoId,
+  pinnedSameMessage,
+  statusMessage,
+  videoSnapshots
+}: {
+  currentPageVideoId: string | undefined
+  currentVideoId: string
+  pinnedSameMessage: string | undefined
+  statusMessage: string | undefined
+  videoSnapshots: Record<string, VideoSnapshot>
+}): { canUseSnapshotFallback: boolean; displayStatus: string | undefined } {
+  const canUseSnapshotFallback =
+    statusMessage !== undefined &&
+    isJsonLdFallbackStatus(statusMessage) &&
+    currentPageVideoId !== undefined &&
+    currentVideoId === currentPageVideoId &&
+    Boolean(videoSnapshots[currentVideoId])
+  return {
+    canUseSnapshotFallback,
+    displayStatus:
+      pinnedSameMessage ?? (canUseSnapshotFallback ? undefined : statusMessage)
+  }
+}
 
 export default function Overlay(): ReactElement | null {
   const [isHovered, setIsHovered] = useState(false)
@@ -184,9 +218,24 @@ export default function Overlay(): ReactElement | null {
     isPinned && pinnedOpponentVideoId === currentVideoId
       ? "比較不可: 再生中と同じ動画が固定されています"
       : undefined
-  const displayStatus = statusMessage ?? pinnedSameMessage
+  const currentPageVideoId = getWatchVideoIdFromPathname(
+    window.location.pathname
+  )
+  const { canUseSnapshotFallback, displayStatus } = resolveStatusState({
+    currentPageVideoId,
+    currentVideoId,
+    pinnedSameMessage,
+    statusMessage,
+    videoSnapshots
+  })
   const isBlockingStatus =
-    displayStatus !== undefined && displayStatus !== RETRY_MESSAGE
+    pinnedSameMessage !== undefined ||
+    (statusMessage !== undefined &&
+      statusMessage !== RETRY_MESSAGE &&
+      !isJsonLdFallbackStatus(statusMessage)) ||
+    (statusMessage !== undefined &&
+      isJsonLdFallbackStatus(statusMessage) &&
+      !canUseSnapshotFallback)
   const canSubmit = currentVideoId && opponentVideoId && !isBlockingStatus
   return (
     <div

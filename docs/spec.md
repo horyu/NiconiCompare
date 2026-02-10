@@ -39,7 +39,7 @@
 - マイリスト等との同期は行わず、比較時点の 2 動画と verdict を永続化する。
 - 動画メタ／投稿者情報は watch ページの JSON-LD (`author.url`, `thumbnailUrl`) から取得し、`authorUrl` をキーに AuthorProfile を保持。再訪時は最新メタで VideoSnapshot/AuthorProfile を上書きする。
   - **JSON-LD 取得失敗時の挙動**:
-    - 該当 videoId の VideoSnapshot が既に `nc_videos` に存在する場合：既存データを使用して比較イベント登録を許可（UI には警告アイコンを表示）
+    - 該当 videoId の VideoSnapshot が既に `nc_videos` に存在する場合：既存データを使用して比較イベント登録を許可（デフォルトでは追加の警告表示を行わない）
     - VideoSnapshot が存在しない場合：オーバーレイにエラーメッセージを表示し、比較入力を完全に抑制
     - いずれの場合もエラーログに記録し、ユーザーはページリロードで再取得を試行できる
     - JSON-LD の構造変更やフィールド欠損（`author.url` 不在など）も同様に扱う
@@ -101,7 +101,7 @@ Options から再計算（リプレイ）を実行できる。詳細手順は `d
 - 比較対象（opponent）はピン留めでき、`nc_state.pinnedOpponentVideoId` に保存される。ピン留め中は Select 変更を無効化し、ページリロード/拡張再起動後も固定状態を維持する。
 - `pinnedOpponentVideoId` が再生中の動画と一致する場合は「比較不可」のステータスメッセージを表示し、verdict 入力を無効化する。
 - verdict 入力（再生中の動画/引き分け/選択中の動画）は 1 アクションで送信でき、送信後は最新の state を再取得して UI を更新する。
-- JSON-LD の取得状況を監視し、メタデータが不足しているときはステータスメッセージとともに verdict ボタンを無効化する（既存 VideoSnapshot がある場合は LRU 表示のみ継続してもよい）。
+- JSON-LD の取得状況を監視し、メタデータが不足しているときは verdict ボタンを無効化する（既存 VideoSnapshot がある場合はフォールバックで比較入力を継続可能。デフォルトでは追加の警告表示を行わない）。
 - `overlayAndCaptureEnabled` と `overlayAutoCloseMs` は `nc_settings` を唯一のソースとし、トグル変更 → UI 表示/非表示、マウスホバー解除 → 自動的にコントロールを閉じる動作が保証される。
 - オーバーレイのカテゴリドロップダウンは `overlayVisibleIds` に含まれるカテゴリのみ表示する。
 - カテゴリ切替時は `activeCategoryId` を更新し、以後の比較イベントに反映する。

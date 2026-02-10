@@ -71,6 +71,11 @@ export const DEFAULT_META: NcMeta = {
   lastCleanupAt: 0
 }
 
+export const OVERLAY_STATUS_MESSAGES = {
+  jsonLdLoading: "動画情報を取得中...",
+  jsonLdUnavailable: "動画情報を取得できません"
+} as const
+
 export const MESSAGE_TYPES = {
   registerSnapshot: "nc/registerSnapshot",
   updateCurrentVideo: "nc/updateCurrentVideo",

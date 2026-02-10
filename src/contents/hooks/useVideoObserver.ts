@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 
+import { OVERLAY_STATUS_MESSAGES } from "../../lib/constants"
 import {
   extractVideoDataFromLdJson,
   observeLdJsonChanges
@@ -44,7 +45,7 @@ export function useVideoObserver({
       onVideoChange(videoData)
     } else {
       logger.debug("[ui:overlay:video-observer] initial video missing")
-      onStatusMessage?.("動画情報を取得中...")
+      onStatusMessage?.(OVERLAY_STATUS_MESSAGES.jsonLdLoading)
     }
 
     return cleanup
