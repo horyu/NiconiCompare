@@ -90,15 +90,16 @@ export default function Overlay(): ReactElement | null {
     isHovered,
     isReady
   })
-  const { lastVerdict, lastEventId, submitVerdict } = useVerdictSubmission({
+  const activeCategoryId = categories.items[overlaySettings.activeCategoryId]
+    ? overlaySettings.activeCategoryId
+    : categories.defaultId
+  const { lastVerdict, submitVerdict } = useVerdictSubmission({
+    activeCategoryId,
     currentVideoId,
     opponentVideoId,
     refreshState,
     onStatusMessage: setStatusMessage
   })
-  const activeCategoryId = categories.items[overlaySettings.activeCategoryId]
-    ? overlaySettings.activeCategoryId
-    : categories.defaultId
 
   const handleCategoryChange = useCallback(
     async (categoryId: string) => {
@@ -117,29 +118,9 @@ export default function Overlay(): ReactElement | null {
         setStatusMessage("カテゴリの更新に失敗しました。")
         return
       }
-      if (lastEventId) {
-        const moveResponse = await runNcAction(
-          () =>
-            sendNcMessage({
-              type: MESSAGE_TYPES.bulkMoveEvents,
-              payload: {
-                eventIds: [lastEventId],
-                targetCategoryId: categoryId
-              }
-            }),
-          {
-            context: "ui:overlay:category-change",
-            errorMessage: "カテゴリの移動に失敗しました。"
-          }
-        )
-        if (!moveResponse) {
-          setStatusMessage("カテゴリの移動に失敗しました。")
-          return
-        }
-      }
       await refreshState()
     },
-    [lastEventId, refreshState, setStatusMessage]
+    [refreshState, setStatusMessage]
   )
 
   const handleVideoChange = useCallback(

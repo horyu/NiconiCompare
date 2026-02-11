@@ -8,6 +8,7 @@ import type { Verdict } from "../../lib/types"
 export const RETRY_MESSAGE = "保存に失敗しました。再度お試しください。"
 
 interface UseVerdictSubmissionParams {
+  activeCategoryId: string
   currentVideoId?: string
   opponentVideoId?: string
   refreshState: () => Promise<void>
@@ -21,6 +22,7 @@ interface UseVerdictSubmissionResult {
 }
 
 export function useVerdictSubmission({
+  activeCategoryId,
   currentVideoId,
   opponentVideoId,
   refreshState,
@@ -29,13 +31,12 @@ export function useVerdictSubmission({
   const [lastVerdict, setLastVerdict] = useState<Verdict>()
   const [lastEventId, setLastEventId] = useState<number>()
 
-  // props 由来の動画ペア変更に合わせて状態をリセットするため useEffect で同期する
+  // 動画ペア変更またはカテゴリ切替時に前回評価のローカル状態を破棄する
   useEffect(() => {
-    // 動画ペアが変わったら前の評価状態をクリア
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLastVerdict(undefined)
     setLastEventId(undefined)
-  }, [currentVideoId, opponentVideoId])
+  }, [activeCategoryId, currentVideoId, opponentVideoId])
 
   const submitVerdict = useCallback(
     async (verdict: Verdict): Promise<void> => {
