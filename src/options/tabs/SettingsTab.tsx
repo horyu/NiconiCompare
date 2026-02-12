@@ -33,6 +33,7 @@ export const SettingsTab = ({
     recentWindowSize: "5",
     popupRecentCount: "5",
     overlayAutoCloseMs: "2000",
+    showClosedOverlayVerdict: true,
     glickoRating: "1500",
     glickoRd: "350",
     glickoVolatility: "0.06"
@@ -45,6 +46,7 @@ export const SettingsTab = ({
       recentWindowSize: String(snapshot.settings.recentWindowSize),
       popupRecentCount: String(snapshot.settings.popupRecentCount),
       overlayAutoCloseMs: String(snapshot.settings.overlayAutoCloseMs),
+      showClosedOverlayVerdict: snapshot.settings.showClosedOverlayVerdict,
       glickoRating: String(snapshot.settings.glicko.rating),
       glickoRd: String(snapshot.settings.glicko.rd),
       glickoVolatility: String(snapshot.settings.glicko.volatility)
@@ -57,11 +59,18 @@ export const SettingsTab = ({
       setSettingsForm((prev) => ({ ...prev, [field]: event.target.value }))
     }
 
+  const handleCheckboxChange =
+    (field: "showClosedOverlayVerdict") =>
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      setSettingsForm((prev) => ({ ...prev, [field]: event.target.checked }))
+    }
+
   const applySettingsToForm = (settings: NcSettings): void => {
     setSettingsForm({
       recentWindowSize: String(settings.recentWindowSize),
       popupRecentCount: String(settings.popupRecentCount),
       overlayAutoCloseMs: String(settings.overlayAutoCloseMs),
+      showClosedOverlayVerdict: settings.showClosedOverlayVerdict,
       glickoRating: String(settings.glicko.rating),
       glickoRd: String(settings.glicko.rd),
       glickoVolatility: String(settings.glicko.volatility)
@@ -75,6 +84,8 @@ export const SettingsTab = ({
       String(snapshot.settings.popupRecentCount) ||
     settingsForm.overlayAutoCloseMs !==
       String(snapshot.settings.overlayAutoCloseMs) ||
+    settingsForm.showClosedOverlayVerdict !==
+      snapshot.settings.showClosedOverlayVerdict ||
     settingsForm.glickoRating !== String(snapshot.settings.glicko.rating) ||
     settingsForm.glickoRd !== String(snapshot.settings.glicko.rd) ||
     settingsForm.glickoVolatility !==
@@ -87,6 +98,7 @@ export const SettingsTab = ({
         recentWindowSize: Number(settingsForm.recentWindowSize),
         popupRecentCount: Number(settingsForm.popupRecentCount),
         overlayAutoCloseMs: Number(settingsForm.overlayAutoCloseMs),
+        showClosedOverlayVerdict: settingsForm.showClosedOverlayVerdict,
         glicko: {
           rating: Number(settingsForm.glickoRating),
           rd: Number(settingsForm.glickoRd),
@@ -197,6 +209,15 @@ export const SettingsTab = ({
             onChange={handleSettingsChange("overlayAutoCloseMs")}
             className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
+        </label>
+        <label className="col-span-2 text-sm flex items-center gap-2 text-slate-700 dark:text-slate-200">
+          <input
+            type="checkbox"
+            checked={settingsForm.showClosedOverlayVerdict}
+            onChange={handleCheckboxChange("showClosedOverlayVerdict")}
+            className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+          />
+          閉じたオーバーレイに直近の勝敗記号（&lt; / = / &gt;）を表示
         </label>
         <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           初期 rating

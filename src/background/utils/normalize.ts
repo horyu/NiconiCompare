@@ -24,6 +24,9 @@ export function normalizeSettings(settings: NcSettings): NcSettings {
     overlayAndCaptureEnabled:
       settings.overlayAndCaptureEnabled ??
       DEFAULT_SETTINGS.overlayAndCaptureEnabled,
+    showClosedOverlayVerdict:
+      settings.showClosedOverlayVerdict ??
+      DEFAULT_SETTINGS.showClosedOverlayVerdict,
     showEventThumbnails:
       settings.showEventThumbnails ?? DEFAULT_SETTINGS.showEventThumbnails,
     activeCategoryId:

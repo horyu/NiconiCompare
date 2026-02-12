@@ -3,7 +3,7 @@ import { useCallback, useState, type ReactElement } from "react"
 import { MESSAGE_TYPES, OVERLAY_STATUS_MESSAGES } from "../lib/constants"
 import { sendNcMessage } from "../lib/messages"
 import { runNcAction } from "../lib/ncAction"
-import type { AuthorProfile, VideoSnapshot } from "../lib/types"
+import type { AuthorProfile, Verdict, VideoSnapshot } from "../lib/types"
 import { getWatchVideoIdFromPathname } from "../lib/url"
 import { CategorySelector } from "./components/CategorySelector"
 import { OpponentSelector } from "./components/OpponentSelector"
@@ -22,6 +22,11 @@ const keepOverlayEnvValue = String(
   import.meta.env.WXT_PUBLIC_KEEP_OVERLAY_OPEN ?? ""
 )
 const forceKeepOverlayOpen = keepOverlayEnvValue.toLowerCase() === "true"
+const VERDICT_SYMBOLS: Record<Verdict, "<" | "=" | ">"> = {
+  better: ">",
+  same: "=",
+  worse: "<"
+}
 
 function isJsonLdFallbackStatus(statusMessage: string): boolean {
   return (
@@ -218,6 +223,12 @@ export default function Overlay(): ReactElement | null {
       isJsonLdFallbackStatus(statusMessage) &&
       !canUseSnapshotFallback)
   const canSubmit = currentVideoId && opponentVideoId && !isBlockingStatus
+  const closedOverlayVerdict =
+    !showControls &&
+    overlaySettings.showClosedOverlayVerdict &&
+    lastVerdict !== undefined
+      ? `${VERDICT_SYMBOLS[lastVerdict]} `
+      : ""
   return (
     <div
       className="fixed top-0 right-0 z-[2147483647] bg-black/75 text-white p-3 rounded-lg shadow-lg max-w-[320px] flex flex-col gap-2"
@@ -235,7 +246,10 @@ export default function Overlay(): ReactElement | null {
             onChange={handleCategoryChange}
           />
         )}
-        <strong className="text-right w-full">NiconiCompare</strong>
+        <strong className="text-right w-full">
+          {closedOverlayVerdict}
+          NiconiCompare
+        </strong>
       </div>
 
       {displayStatus && (

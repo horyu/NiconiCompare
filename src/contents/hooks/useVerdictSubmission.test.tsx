@@ -13,9 +13,8 @@ interface SubmissionMessage {
 
 const { runNcActionMock, sendNcMessageMock } = vi.hoisted(() => ({
   runNcActionMock: vi.fn(),
-  sendNcMessageMock: vi.fn<
-    (message: SubmissionMessage) => Promise<BackgroundResponse>
-  >()
+  sendNcMessageMock:
+    vi.fn<(message: SubmissionMessage) => Promise<BackgroundResponse>>()
 }))
 
 vi.mock("../../lib/messages", () => ({
@@ -35,10 +34,7 @@ describe("useVerdictSubmission", () => {
   it("カテゴリ切替時に lastVerdict / lastEventId をリセットすること", async () => {
     sendNcMessageMock.mockResolvedValue({ ok: true, eventId: 101 })
     runNcActionMock.mockImplementation(
-      (
-        action: () => Promise<BackgroundResponse>,
-        _options: unknown
-      ) => action()
+      (action: () => Promise<BackgroundResponse>, _options: unknown) => action()
     )
     const refreshState = vi.fn(async () => {})
 
@@ -85,10 +81,7 @@ describe("useVerdictSubmission", () => {
       .mockResolvedValueOnce({ ok: true, eventId: 201 })
       .mockResolvedValueOnce({ ok: true, eventId: 202 })
     runNcActionMock.mockImplementation(
-      (
-        action: () => Promise<BackgroundResponse>,
-        _options: unknown
-      ) => action()
+      (action: () => Promise<BackgroundResponse>, _options: unknown) => action()
     )
     const refreshState = vi.fn(async () => {})
 
@@ -115,7 +108,11 @@ describe("useVerdictSubmission", () => {
       await result.current.submitVerdict("same" as Verdict)
     })
 
-    expect(sendNcMessageMock.mock.calls[0]?.[0]?.payload?.eventId).toBeUndefined()
-    expect(sendNcMessageMock.mock.calls[1]?.[0]?.payload?.eventId).toBeUndefined()
+    expect(
+      sendNcMessageMock.mock.calls[0]?.[0]?.payload?.eventId
+    ).toBeUndefined()
+    expect(
+      sendNcMessageMock.mock.calls[1]?.[0]?.payload?.eventId
+    ).toBeUndefined()
   })
 })

@@ -42,6 +42,7 @@ describe("normalizeSettings", () => {
     const settings = {
       ...DEFAULT_SETTINGS,
       overlayAndCaptureEnabled: undefined as unknown as boolean,
+      showClosedOverlayVerdict: undefined as unknown as boolean,
       showEventThumbnails: undefined as unknown as boolean,
       activeCategoryId: undefined as unknown as string,
       glicko: null as unknown as NcSettings["glicko"]
@@ -51,6 +52,9 @@ describe("normalizeSettings", () => {
 
     expect(normalized.overlayAndCaptureEnabled).toBe(
       DEFAULT_SETTINGS.overlayAndCaptureEnabled
+    )
+    expect(normalized.showClosedOverlayVerdict).toBe(
+      DEFAULT_SETTINGS.showClosedOverlayVerdict
     )
     expect(normalized.showEventThumbnails).toBe(
       DEFAULT_SETTINGS.showEventThumbnails

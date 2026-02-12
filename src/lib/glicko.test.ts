@@ -9,6 +9,7 @@ describe("glicko", () => {
     popupRecentCount: 10,
     overlayAndCaptureEnabled: true,
     overlayAutoCloseMs: 5000,
+    showClosedOverlayVerdict: true,
     showEventThumbnails: true,
     activeCategoryId: "default",
     glicko: {

@@ -38,6 +38,7 @@ export interface NcSettings {
   popupRecentCount: number
   overlayAndCaptureEnabled: boolean
   overlayAutoCloseMs: number
+  showClosedOverlayVerdict: boolean
   showEventThumbnails: boolean
   activeCategoryId: string
   glicko: {
