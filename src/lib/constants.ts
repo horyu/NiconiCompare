@@ -40,6 +40,7 @@ export const DEFAULT_SETTINGS: NcSettings = {
   overlayAndCaptureEnabled: true,
   overlayAutoCloseMs: 2000,
   showClosedOverlayVerdict: true,
+  showPopupVideoVerdictCounts: false,
   showEventThumbnails: true,
   activeCategoryId: DEFAULT_CATEGORY_ID,
   glicko: {

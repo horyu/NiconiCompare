@@ -39,6 +39,7 @@ export interface NcSettings {
   overlayAndCaptureEnabled: boolean
   overlayAutoCloseMs: number
   showClosedOverlayVerdict: boolean
+  showPopupVideoVerdictCounts: boolean
   showEventThumbnails: boolean
   activeCategoryId: string
   glicko: {

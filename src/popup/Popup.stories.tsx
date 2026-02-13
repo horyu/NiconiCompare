@@ -26,7 +26,7 @@ interface PopupData {
 const baseData: PopupData = {
   settings: { ...DEFAULT_SETTINGS, overlayAndCaptureEnabled: true },
   events: {
-    nextId: 3,
+    nextId: 4,
     items: [
       {
         id: 1,
@@ -43,6 +43,15 @@ const baseData: PopupData = {
         currentVideoId: "sm3333333",
         opponentVideoId: "sm4444444",
         verdict: "same",
+        disabled: false,
+        categoryId: DEFAULT_CATEGORY_ID
+      },
+      {
+        id: 3,
+        timestamp: Date.now() - 1000 * 180,
+        currentVideoId: "sm1111111",
+        opponentVideoId: "sm3333333",
+        verdict: "worse",
         disabled: false,
         categoryId: DEFAULT_CATEGORY_ID
       }
@@ -83,7 +92,11 @@ const baseData: PopupData = {
 }
 
 const withPopupData =
-  (overrides: Partial<PopupData> = {}) =>
+  (
+    overrides: Omit<Partial<PopupData>, "settings"> & {
+      settings?: Partial<PopupData["settings"]>
+    } = {}
+  ) =>
   (Story: () => ReactElement) => {
     const data: PopupData = {
       settings: { ...baseData.settings, ...overrides.settings },
@@ -133,6 +146,16 @@ export const EmptyEvents: Story = {
       events: {
         nextId: 1,
         items: []
+      }
+    })
+  ]
+}
+
+export const WithVideoVerdictCounts: Story = {
+  decorators: [
+    withPopupData({
+      settings: {
+        showPopupVideoVerdictCounts: true
       }
     })
   ]

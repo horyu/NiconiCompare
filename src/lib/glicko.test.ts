@@ -10,6 +10,7 @@ describe("glicko", () => {
     overlayAndCaptureEnabled: true,
     overlayAutoCloseMs: 5000,
     showClosedOverlayVerdict: true,
+    showPopupVideoVerdictCounts: false,
     showEventThumbnails: true,
     activeCategoryId: "default",
     glicko: {

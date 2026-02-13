@@ -27,6 +27,9 @@ export function normalizeSettings(settings: NcSettings): NcSettings {
     showClosedOverlayVerdict:
       settings.showClosedOverlayVerdict ??
       DEFAULT_SETTINGS.showClosedOverlayVerdict,
+    showPopupVideoVerdictCounts:
+      settings.showPopupVideoVerdictCounts ??
+      DEFAULT_SETTINGS.showPopupVideoVerdictCounts,
     showEventThumbnails:
       settings.showEventThumbnails ?? DEFAULT_SETTINGS.showEventThumbnails,
     activeCategoryId:

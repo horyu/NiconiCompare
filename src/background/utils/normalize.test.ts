@@ -43,6 +43,7 @@ describe("normalizeSettings", () => {
       ...DEFAULT_SETTINGS,
       overlayAndCaptureEnabled: undefined as unknown as boolean,
       showClosedOverlayVerdict: undefined as unknown as boolean,
+      showPopupVideoVerdictCounts: undefined as unknown as boolean,
       showEventThumbnails: undefined as unknown as boolean,
       activeCategoryId: undefined as unknown as string,
       glicko: null as unknown as NcSettings["glicko"]
@@ -55,6 +56,9 @@ describe("normalizeSettings", () => {
     )
     expect(normalized.showClosedOverlayVerdict).toBe(
       DEFAULT_SETTINGS.showClosedOverlayVerdict
+    )
+    expect(normalized.showPopupVideoVerdictCounts).toBe(
+      DEFAULT_SETTINGS.showPopupVideoVerdictCounts
     )
     expect(normalized.showEventThumbnails).toBe(
       DEFAULT_SETTINGS.showEventThumbnails

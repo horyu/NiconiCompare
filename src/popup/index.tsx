@@ -12,6 +12,14 @@ import type {
   NcVideos
 } from "../lib/types"
 import { createWatchUrl } from "../lib/url"
+import {
+  buildRecentEvents,
+  buildRecentEventVideoVerdictStats,
+  labelVerdict,
+  verdictToStatKey,
+  type VideoVerdictStatKey,
+  type VideoVerdictStats
+} from "./utils"
 
 interface PopupSnapshot {
   settings: NcSettings
@@ -74,6 +82,26 @@ export default function Popup(): ReactElement {
     await refreshState()
   }
 
+  const toggleVideoVerdictCounts = async (enabled: boolean): Promise<void> => {
+    setError(undefined)
+    const response = await runNcAction(
+      () =>
+        sendNcMessage({
+          type: MESSAGE_TYPES.updateSettings,
+          payload: { showPopupVideoVerdictCounts: enabled }
+        }),
+      {
+        context: "ui:popup:toggle-video-verdict-counts",
+        errorMessage: "更新に失敗しました。"
+      }
+    )
+    if (!response) {
+      setError("更新に失敗しました。")
+      return
+    }
+    await refreshState()
+  }
+
   if (loading) {
     return (
       <main className="w-80 p-4 flex flex-col gap-4 font-sans bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
@@ -106,6 +134,12 @@ export default function Popup(): ReactElement {
     activeCategoryId,
     snapshot.categories.defaultId
   )
+  const videoVerdictStatsByEvent = buildRecentEventVideoVerdictStats(
+    snapshot.events,
+    lastEvents,
+    activeCategoryId,
+    snapshot.categories.defaultId
+  )
   return (
     <main className="w-80 p-4 flex flex-col gap-4 font-sans bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="flex items-center justify-between">
@@ -121,11 +155,22 @@ export default function Popup(): ReactElement {
       </header>
 
       <section>
-        <h3 className="text-sm mb-2 truncate">
-          <span className="block max-w-full truncate">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <h3 className="text-sm truncate">
             直近の評価（{activeCategoryName}）
-          </span>
-        </h3>
+          </h3>
+          <label className="text-xs flex items-center gap-1 whitespace-nowrap">
+            <input
+              type="checkbox"
+              checked={snapshot.settings.showPopupVideoVerdictCounts}
+              title="各動画の 勝/引き分け/敗 を表示"
+              onChange={(e) => {
+                void toggleVideoVerdictCounts(e.target.checked)
+              }}
+            />
+            勝敗数
+          </label>
+        </div>
         {lastEvents.length === 0 ? (
           <p className="text-xs opacity-70 text-slate-500 dark:text-slate-400">
             評価なし
@@ -145,14 +190,30 @@ export default function Popup(): ReactElement {
                   </div>
                   {renderVideoCard(
                     snapshot.videos[event.currentVideoId],
-                    event.currentVideoId
+                    event.currentVideoId,
+                    snapshot.settings.showPopupVideoVerdictCounts
+                      ? videoVerdictStatsByEvent[event.id]?.[
+                          event.currentVideoId
+                        ]
+                      : undefined,
+                    snapshot.settings.showPopupVideoVerdictCounts
+                      ? verdictToStatKey(event.verdict)
+                      : undefined
                   )}
                   <span className="w-fit justify-self-center text-base font-bold text-center text-slate-700 dark:text-slate-200">
                     {labelVerdict(event.verdict)}
                   </span>
                   {renderVideoCard(
                     snapshot.videos[event.opponentVideoId],
-                    event.opponentVideoId
+                    event.opponentVideoId,
+                    snapshot.settings.showPopupVideoVerdictCounts
+                      ? videoVerdictStatsByEvent[event.id]?.[
+                          event.opponentVideoId
+                        ]
+                      : undefined,
+                    snapshot.settings.showPopupVideoVerdictCounts
+                      ? toOpponentStatKey(event.verdict)
+                      : undefined
                   )}
                 </li>
               )
@@ -168,35 +229,11 @@ export default function Popup(): ReactElement {
   )
 }
 
-function buildRecentEvents(
-  events: NcEventsBucket,
-  limit: number,
-  categoryId: string,
-  defaultCategoryId: string
-): NcEventsBucket["items"] {
-  return [...events.items]
-    .filter((event) => !event.disabled)
-    .filter((event) => (event.categoryId ?? defaultCategoryId) === categoryId)
-    .sort((a, b) => b.id - a.id)
-    .slice(0, Math.max(1, limit))
-}
-
-function labelVerdict(verdict: string): string {
-  switch (verdict) {
-    case "better":
-      return ">"
-    case "same":
-      return "="
-    case "worse":
-      return "<"
-    default:
-      return verdict
-  }
-}
-
 function renderVideoCard(
   video: PopupSnapshot["videos"][string] | undefined,
-  videoId: string
+  videoId: string,
+  verdictStats?: VideoVerdictStats,
+  highlightedStatKey?: VideoVerdictStatKey
 ): ReactElement {
   const thumbnailUrl = video?.thumbnailUrls?.[0]
   const watchUrl = createWatchUrl(videoId)
@@ -215,6 +252,36 @@ function renderVideoCard(
       ) : (
         <div className="w-24 h-[54px] rounded-md bg-slate-200 dark:bg-slate-700" />
       )}
+      {verdictStats && (
+        <span className="w-full text-center text-[11px] text-slate-700 dark:text-slate-300">
+          <span className={highlightedStatKey === "wins" ? "font-bold" : ""}>
+            {verdictStats.wins}
+          </span>
+          /
+          <span className={highlightedStatKey === "draws" ? "font-bold" : ""}>
+            {verdictStats.draws}
+          </span>
+          /
+          <span className={highlightedStatKey === "losses" ? "font-bold" : ""}>
+            {verdictStats.losses}
+          </span>
+        </span>
+      )}
     </a>
   )
+}
+
+function toOpponentStatKey(
+  verdict: "better" | "same" | "worse"
+): VideoVerdictStatKey {
+  switch (verdict) {
+    case "better":
+      return "losses"
+    case "same":
+      return "draws"
+    case "worse":
+      return "wins"
+    default:
+      return "draws"
+  }
 }
