@@ -23,6 +23,7 @@ interface VideosTabProps {
   snapshot: OptionsSnapshot
   refreshState: (silent?: boolean) => Promise<void>
   showToast: (tone: "success" | "error", text: string) => void
+  onOpenEventsForVideo?: (videoId: string, categoryId: string) => void
 }
 
 interface VideoSessionState {
@@ -58,7 +59,10 @@ const DEFAULT_VIDEO_SESSION_STATE: VideoSessionState = {
   page: 1
 }
 
-export const VideosTab = ({ snapshot }: VideosTabProps): ReactElement => {
+export const VideosTab = ({
+  snapshot,
+  onOpenEventsForVideo
+}: VideosTabProps): ReactElement => {
   const { initialState, persistState } = useSessionState(
     SESSION_KEY,
     DEFAULT_VIDEO_SESSION_STATE
@@ -382,6 +386,8 @@ export const VideosTab = ({ snapshot }: VideosTabProps): ReactElement => {
                   authorName={author?.name}
                   verdictCounts={verdictCounts}
                   lastVerdictAt={lastEventByVideo.get(video.videoId)}
+                  categoryId={effectiveCategoryId}
+                  onOpenEventsForVideo={onOpenEventsForVideo}
                 />
               )
             })
@@ -430,6 +436,8 @@ interface VideoRowProps {
   authorName?: string
   verdictCounts: { wins: number; draws: number; losses: number }
   lastVerdictAt?: number
+  categoryId: string
+  onOpenEventsForVideo?: (videoId: string, categoryId: string) => void
 }
 
 // oxlint-disable-next-line react/no-multi-comp
@@ -438,7 +446,9 @@ const VideoRow = ({
   rating,
   authorName,
   verdictCounts,
-  lastVerdictAt
+  lastVerdictAt,
+  categoryId,
+  onOpenEventsForVideo
 }: VideoRowProps): ReactElement => {
   const verdictTotal =
     verdictCounts.wins + verdictCounts.draws + verdictCounts.losses
@@ -474,8 +484,19 @@ const VideoRow = ({
       <div className="text-sm text-slate-700 dark:text-slate-200">
         {rating ? Math.round(rating.rd) : "-"}
       </div>
-      <div className="text-sm text-slate-700 dark:text-slate-200">
-        {verdictTotal > 0 ? verdictTotal : "-"}
+      <div className="text-sm">
+        {verdictTotal > 0 && onOpenEventsForVideo ? (
+          <button
+            type="button"
+            onClick={() => onOpenEventsForVideo(video.videoId, categoryId)}
+            className="text-sky-700 underline decoration-sky-500 decoration-1 underline-offset-2 hover:text-sky-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:text-sky-300 dark:hover:text-sky-200">
+            {verdictTotal}
+          </button>
+        ) : (
+          <span className="text-slate-700 dark:text-slate-200">
+            {verdictTotal > 0 ? verdictTotal : "-"}
+          </span>
+        )}
       </div>
       <div className="text-xs text-slate-600 dark:text-slate-400">
         {verdictTotal > 0

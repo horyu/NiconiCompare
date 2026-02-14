@@ -18,6 +18,12 @@ interface Toast {
   text: string
 }
 
+interface EventTabNavigation {
+  videoId: string
+  categoryId: string
+  requestKey: number
+}
+
 const TAB_LABELS: { key: TabKey; label: string }[] = [
   { key: "videos", label: "動画一覧" },
   { key: "events", label: "評価一覧" },
@@ -31,6 +37,8 @@ export default function OptionsPage(): ReactElement {
     useOptionsData()
   const [toast, setToast] = useState<Toast | null>(null)
   const [activeTab, setActiveTabState] = useState<TabKey>("videos")
+  const [eventTabNavigation, setEventTabNavigation] =
+    useState<EventTabNavigation | null>(null)
   const showToast = useCallback((tone: Toast["tone"], text: string) => {
     setToast({ tone, text })
   }, [])
@@ -39,6 +47,19 @@ export default function OptionsPage(): ReactElement {
     setActiveTabState(tab)
     setToast(null)
   }, [])
+
+  const handleOpenEventsForVideo = useCallback(
+    (videoId: string, categoryId: string) => {
+      setActiveTabState("events")
+      setToast(null)
+      setEventTabNavigation((prev) => ({
+        videoId,
+        categoryId,
+        requestKey: (prev?.requestKey ?? 0) + 1
+      }))
+    },
+    []
+  )
 
   useEffect(() => {
     const root = document.documentElement
@@ -148,6 +169,7 @@ export default function OptionsPage(): ReactElement {
             snapshot={snapshot}
             refreshState={refreshState}
             showToast={showToast}
+            onOpenEventsForVideo={handleOpenEventsForVideo}
           />
         )}
 
@@ -158,6 +180,7 @@ export default function OptionsPage(): ReactElement {
             onToggleEventThumbnails={handleToggleEventThumbnails}
             refreshState={refreshState}
             showToast={showToast}
+            navigateToVideoRequest={eventTabNavigation}
           />
         )}
 

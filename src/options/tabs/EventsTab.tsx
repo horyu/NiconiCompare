@@ -30,6 +30,11 @@ interface EventsTabProps {
   onToggleEventThumbnails: (checked: boolean) => void
   refreshState: (silent?: boolean) => Promise<void>
   showToast: (tone: "success" | "error", text: string) => void
+  navigateToVideoRequest?: {
+    videoId: string
+    categoryId: string
+    requestKey: number
+  } | null
 }
 
 interface EventSessionState {
@@ -72,7 +77,8 @@ export const EventsTab = ({
   eventShowThumbnails,
   onToggleEventThumbnails,
   refreshState,
-  showToast
+  showToast,
+  navigateToVideoRequest
 }: EventsTabProps): ReactElement => {
   const { initialState, persistState } = useSessionState(
     SESSION_KEY,
@@ -130,6 +136,20 @@ export const EventsTab = ({
       setEventCategoryId(snapshot.categories.defaultId)
     }
   }, [eventCategoryId, snapshot.categories])
+
+  useEffect(() => {
+    if (!navigateToVideoRequest) {
+      return
+    }
+    setEventSearch(navigateToVideoRequest.videoId)
+    const nextCategoryId = snapshot.categories.items[
+      navigateToVideoRequest.categoryId
+    ]
+      ? navigateToVideoRequest.categoryId
+      : snapshot.categories.defaultId
+    setEventCategoryId(nextCategoryId)
+    setEventPage(1)
+  }, [navigateToVideoRequest, snapshot.categories])
 
   useEffect(() => {
     if (bulkMoveTargets.length === 0) {
