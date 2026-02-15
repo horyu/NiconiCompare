@@ -42,7 +42,6 @@ interface ShareEventRow {
 interface SharePayload {
   meta: {
     generatedAt: number
-    categoryId: string
     categoryName: string
     videoCount: number
     eventCount: number
@@ -147,7 +146,6 @@ const buildSharePayload = ({
   return {
     meta: {
       generatedAt: Date.now(),
-      categoryId,
       categoryName,
       videoCount: videos.length,
       eventCount: shareEvents.length,
