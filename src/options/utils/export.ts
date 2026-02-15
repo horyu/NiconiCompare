@@ -1,4 +1,4 @@
-import { pad2 } from "./date"
+import { formatCompactTimestamp } from "./date"
 
 type ExportFormat = "csv" | "tsv"
 interface ExportDownloadOptions {
@@ -31,10 +31,7 @@ export const buildExportFilename = (
   format: ExportFormat,
   categoryName?: string
 ): string => {
-  const now = new Date()
-  const stamp = `${now.getFullYear()}${pad2(now.getMonth() + 1)}${pad2(now.getDate())}${pad2(
-    now.getHours()
-  )}${pad2(now.getMinutes())}${pad2(now.getSeconds())}`
+  const stamp = formatCompactTimestamp(new Date())
   const categorySuffix =
     categoryName !== undefined
       ? `-${sanitizeFilenameSegment(categoryName)}`

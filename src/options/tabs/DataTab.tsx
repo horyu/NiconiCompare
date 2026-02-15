@@ -8,7 +8,7 @@ import { CategorySelect } from "../components/CategorySelect"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { buildShareExportFilename, buildShareHtml } from "../utils/buildHtml"
 import { buildCategoryOptions } from "../utils/categories"
-import { pad2 } from "../utils/date"
+import { formatCompactTimestamp } from "../utils/date"
 
 interface DataTabProps {
   snapshot: OptionsSnapshot
@@ -112,12 +112,7 @@ export const DataTab = ({
       const data = JSON.stringify(response.data, null, 2)
       const blob = new Blob([data], { type: "application/json" })
       const url = URL.createObjectURL(blob)
-      const now = new Date()
-      const filename = `NiconiCompareData-${now.getFullYear()}${pad2(
-        now.getMonth() + 1
-      )}${pad2(now.getDate())}${pad2(now.getHours())}${pad2(
-        now.getMinutes()
-      )}${pad2(now.getSeconds())}.json`
+      const filename = `NiconiCompareData-${formatCompactTimestamp(new Date())}.json`
       const anchor = document.createElement("a")
       anchor.href = url
       anchor.download = filename

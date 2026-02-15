@@ -2,7 +2,7 @@ import type { CompareEvent, RatingSnapshot } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import shareReportTemplate from "../templates/share-report.template.html?raw"
-import { pad2 } from "./date"
+import { formatCompactTimestamp } from "./date"
 
 interface BuildShareHtmlInput {
   snapshot: OptionsSnapshot
@@ -56,10 +56,7 @@ interface SharePayload {
 }
 
 export const buildShareExportFilename = (categoryName: string): string => {
-  const now = new Date()
-  const stamp = `${now.getFullYear()}${pad2(now.getMonth() + 1)}${pad2(now.getDate())}${pad2(
-    now.getHours()
-  )}${pad2(now.getMinutes())}${pad2(now.getSeconds())}`
+  const stamp = formatCompactTimestamp(new Date())
   return `NiconiCompareShare-${sanitizeFilenameSegment(categoryName)}-${stamp}.html`
 }
 
