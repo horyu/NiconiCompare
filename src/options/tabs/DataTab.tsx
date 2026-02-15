@@ -1,10 +1,13 @@
-import { useRef, useState, type ReactElement } from "react"
+import { useEffect, useRef, useState, type ReactElement } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
 import { handleUIError } from "../../lib/errorHandler"
 import { sendNcMessage } from "../../lib/messages"
 import { runNcAction } from "../../lib/ncAction"
+import { CategorySelect } from "../components/CategorySelect"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
+import { buildShareExportFilename, buildShareHtml } from "../utils/buildHtml"
+import { buildCategoryOptions } from "../utils/categories"
 import { pad2 } from "../utils/date"
 
 interface DataTabProps {
@@ -22,9 +25,26 @@ export const DataTab = ({
 }: DataTabProps): ReactElement => {
   const [deletingAll, setDeletingAll] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const [exportingHtml, setExportingHtml] = useState(false)
   const [importing, setImporting] = useState(false)
   const [importFileName, setImportFileName] = useState("")
+  const categoryOptions = buildCategoryOptions(snapshot.categories)
+  const initialHtmlExportCategoryId = snapshot.categories.items[
+    snapshot.settings.activeCategoryId
+  ]
+    ? snapshot.settings.activeCategoryId
+    : snapshot.categories.defaultId
+  const [htmlExportCategoryId, setHtmlExportCategoryId] = useState(
+    initialHtmlExportCategoryId
+  )
   const importFileRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    if (snapshot.categories.items[htmlExportCategoryId]) {
+      return
+    }
+    setHtmlExportCategoryId(initialHtmlExportCategoryId)
+  }, [htmlExportCategoryId, initialHtmlExportCategoryId, snapshot.categories])
 
   const lastCleanupLabel = snapshot.meta?.lastCleanupAt
     ? new Date(snapshot.meta.lastCleanupAt).toLocaleString()
@@ -103,7 +123,6 @@ export const DataTab = ({
       anchor.download = filename
       anchor.click()
       URL.revokeObjectURL(url)
-      showToast("success", "エクスポートしました。")
     } catch (error) {
       handleUIError(error, "ui:options:data:export", showToast)
     } finally {
@@ -159,6 +178,32 @@ export const DataTab = ({
     }
   }
 
+  const handleShareHtmlExport = (): void => {
+    setExportingHtml(true)
+    try {
+      const html = buildShareHtml({
+        snapshot,
+        categoryId: htmlExportCategoryId
+      })
+      const categoryName =
+        snapshot.categories.items[htmlExportCategoryId]?.name ??
+        htmlExportCategoryId
+      const blob = new Blob([html], {
+        type: "text/html;charset=utf-8"
+      })
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement("a")
+      anchor.href = url
+      anchor.download = buildShareExportFilename(categoryName)
+      anchor.click()
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      handleUIError(error, "ui:options:data:share-html-export", showToast)
+    } finally {
+      setExportingHtml(false)
+    }
+  }
+
   return (
     <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-6 dark:bg-slate-900 dark:border-slate-700">
       <header>
@@ -209,6 +254,22 @@ export const DataTab = ({
         </div>
 
         <div className="flex flex-col gap-3">
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+            共有HTML出力
+          </h3>
+          <CategorySelect
+            value={htmlExportCategoryId}
+            options={categoryOptions}
+            onChange={setHtmlExportCategoryId}
+            className="w-full"
+          />
+          <button
+            type="button"
+            onClick={handleShareHtmlExport}
+            disabled={exportingHtml}
+            className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+            共有HTML エクスポート
+          </button>
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
             クリーンアップ
           </h3>

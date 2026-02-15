@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NiconiCompare Share - {{PAGE_TITLE}}</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+
+      h1 {
+        margin: 0;
+      }
+
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .card {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 16px;
+      }
+
+      .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px 12px;
+        margin-top: 10px;
+        font-size: 13px;
+      }
+
+      .meta-wide {
+        grid-column: 1 / -1;
+      }
+
+      .tab-list {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .tab-button {
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #0f172a;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .tab-button.is-active {
+        background: #0f172a;
+        color: #ffffff;
+        border-color: #0f172a;
+      }
+
+      .panel {
+        margin-top: 14px;
+      }
+
+      .panel[hidden] {
+        display: none;
+      }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+        font-size: 13px;
+      }
+
+      .toolbar label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+      }
+
+      .toolbar input {
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 6px 8px;
+        width: min(560px, 100%);
+        min-width: 210px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid #e2e8f0;
+        padding: 8px;
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      th button {
+        border: none;
+        padding: 0;
+        background: none;
+        color: inherit;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      a {
+        color: #0369a1;
+      }
+
+      .thumb {
+        width: 96px;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        border-radius: 6px;
+        display: block;
+        background: #e2e8f0;
+      }
+
+      .date-col {
+        white-space: nowrap;
+      }
+
+      .winner-cell {
+        position: relative;
+        padding-left: 6px;
+      }
+
+      .winner-cell::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 1px;
+        bottom: 1px;
+        width: 3px;
+        background: #94a3b8;
+        border-radius: 2px;
+      }
+
+      @media (max-width: 900px) {
+        .meta-grid {
+          grid-template-columns: 1fr;
+        }
+
+        table {
+          font-size: 12px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <section class="card">
+        <h1>NiconiCompare 共有レポート</h1>
+        <div class="meta-grid">
+          <div>生成日時: <span id="meta-generated-at"></span></div>
+          <div>カテゴリ: <span id="meta-category-name"></span></div>
+          <div>動画件数: <span id="meta-video-count"></span></div>
+          <div>評価件数: <span id="meta-event-count"></span></div>
+          <div class="meta-wide">
+            Glicko-2レーティング設定: <span id="meta-glicko"></span>
+          </div>
+        </div>
+      </section>
+
+      <div class="tab-list">
+        <button
+          type="button"
+          class="tab-button is-active"
+          data-tab-target="videos">
+          動画一覧
+        </button>
+        <button type="button" class="tab-button" data-tab-target="events">
+          評価一覧
+        </button>
+      </div>
+
+      <section class="card panel" data-tab-panel="videos">
+        <div class="toolbar">
+          <label>
+            検索:
+            <input
+              type="search"
+              id="video-search"
+              placeholder="タイトル・動画ID・投稿者" />
+          </label>
+          <span id="video-count"></span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>サムネ</th>
+              <th>
+                <button type="button" data-video-sort-key="title">
+                  タイトル
+                </button>
+              </th>
+              <th>
+                <button type="button" data-video-sort-key="authorName">
+                  投稿者
+                </button>
+              </th>
+              <th>
+                <button type="button" data-video-sort-key="rating">
+                  Rating
+                </button>
+              </th>
+              <th>
+                <button type="button" data-video-sort-key="rd">RD</button>
+              </th>
+              <th>
+                <button type="button" data-video-sort-key="evalCount">
+                  評価数
+                </button>
+              </th>
+              <th>
+                <button type="button" data-video-sort-key="wins">勝</button>
+              </th>
+              <th>
+                <button type="button" data-video-sort-key="draws">分</button>
+              </th>
+              <th>
+                <button type="button" data-video-sort-key="losses">敗</button>
+              </th>
+              <th class="date-col">
+                <button type="button" data-video-sort-key="lastVerdictAt">
+                  最終判定日時
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="videos-body"></tbody>
+        </table>
+      </section>
+
+      <section class="card panel" data-tab-panel="events" hidden>
+        <div class="toolbar">
+          <label>
+            検索:
+            <input
+              type="search"
+              id="event-search"
+              placeholder="タイトル・動画ID・投稿者" />
+          </label>
+          <span id="event-count"></span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>
+                <button type="button" data-event-sort-key="id">ID</button>
+              </th>
+              <th>
+                <button
+                  type="button"
+                  class="date-col"
+                  data-event-sort-key="timestamp">
+                  日時
+                </button>
+              </th>
+              <th>
+                <button type="button" data-event-sort-key="currentVideoId">
+                  基準動画
+                </button>
+              </th>
+              <th>
+                <button type="button" data-event-sort-key="opponentVideoId">
+                  比較動画
+                </button>
+              </th>
+              <th>
+                <button type="button" data-event-sort-key="verdictLabel">
+                  評価
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="events-body"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script id="nc-share-data" type="application/json">
+      {{EMBEDDED_PAYLOAD}}
+    </script>
+    <script>
+      ;(function () {
+        const dataElement = document.getElementById("nc-share-data")
+        if (!dataElement) return
+        const data = JSON.parse(dataElement.textContent || "{}")
+        const tabs = document.querySelectorAll("[data-tab-target]")
+        const panels = document.querySelectorAll("[data-tab-panel]")
+
+        const videoState = { query: "", sortKey: "rating", direction: "desc" }
+        const eventState = { query: "", sortKey: "id", direction: "desc" }
+
+        const setMeta = () => {
+          setText("meta-generated-at", formatDate(data.meta.generatedAt))
+          setText("meta-category-name", data.meta.categoryName)
+          setText("meta-video-count", String(data.meta.videoCount))
+          setText("meta-event-count", String(data.meta.eventCount))
+          setText(
+            "meta-glicko",
+            "Rating " +
+              String(data.meta.glicko.rating) +
+              " / RD " +
+              String(data.meta.glicko.rd) +
+              " / Volatility " +
+              String(data.meta.glicko.volatility)
+          )
+        }
+
+        const setText = (id, value) => {
+          const el = document.getElementById(id)
+          if (el) el.textContent = value
+        }
+
+        const formatDate = (timestamp) =>
+          Number.isFinite(timestamp)
+            ? new Date(timestamp).toLocaleString()
+            : "-"
+
+        const escapeHtml = (value) =>
+          String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#39;")
+
+        const compareValues = (left, right, direction) => {
+          if (typeof left === "number" && typeof right === "number") {
+            return direction === "asc" ? left - right : right - left
+          }
+          const result = String(left).localeCompare(String(right), "ja")
+          return direction === "asc" ? result : -result
+        }
+
+        const applyFilter = (rows, query, fields) => {
+          const normalized = query.trim().toLowerCase()
+          if (!normalized) return rows
+          return rows.filter((row) =>
+            fields.some((field) =>
+              String(row[field] ?? "")
+                .toLowerCase()
+                .includes(normalized)
+            )
+          )
+        }
+
+        const applySort = (rows, sortKey, direction) => {
+          return [...rows].sort((left, right) =>
+            compareValues(left[sortKey], right[sortKey], direction)
+          )
+        }
+
+        const renderVideos = () => {
+          const body = document.getElementById("videos-body")
+          if (!body) return
+          const filtered = applyFilter(data.videos, videoState.query, [
+            "videoId",
+            "title",
+            "authorName"
+          ])
+          const sorted = applySort(
+            filtered,
+            videoState.sortKey,
+            videoState.direction
+          )
+          setText("video-count", "表示 " + sorted.length + " 件")
+          body.innerHTML = sorted
+            .map((row) => {
+              const thumb = row.thumbnailUrl
+                ? '<img class="thumb" src="' +
+                  escapeHtml(row.thumbnailUrl) +
+                  '" alt="' +
+                  escapeHtml(row.title) +
+                  '" loading="lazy" />'
+                : "-"
+              return (
+                "<tr>" +
+                "<td>" +
+                thumb +
+                "</td>" +
+                "<td><a href='" +
+                escapeHtml(row.videoUrl) +
+                "' target='_blank' rel='noreferrer'>" +
+                escapeHtml(row.title) +
+                "</a><br /><small>" +
+                escapeHtml(row.videoId) +
+                "</small></td>" +
+                "<td>" +
+                escapeHtml(row.authorName) +
+                "</td>" +
+                "<td>" +
+                (row.rating === null ? "-" : String(Math.round(row.rating))) +
+                "</td>" +
+                "<td>" +
+                (row.rd === null ? "-" : String(Math.round(row.rd))) +
+                "</td>" +
+                "<td>" +
+                String(row.evalCount) +
+                "</td>" +
+                "<td>" +
+                String(row.wins) +
+                "</td>" +
+                "<td>" +
+                String(row.draws) +
+                "</td>" +
+                "<td>" +
+                String(row.losses) +
+                "</td>" +
+                "<td class='date-col'>" +
+                formatDate(row.lastVerdictAt) +
+                "</td>" +
+                "</tr>"
+              )
+            })
+            .join("")
+        }
+
+        const renderEvents = () => {
+          const body = document.getElementById("events-body")
+          if (!body) return
+          const filtered = applyFilter(data.events, eventState.query, [
+            "currentVideoId",
+            "currentTitle",
+            "currentAuthorName",
+            "opponentVideoId",
+            "opponentTitle",
+            "opponentAuthorName",
+            "verdictLabel"
+          ])
+          const sorted = applySort(
+            filtered,
+            eventState.sortKey,
+            eventState.direction
+          )
+          setText("event-count", "表示 " + sorted.length + " 件")
+          body.innerHTML = sorted
+            .map((row) => {
+              const currentClass = row.verdict === "better" ? "winner-cell" : ""
+              const opponentClass = row.verdict === "worse" ? "winner-cell" : ""
+              return (
+                "<tr>" +
+                "<td>#" +
+                String(row.id) +
+                "</td>" +
+                "<td class='date-col'>" +
+                formatDate(row.timestamp) +
+                "</td>" +
+                "<td class='" +
+                currentClass +
+                "'><a href='" +
+                escapeHtml(row.currentVideoUrl) +
+                "' target='_blank' rel='noreferrer'>" +
+                escapeHtml(row.currentTitle) +
+                "</a><br /><small>" +
+                escapeHtml(row.currentVideoId) +
+                " | " +
+                escapeHtml(row.currentAuthorName) +
+                "</small></td>" +
+                "<td class='" +
+                opponentClass +
+                "'><a href='" +
+                escapeHtml(row.opponentVideoUrl) +
+                "' target='_blank' rel='noreferrer'>" +
+                escapeHtml(row.opponentTitle) +
+                "</a><br /><small>" +
+                escapeHtml(row.opponentVideoId) +
+                " | " +
+                escapeHtml(row.opponentAuthorName) +
+                "</small></td>" +
+                "<td>" +
+                escapeHtml(row.verdictLabel) +
+                "</td>" +
+                "</tr>"
+              )
+            })
+            .join("")
+        }
+
+        const bindTabs = () => {
+          tabs.forEach((tabButton) => {
+            tabButton.addEventListener("click", () => {
+              const nextTarget = tabButton.getAttribute("data-tab-target")
+              tabs.forEach((button) => {
+                const isActive =
+                  button.getAttribute("data-tab-target") === nextTarget
+                button.classList.toggle("is-active", isActive)
+              })
+              panels.forEach((panel) => {
+                panel.hidden =
+                  panel.getAttribute("data-tab-panel") !== nextTarget
+              })
+            })
+          })
+        }
+
+        const bindFilters = () => {
+          const videoSearch = document.getElementById("video-search")
+          const eventSearch = document.getElementById("event-search")
+          if (videoSearch) {
+            videoSearch.addEventListener("input", (event) => {
+              videoState.query = event.target.value
+              renderVideos()
+            })
+          }
+          if (eventSearch) {
+            eventSearch.addEventListener("input", (event) => {
+              eventState.query = event.target.value
+              renderEvents()
+            })
+          }
+        }
+
+        const bindSorts = () => {
+          document
+            .querySelectorAll("[data-video-sort-key]")
+            .forEach((button) => {
+              button.addEventListener("click", () => {
+                const key = button.getAttribute("data-video-sort-key")
+                if (!key) return
+                videoState.direction =
+                  videoState.sortKey === key && videoState.direction === "desc"
+                    ? "asc"
+                    : "desc"
+                videoState.sortKey = key
+                renderVideos()
+              })
+            })
+
+          document
+            .querySelectorAll("[data-event-sort-key]")
+            .forEach((button) => {
+              button.addEventListener("click", () => {
+                const key = button.getAttribute("data-event-sort-key")
+                if (!key) return
+                eventState.direction =
+                  eventState.sortKey === key && eventState.direction === "desc"
+                    ? "asc"
+                    : "desc"
+                eventState.sortKey = key
+                renderEvents()
+              })
+            })
+        }
+
+        setMeta()
+        bindTabs()
+        bindFilters()
+        bindSorts()
+        renderVideos()
+        renderEvents()
+      })()
+    </script>
+  </body>
+</html>
