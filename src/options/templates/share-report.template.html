@@ -212,6 +212,7 @@
         <table>
           <thead>
             <tr>
+              <th>#</th>
               <th>サムネ</th>
               <th>
                 <button type="button" data-video-sort-key="title">
@@ -392,7 +393,7 @@
           )
           setText("video-count", "表示 " + sorted.length + " 件")
           body.innerHTML = sorted
-            .map((row) => {
+            .map((row, index) => {
               const thumb = row.thumbnailUrl
                 ? '<img class="thumb" src="' +
                   escapeHtml(row.thumbnailUrl) +
@@ -402,6 +403,9 @@
                 : "-"
               return (
                 "<tr>" +
+                "<td>" +
+                String(index + 1) +
+                "</td>" +
                 "<td>" +
                 thumb +
                 "</td>" +
