@@ -354,7 +354,8 @@ export const VideosTab = ({
       </div>
 
       <div className="border border-slate-200 rounded-lg overflow-hidden dark:border-slate-700">
-        <div className="grid grid-cols-[90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 bg-slate-100 text-xs font-semibold px-3 py-2 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+        <div className="grid grid-cols-[28px_90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 bg-slate-100 text-xs font-semibold px-3 py-2 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+          <div>#</div>
           <div>サムネ</div>
           <div>タイトル</div>
           <div>投稿者</div>
@@ -370,7 +371,7 @@ export const VideosTab = ({
               表示できる動画がありません。
             </div>
           ) : (
-            pagedVideos.map((video) => {
+            pagedVideos.map((video, index) => {
               const rating = ratingsByCategory[video.videoId]
               const author = snapshot.authors[video.authorUrl]
               const verdictCounts = verdictCountsByVideo.get(video.videoId) ?? {
@@ -381,6 +382,7 @@ export const VideosTab = ({
               return (
                 <VideoRow
                   key={video.videoId}
+                  rowNumber={start + index + 1}
                   video={video}
                   rating={rating}
                   authorName={author?.name}
@@ -431,6 +433,7 @@ interface ExportRowParams {
 }
 
 interface VideoRowProps {
+  rowNumber: number
   video: VideoSnapshot
   rating?: RatingSnapshot
   authorName?: string
@@ -442,6 +445,7 @@ interface VideoRowProps {
 
 // oxlint-disable-next-line react/no-multi-comp
 const VideoRow = ({
+  rowNumber,
   video,
   rating,
   authorName,
@@ -453,7 +457,10 @@ const VideoRow = ({
   const verdictTotal =
     verdictCounts.wins + verdictCounts.draws + verdictCounts.losses
   return (
-    <div className="grid grid-cols-[90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 items-center px-3 py-2">
+    <div className="grid grid-cols-[28px_90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 items-center px-3 py-2">
+      <div className="text-xs text-slate-600 dark:text-slate-400">
+        {rowNumber}
+      </div>
       <a
         href={createWatchUrl(video.videoId)}
         target="_blank"
