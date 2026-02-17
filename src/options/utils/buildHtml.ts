@@ -1,8 +1,8 @@
+import { formatCompactTimestamp } from "../../lib/date"
 import type { CompareEvent, RatingSnapshot } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import shareReportTemplate from "../templates/share-report.template.html?raw"
-import { formatCompactTimestamp } from "./date"
 
 interface BuildShareHtmlInput {
   snapshot: OptionsSnapshot

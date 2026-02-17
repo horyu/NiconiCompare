@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactElement } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
+import { formatCompactTimestamp } from "../../lib/date"
 import { handleUIError } from "../../lib/errorHandler"
 import { sendNcMessage } from "../../lib/messages"
 import { runNcAction } from "../../lib/ncAction"
@@ -8,7 +9,6 @@ import { CategorySelect } from "../components/CategorySelect"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { buildShareExportFilename, buildShareHtml } from "../utils/buildHtml"
 import { buildCategoryOptions } from "../utils/categories"
-import { formatCompactTimestamp } from "../utils/date"
 
 interface DataTabProps {
   snapshot: OptionsSnapshot

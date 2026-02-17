@@ -1,4 +1,4 @@
-import { formatCompactTimestamp } from "./date"
+import { formatCompactTimestamp } from "../../lib/date"
 
 type ExportFormat = "csv" | "tsv"
 interface ExportDownloadOptions {
