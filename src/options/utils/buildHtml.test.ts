@@ -142,15 +142,18 @@ describe("buildShareHtml", () => {
     const payload = extractEmbeddedPayload(html)
     const events = payload.events as Record<string, unknown>[]
     expect(events).toHaveLength(2)
-    expect(events.map((event) => event.timestamp)).toEqual([2000, 1000])
-    expect(events.some((event) => "id" in event)).toBe(false)
-    expect(
-      events.every(
-        (event) =>
-          (event.currentVideoId === "sm1" && event.opponentVideoId === "sm2") ||
-          (event.currentVideoId === "sm2" && event.opponentVideoId === "sm3")
-      )
-    ).toBe(true)
+    expect(events[0]).toMatchObject({
+      timestamp: 2000,
+      currentVideoId: "sm2",
+      opponentVideoId: "sm3"
+    })
+    expect(events[1]).toMatchObject({
+      timestamp: 1000,
+      currentVideoId: "sm1",
+      opponentVideoId: "sm2"
+    })
+    expect(events[0]).not.toHaveProperty("id")
+    expect(events[1]).not.toHaveProperty("id")
   })
 
   it("カテゴリ内有効イベントに登場する全動画と必要情報を埋め込むこと", () => {
