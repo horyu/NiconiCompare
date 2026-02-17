@@ -271,9 +271,7 @@
         <table>
           <thead>
             <tr>
-              <th>
-                <button type="button" data-event-sort-key="id">ID</button>
-              </th>
+              <th>#</th>
               <th>
                 <button
                   type="button"
@@ -316,7 +314,11 @@
         const panels = document.querySelectorAll("[data-tab-panel]")
 
         const videoState = { query: "", sortKey: "rating", direction: "desc" }
-        const eventState = { query: "", sortKey: "id", direction: "desc" }
+        const eventState = {
+          query: "",
+          sortKey: "timestamp",
+          direction: "desc"
+        }
 
         const setMeta = () => {
           setText("meta-generated-at", formatDate(data.meta.generatedAt))
@@ -465,13 +467,13 @@
           )
           setText("event-count", "表示 " + sorted.length + " 件")
           body.innerHTML = sorted
-            .map((row) => {
+            .map((row, index) => {
               const currentClass = row.verdict === "better" ? "winner-cell" : ""
               const opponentClass = row.verdict === "worse" ? "winner-cell" : ""
               return (
                 "<tr>" +
-                "<td>#" +
-                String(row.id) +
+                "<td>" +
+                String(index + 1) +
                 "</td>" +
                 "<td class='date-col'>" +
                 formatDate(row.timestamp) +

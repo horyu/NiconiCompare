@@ -25,7 +25,6 @@ interface ShareVideoRow {
 }
 
 interface ShareEventRow {
-  id: number
   timestamp: number
   currentVideoId: string
   currentTitle: string
@@ -227,7 +226,6 @@ const buildEventRow = ({
     ? snapshot.authors[opponentVideo.authorUrl]?.name
     : undefined
   return {
-    id: event.id,
     timestamp: event.timestamp,
     currentVideoId: event.currentVideoId,
     currentTitle: currentVideo?.title ?? "データ未取得",
