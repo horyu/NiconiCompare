@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactElement } from "react"
 
 import "../style.css"
 import { MESSAGE_TYPES } from "../lib/constants"
+import { formatPaddedDateTime } from "../lib/date"
 import { sendNcMessage } from "../lib/messages"
 import { runNcAction } from "../lib/ncAction"
 import type {
@@ -178,15 +179,14 @@ export default function Popup(): ReactElement {
         ) : (
           <ul className="list-none p-0 m-0 flex flex-col gap-1 text-[13px]">
             {lastEvents.map((event) => {
-              const timestamp = new Date(event.timestamp)
+              const timestamp = formatPaddedDateTime(new Date(event.timestamp))
               return (
                 <li
                   key={event.id}
                   className="grid grid-cols-[auto_96px_auto_96px] items-center gap-0 p-2 rounded-lg bg-slate-900/10 dark:bg-white/10">
                   <div className="flex flex-col gap-0.5 text-[10px]">
                     <strong>#{event.id}</strong>
-                    <span>{timestamp.toLocaleDateString()}</span>
-                    <span>{timestamp.toLocaleTimeString()}</span>
+                    <span>{timestamp}</span>
                   </div>
                   {renderVideoCard(
                     snapshot.videos[event.currentVideoId],

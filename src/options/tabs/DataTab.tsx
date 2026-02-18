@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactElement } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
-import { formatCompactTimestamp } from "../../lib/date"
+import { formatCompactTimestamp, formatPaddedDateTime } from "../../lib/date"
 import { handleUIError } from "../../lib/errorHandler"
 import { sendNcMessage } from "../../lib/messages"
 import { runNcAction } from "../../lib/ncAction"
@@ -47,7 +47,7 @@ export const DataTab = ({
   }, [htmlExportCategoryId, initialHtmlExportCategoryId, snapshot.categories])
 
   const lastCleanupLabel = snapshot.meta?.lastCleanupAt
-    ? new Date(snapshot.meta.lastCleanupAt).toLocaleString()
+    ? formatPaddedDateTime(new Date(snapshot.meta.lastCleanupAt))
     : "未実行"
 
   const handleCleanup = async (): Promise<void> => {

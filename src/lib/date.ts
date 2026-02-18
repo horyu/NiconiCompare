@@ -4,3 +4,8 @@ export const formatCompactTimestamp = (date: Date): string =>
   `${date.getFullYear()}${pad2(date.getMonth() + 1)}${pad2(date.getDate())}${pad2(
     date.getHours()
   )}${pad2(date.getMinutes())}${pad2(date.getSeconds())}`
+
+export const formatPaddedDateTime = (date: Date): string =>
+  `${date.getFullYear()}/${pad2(date.getMonth() + 1)}/${pad2(date.getDate())} ${pad2(
+    date.getHours()
+  )}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`

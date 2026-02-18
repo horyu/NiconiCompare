@@ -9,6 +9,7 @@ import {
 } from "react"
 
 import { EVENT_PAGE_SIZE, MESSAGE_TYPES } from "../../lib/constants"
+import { formatPaddedDateTime } from "../../lib/date"
 import { sendNcMessage } from "../../lib/messages"
 import { runNcAction } from "../../lib/ncAction"
 import type { CompareEvent, Verdict } from "../../lib/types"
@@ -689,9 +690,7 @@ const EventRow = ({
         )}
       </div>
       <div className="text-xs text-slate-500 dark:text-slate-400">
-        {timestamp.toLocaleDateString()}
-        <br />
-        {timestamp.toLocaleTimeString()}
+        {formatPaddedDateTime(timestamp)}
       </div>
       <div
         className={isCurrentWinner ? "border-l-4 border-l-slate-400 pl-2" : ""}>
@@ -852,7 +851,7 @@ const buildExportRows = ({
       : ""
     return {
       id: String(event.id),
-      occurredAt: new Date(event.timestamp).toLocaleString(),
+      occurredAt: formatPaddedDateTime(new Date(event.timestamp)),
       status: event.disabled ? "無効" : "有効",
       currentVideoId: event.currentVideoId,
       currentVideoUrl: createWatchUrl(event.currentVideoId),

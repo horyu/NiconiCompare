@@ -8,6 +8,7 @@ import {
 } from "react"
 
 import { VIDEO_PAGE_SIZE } from "../../lib/constants"
+import { formatPaddedDateTime } from "../../lib/date"
 import type { RatingSnapshot, VideoSnapshot } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
 import { CategorySelect } from "../components/CategorySelect"
@@ -511,7 +512,7 @@ const VideoRow = ({
           : "-"}
       </div>
       <div className="text-xs text-slate-600 dark:text-slate-400">
-        {lastVerdictAt ? new Date(lastVerdictAt).toLocaleString() : "-"}
+        {lastVerdictAt ? formatPaddedDateTime(new Date(lastVerdictAt)) : "-"}
       </div>
     </div>
   )
@@ -718,7 +719,9 @@ const buildExportRows = ({
       wins: String(counts.wins),
       draws: String(counts.draws),
       losses: String(counts.losses),
-      lastVerdictAt: lastVerdict ? new Date(lastVerdict).toLocaleString() : ""
+      lastVerdictAt: lastVerdict
+        ? formatPaddedDateTime(new Date(lastVerdict))
+        : ""
     }
   })
 }

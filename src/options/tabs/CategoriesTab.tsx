@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactElement } from "react"
 
 import { DEFAULT_CATEGORY_ID, MESSAGE_TYPES } from "../../lib/constants"
+import { formatPaddedDateTime } from "../../lib/date"
 import { sendNcMessage } from "../../lib/messages"
 import { runNcAction } from "../../lib/ncAction"
 import { CategorySelect } from "../components/CategorySelect"
@@ -232,8 +233,7 @@ export const CategoriesTab = ({
                   </span>
                 </div>
                 <div className="text-xs text-slate-600 dark:text-slate-400">
-                  <div>{createdAt.toLocaleDateString()}</div>
-                  <div>{createdAt.toLocaleTimeString()}</div>
+                  <div>{formatPaddedDateTime(createdAt)}</div>
                 </div>
                 <div className="text-xs">
                   {isActive ? (
