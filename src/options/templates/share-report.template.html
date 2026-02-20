@@ -341,10 +341,24 @@
           if (el) el.textContent = value
         }
 
-        const formatDate = (timestamp) =>
-          Number.isFinite(timestamp)
-            ? new Date(timestamp).toLocaleString()
-            : "-"
+        const pad2 = (value) => String(value).padStart(2, "0")
+        const formatDate = (timestamp) => {
+          if (!Number.isFinite(timestamp)) return "-"
+          const date = new Date(timestamp)
+          return (
+            String(date.getFullYear()) +
+            "/" +
+            pad2(date.getMonth() + 1) +
+            "/" +
+            pad2(date.getDate()) +
+            " " +
+            pad2(date.getHours()) +
+            ":" +
+            pad2(date.getMinutes()) +
+            ":" +
+            pad2(date.getSeconds())
+          )
+        }
 
         const escapeHtml = (value) =>
           String(value ?? "")
