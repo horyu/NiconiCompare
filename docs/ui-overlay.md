@@ -43,7 +43,7 @@
 - ヘッダーにカテゴリドロップダウンを表示し、`overlayVisibleIds` に含まれるカテゴリのみを選択肢にする（`showControls` 時のみ表示）
 - ドロップダウンは幅固定＋省略表示（長いカテゴリ名を見切る）
 - verdict ボタンは 3 つ（再生中/引き分け/選択中）で、`submitVerdict` を通じて background へ送信
-- verdict ボタンは最後に押したものが選択状態になり、`currentVideoId` の切替時に解除される
+- verdict ボタンは最後に押したものが選択状態になり、`activeCategoryId` / `currentVideoId` / `opponentVideoId` のいずれかが変わると解除される
 - サムネイルは current/opponent の2枚表示。opponent 側は新規タブで watch ページを開くリンクにしている
 - Select は `opacity-0` で透明化し、`label` 内の `span` と重ねる構造。候補ラベルは `{index}. videoId | title`
 - ピン留めボタンは Select 右側に配置し、ピン留め中は Select を無効化する
