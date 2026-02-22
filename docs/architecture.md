@@ -396,7 +396,7 @@ async function saveCompareEvent(event: CompareEvent) {
 
 **役割**: 比較UIの常駐、動画メタデータの抽出とService Workerへの転送、比較操作の受付。
 
-**仕様/実装詳細**: `docs/spec.md §9.1` と `src/contents/overlay.tsx` / `docs/ui-overlay.md` を正とする。
+**仕様/実装詳細**: `docs/spec.md §9.1` と `src/contents/overlay.tsx` を正とする。
 
 ### 6.2 Popup
 

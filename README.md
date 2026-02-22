@@ -18,7 +18,6 @@
 - **[仕様書](./docs/spec.md)**: 機能要件とUI/UX仕様
 - **[開発者ガイド](./docs/developer-guide.md)**: 環境構築・ビルド・テスト手順（Tailwind CSS v4対応）
 - **[アーキテクチャ設計書](./docs/architecture.md)**: 技術設計とデータフロー
-- **[UI実装スナップショット](./docs/ui-overlay.md)**: オーバーレイUI実装の現状（React + Tailwind v4）
 
 ## 🔧 開発
 
