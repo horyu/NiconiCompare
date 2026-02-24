@@ -2,7 +2,7 @@
 
 ニコニコ動画の視聴中に動画を比較し続け、あなたの嗜好を自動的にレーティング・ランキング化するブラウザ拡張機能。
 
-## 🎯 何ができるか
+## 🎯 プロジェクト概要
 
 - **視聴フローを妨げない比較**: 再生中の動画と過去に見た動画を素早く比較（良い・同じ・悪い）
 - **自動レーティング算出**: Glicko-2アルゴリズムで比較履歴から各動画の評価を自動計算
@@ -10,27 +10,22 @@
 - **カテゴリ別の比較・整理**: 比較の観点をカテゴリとして記録し、カテゴリ単位でランキングを管理
 - **イベントログ方式**: すべての比較履歴を保存し、いつでも再計算・修正が可能
 - **完全ローカル**: すべてのデータはブラウザ内に保存、外部送信なし
+- **共有HTML出力**: 単一カテゴリの動画一覧・評価一覧をオフラインで閲覧できる単体HTMLとして出力可能
+
+## ⚡ クイックスタート
+
+1. `mise install`
+2. `pnpm install`
+3. `pnpm dev`
+4. コミット前に `pnpm fix` と `pnpm check`
+5. 詳細手順は `docs/developer-guide.md` を参照
 
 ## 📚 ドキュメント
 
-詳細な仕様・開発手順・アーキテクチャについては[ドキュメント](./docs/)を参照してください。
-
-- **[仕様書](./docs/spec.md)**: 機能要件とUI/UX仕様
-- **[開発者ガイド](./docs/developer-guide.md)**: 環境構築・ビルド・テスト手順（Tailwind CSS v4対応）
-- **[アーキテクチャ設計書](./docs/architecture.md)**: 技術設計とデータフロー
-
-## 🔧 開発
-
-```bash
-pnpm install          # 依存関係のインストール
-pnpm dev              # 開発サーバー起動
-pnpm fix              # コード自動修正（oxfmt + oxlint + ESLint）
-pnpm lint             # コード品質チェック（oxlint + ESLint）
-pnpm check            # 型・lint・format のチェック
-pnpm build            # 本番ビルド
-```
-
-**⚠️ コミット前に必ず実行**: `pnpm fix` → `pnpm check` で全チェック合格を確認すること
+- `docs/spec.md`: 機能仕様（ユーザーに見える挙動）
+- `docs/architecture.md`: 技術設計（データフロー・責務分担）
+- `docs/developer-guide.md`: 開発手順（環境構築・ビルド・テスト）
+- `docs/README.md`: ドキュメント運用ルール（責務分離・更新手順）
 
 ## ⚠️ 免責事項
 
@@ -48,8 +43,3 @@ pnpm build            # 本番ビルド
 ```txt
 Copyright (C) 2025 horyu
 ```
-
----
-
-**Status**: v0.0.1 開発中  
-**Target Browser**: Chrome 109+ / Firefox 109+ (Manifest V3)
