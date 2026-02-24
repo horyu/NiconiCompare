@@ -12,7 +12,7 @@ LLM による開発を前提とした環境構築・開発手順の要点をま�
 
 ```bash
 # mise インストール (未導入の場合)
-# Windows: https://mise.jdx.dev/installing-mise.html 参照
+# https://mise.jdx.dev/installing-mise.html 参照
 
 # プロジェクトルートで実行
 mise install
@@ -188,11 +188,12 @@ pnpm build
 
 ---
 
-## 5. デバッグ
+## 5. デバッグ（Chrome）
 
-- **Service Worker**: chrome://extensions → サービスワーカー
-- **Content Script**: watch page 上で DevTools
-- **Storage 確認**: `chrome.storage.local.get(null, console.log)`
+- Overlay: watch ページ → 開発者ツール + 必要に応じて .env の `WXT_PUBLIC_KEEP_OVERLAY_OPEN=true` を設定
+- Storage: 開発者ツール → Application → Storage → Extension Storage → niconi-compare → Local
+- Popup: ポップアップ内で右クリック → 開発者ツール → 検証
+- Service Worker: chrome://extensions → niconi-compare 詳細 → ビューを検査 → Service Worker
 
 ---
 
