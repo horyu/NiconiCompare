@@ -66,7 +66,6 @@
     "unicorn/switch-case-braces": ["error", "avoid"],
     // restriction
     "eslint/no-alert": "off",
-    "eslint/no-console": "off",
     "eslint/no-empty-function": "off",
     "eslint/no-plusplus": "off",
     "eslint/no-undefined": "off",
@@ -113,6 +112,12 @@
         "react/display-name": "off",
         // chrome API の型定義省力化用
         "no-unsafe-type-assertion": "off"
+      }
+    },
+    {
+      "files": ["src/lib/logger.ts"],
+      "rules": {
+        "eslint/no-console": "off"
       }
     }
   ]

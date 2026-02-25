@@ -119,27 +119,15 @@ src/
 
 TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関数/変数), snake_case (storage キー)
 
-- エラーハンドリングは `src/lib/errorHandler.ts` を使用し、`console.error` の直書きは避ける
+- ログ出力は `src/lib/logger.ts` を使用する
+- エラーハンドリングは `src/lib/errorHandler.ts` を使用する
 - エラー context は `bg:*`（background）/ `ui:*`（UI）のプレフィックスで統一する
 - background へのメッセージ送信は `sendNcMessage` を使用して型チェックする
 - UIコンポーネントを追加した場合や props が増えた場合は、Storybook の stories も更新する
 
 ### 2.4 コード品質チェック
 
-**ESLint**: 静的解析によりコード品質を保証
-
-- **設定ファイル**: `eslint.config.mjs` (ESLint 9 flat config)
-- **有効なルール**:
-  - TypeScript 推奨ルール (@typescript-eslint/recommended)
-  - React 推奨ルール (react/recommended)
-  - React Hooks ルール (react-hooks/rules-of-hooks, exhaustive-deps)
-- **React 設定**: `settings.react.version` を `detect` に指定し、React 版本警告を回避
-- **カスタムルール**:
-  - `react/react-in-jsx-scope`: off (React 17+ では不要)
-  - `@typescript-eslint/no-explicit-any`: warn
-  - `react-hooks/exhaustive-deps`: warn
-
-**oxfmt**: コードフォーマッター
+設定ファイルは `eslint.config.mjs` / `.oxlintrc.json` / `.oxfmtrc.jsonc` を参照する。
 
 **実行コマンド**:
 
@@ -155,7 +143,7 @@ pnpm storybook         # Storybook 開発サーバー
 pnpm storybook:build   # Storybook ビルド
 ```
 
-**開発フロー**:
+**推奨フロー**:
 
 1. コード編集
 2. `pnpm fix` でコード自動修正
