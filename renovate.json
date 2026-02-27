@@ -9,6 +9,7 @@
   "reviewers": ["horyu"],
   "prHourlyLimit": 0,
   "separateMajorMinor": true,
+  "rangeStrategy": "pin",
   "minimumReleaseAge": "1 day",
   "packageRules": [
     {
