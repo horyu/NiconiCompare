@@ -1,0 +1,65 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "labels": ["dependencies", "renovate"],
+  "assignees": ["horyu"],
+  "reviewers": ["horyu"],
+  "separateMajorMinor": true,
+  "minimumReleaseAge": "1 day",
+  "packageRules": [
+    {
+      "groupName": "storybook",
+      "description": "Keep Storybook packages in a single PR",
+      "matchPackageNames": [
+        "storybook",
+        "/^@storybook\\//",
+        "eslint-plugin-storybook"
+      ]
+    },
+    {
+      "groupName": "react",
+      "description": "Keep React packages aligned",
+      "matchPackageNames": [
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom",
+        "eslint-plugin-react",
+        "eslint-plugin-react-hooks"
+      ]
+    },
+    {
+      "groupName": "vitest",
+      "description": "Keep Vitest packages aligned",
+      "matchPackageNames": ["vitest", "/^@vitest\\//", "happy-dom"]
+    },
+    {
+      "groupName": "eslint-tooling",
+      "description": "Keep ESLint core/tooling updates together",
+      "matchPackageNames": [
+        "eslint",
+        "@eslint/js",
+        "typescript-eslint",
+        "eslint-config-prettier"
+      ]
+    },
+    {
+      "groupName": "oxc-tooling",
+      "description": "Keep Oxc lint/format tooling aligned",
+      "matchPackageNames": [
+        "oxlint",
+        "oxfmt",
+        "oxlint-tsgolint",
+        "eslint-plugin-oxlint"
+      ]
+    },
+    {
+      "groupName": "tailwind",
+      "description": "Keep Tailwind packages aligned",
+      "matchPackageNames": ["tailwindcss", "/^@tailwindcss\\//"]
+    }
+  ]
+}
