@@ -1,0 +1,5 @@
+version: 1
+interface:
+  display_name: Renovate PR Handler
+  short_description: Analyze Renovate PRs, apply related improvements, validate, and complete commit/push/merge flow after approval.
+  default_prompt: Handle this Renovate PR URL end-to-end for this project. Decide whether follow-up changes are needed, prioritize related code improvements (while preserving behavior), run pnpm install --frozen-lockfile and pnpm check, stage files, ask for staged-change confirmation, then commit/push after approval and proceed to merge flow.
