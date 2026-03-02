@@ -13,6 +13,11 @@
   "minimumReleaseAge": "1 day",
   "packageRules": [
     {
+      "description": "Do not pin versions in mise toolchain config",
+      "matchManagers": ["mise"],
+      "rangeStrategy": "auto"
+    },
+    {
       "groupName": "storybook",
       "description": "Keep Storybook packages in a single PR",
       "matchPackageNames": [
