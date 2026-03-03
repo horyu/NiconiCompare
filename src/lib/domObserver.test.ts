@@ -98,8 +98,8 @@ describe("observeLdJsonChanges", () => {
     })
 
     expect(onVideoDataChange).toHaveBeenCalledTimes(1)
-    const [payload] = onVideoDataChange.mock.calls[0] ?? []
-    expect(payload?.video.videoId).toBe("sm3333333")
+    const [[payload]] = onVideoDataChange.mock.calls
+    expect(payload.video.videoId).toBe("sm3333333")
     cleanup?.()
   })
 

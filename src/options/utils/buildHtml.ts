@@ -72,7 +72,7 @@ export const buildShareHtml = ({
   })
 }
 
-const buildSharePayload = ({
+function buildSharePayload({
   snapshot,
   categoryId,
   categoryName
@@ -80,7 +80,7 @@ const buildSharePayload = ({
   snapshot: OptionsSnapshot
   categoryId: string
   categoryName: string
-}): SharePayload => {
+}): SharePayload {
   const events = snapshot.events.items
     .filter((event) => {
       if (event.disabled) return false
@@ -156,7 +156,7 @@ const buildSharePayload = ({
   }
 }
 
-const buildVideoRow = ({
+function buildVideoRow({
   videoId,
   snapshot,
   rating,
@@ -171,7 +171,7 @@ const buildVideoRow = ({
     losses: number
     lastVerdictAt: number | null
   }
-}): ShareVideoRow => {
+}): ShareVideoRow {
   const { title, thumbnailUrl, authorName } = getVideoDisplayFields(
     snapshot,
     videoId
@@ -195,10 +195,10 @@ const buildVideoRow = ({
   }
 }
 
-const getVideoDisplayFields = (
+function getVideoDisplayFields(
   snapshot: OptionsSnapshot,
   videoId: string
-): { title: string; thumbnailUrl: string; authorName: string } => {
+): { title: string; thumbnailUrl: string; authorName: string } {
   const video = snapshot.videos[videoId]
   if (!video) {
     return { title: "データ未取得", thumbnailUrl: "", authorName: "不明" }
@@ -210,13 +210,13 @@ const getVideoDisplayFields = (
   }
 }
 
-const buildEventRow = ({
+function buildEventRow({
   event,
   snapshot
 }: {
   event: CompareEvent
   snapshot: OptionsSnapshot
-}): ShareEventRow => {
+}): ShareEventRow {
   const currentVideo = snapshot.videos[event.currentVideoId]
   const opponentVideo = snapshot.videos[event.opponentVideoId]
   const currentAuthorName = currentVideo
@@ -245,7 +245,7 @@ const buildEventRow = ({
   }
 }
 
-const ensureVideoStats = (
+function ensureVideoStats(
   map: Map<
     string,
     {
@@ -261,7 +261,7 @@ const ensureVideoStats = (
   draws: number
   losses: number
   lastVerdictAt: number | null
-} => {
+} {
   const existing = map.get(videoId)
   if (existing) return existing
   const created = { wins: 0, draws: 0, losses: 0, lastVerdictAt: null }
@@ -269,26 +269,30 @@ const ensureVideoStats = (
   return created
 }
 
-const resolveCategoryId = (
+function resolveCategoryId(
   event: CompareEvent,
   defaultCategoryId: string
-): string => event.categoryId || defaultCategoryId
+): string {
+  return event.categoryId || defaultCategoryId
+}
 
-const sanitizeFilenameSegment = (value: string): string =>
-  value.replaceAll(/[\\/:*?"<>|]/g, "")
+function sanitizeFilenameSegment(value: string): string {
+  return value.replaceAll(/[\\/:*?"<>|]/g, "")
+}
 
-const escapeHtml = (value: string): string =>
-  value
+function escapeHtml(value: string): string {
+  return value
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;")
+}
 
-const applyTemplate = (
+function applyTemplate(
   template: string,
   values: Record<string, string>
-): string => {
+): string {
   let output = template
   for (const [key, value] of Object.entries(values)) {
     output = output.replaceAll(`{{${key}}}`, value)

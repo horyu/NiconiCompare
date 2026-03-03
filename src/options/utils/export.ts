@@ -58,7 +58,7 @@ export const downloadDelimitedFile = ({
   URL.revokeObjectURL(url)
 }
 
-const escapeField = (value: string, delimiter: string): string => {
+function escapeField(value: string, delimiter: string): string {
   const text = value ?? ""
   if (
     text.includes(delimiter) ||
@@ -71,5 +71,6 @@ const escapeField = (value: string, delimiter: string): string => {
   return text
 }
 
-const sanitizeFilenameSegment = (value: string): string =>
-  value.replaceAll(/[\\/:*?"<>|]/g, "")
+function sanitizeFilenameSegment(value: string): string {
+  return value.replaceAll(/[\\/:*?"<>|]/g, "")
+}

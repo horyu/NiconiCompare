@@ -445,7 +445,7 @@ interface VideoRowProps {
 }
 
 // oxlint-disable-next-line react/no-multi-comp
-const VideoRow = ({
+function VideoRow({
   rowNumber,
   video,
   rating,
@@ -454,7 +454,7 @@ const VideoRow = ({
   lastVerdictAt,
   categoryId,
   onOpenEventsForVideo
-}: VideoRowProps): ReactElement => {
+}: VideoRowProps): ReactElement {
   const verdictTotal =
     verdictCounts.wins + verdictCounts.draws + verdictCounts.losses
   return (
@@ -533,11 +533,11 @@ interface FilterVideosParams {
   order: "desc" | "asc"
 }
 
-const buildLastEventByVideo = (
+function buildLastEventByVideo(
   events: OptionsSnapshot["events"]["items"],
   defaultCategoryId: string,
   categoryId: string
-): Map<string, number> => {
+): Map<string, number> {
   const map = new Map<string, number>()
   for (const event of events) {
     if (event.disabled) continue
@@ -555,11 +555,11 @@ const buildLastEventByVideo = (
   return map
 }
 
-const buildVerdictCountsByVideo = (
+function buildVerdictCountsByVideo(
   events: OptionsSnapshot["events"]["items"],
   defaultCategoryId: string,
   categoryId: string
-): Map<string, { wins: number; draws: number; losses: number }> => {
+): Map<string, { wins: number; draws: number; losses: number }> {
   const map = new Map<string, { wins: number; draws: number; losses: number }>()
 
   const ensure = (
@@ -596,7 +596,7 @@ const buildVerdictCountsByVideo = (
   return map
 }
 
-const filterVideos = ({
+function filterVideos({
   videos,
   authors,
   ratingsByCategory,
@@ -606,7 +606,7 @@ const filterVideos = ({
   author,
   sort,
   order
-}: FilterVideosParams): VideoSnapshot[] => {
+}: FilterVideosParams): VideoSnapshot[] {
   const normalizedSearch = search.trim().toLowerCase()
   const filtered = Object.values(videos).filter((video) => {
     const hasRating = Boolean(ratingsByCategory[video.videoId])
@@ -630,7 +630,7 @@ const filterVideos = ({
   return filtered.sort((left, right) => direction * sorter(left, right))
 }
 
-const getVideoSorter = ({
+function getVideoSorter({
   sort,
   ratingsByCategory,
   lastEventByVideo,
@@ -643,7 +643,7 @@ const getVideoSorter = ({
     string,
     { wins: number; draws: number; losses: number }
   >
-}): ((left: VideoSnapshot, right: VideoSnapshot) => number) => {
+}): (left: VideoSnapshot, right: VideoSnapshot) => number {
   type VideoItem = VideoSnapshot
   const compareByRating = (left: VideoItem, right: VideoItem): number =>
     (ratingsByCategory[right.videoId]?.rating ?? 0) -
@@ -690,13 +690,13 @@ const getVideoSorter = ({
               : compareByRating
 }
 
-const buildExportRows = ({
+function buildExportRows({
   videos,
   snapshot,
   ratingsByCategory,
   lastEventByVideo,
   verdictCountsByVideo
-}: ExportRowParams): ExportRow[] => {
+}: ExportRowParams): ExportRow[] {
   return videos.map((video) => {
     const rating = ratingsByCategory[video.videoId]
     const author = snapshot.authors[video.authorUrl]

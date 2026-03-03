@@ -83,6 +83,12 @@
       }
     ],
     "typescript/no-dynamic-delete": "off",
+    "eslint/no-use-before-define": [
+      "error",
+      {
+        "functions": false
+      }
+    ],
     "typescript/promise-function-async": [
       "error",
       {
@@ -95,8 +101,7 @@
     "typescript/prefer-readonly-parameter-types": "off",
     "typescript/strict-void-return": "off",
     // FIXME: エラー量が多いため一時無効化
-    "typescript/no-unnecessary-condition": "off",
-    "eslint/no-use-before-define": "off"
+    "typescript/no-unnecessary-condition": "off"
   },
   "overrides": [
     {
