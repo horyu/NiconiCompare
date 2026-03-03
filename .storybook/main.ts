@@ -7,7 +7,7 @@ import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
 import type { Plugin } from "vite"
 
-const config: StorybookConfig = {
+export default {
   framework: "@storybook/react-vite",
   stories: ["../src/**/*.stories.tsx"],
   addons: ["@storybook/addon-themes"],
@@ -36,6 +36,4 @@ const config: StorybookConfig = {
     ]
     return config
   }
-}
-
-export default config
+} satisfies StorybookConfig

@@ -235,7 +235,7 @@ function renderVideoCard(
   verdictStats?: VideoVerdictStats,
   highlightedStatKey?: VideoVerdictStatKey
 ): ReactElement {
-  const thumbnailUrl = video?.thumbnailUrls?.[0]
+  const thumbnailUrl = video?.thumbnailUrls[0]
   const watchUrl = createWatchUrl(videoId)
   return (
     <a

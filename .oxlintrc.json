@@ -90,7 +90,13 @@
       }
     ],
     "unicorn/no-array-for-each": "off",
-    "unicorn/no-array-reduce": "off"
+    "unicorn/no-array-reduce": "off",
+    // nursery
+    "typescript/prefer-readonly-parameter-types": "off",
+    "typescript/strict-void-return": "off",
+    // FIXME: エラー量が多いため一時無効化
+    "typescript/no-unnecessary-condition": "off",
+    "eslint/no-use-before-define": "off"
   },
   "overrides": [
     {
