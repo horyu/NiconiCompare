@@ -653,7 +653,7 @@ interface EventRowProps {
 }
 
 // oxlint-disable-next-line react/no-multi-comp
-const EventRow = ({
+function EventRow({
   event,
   showCategoryOps,
   isBusy,
@@ -673,7 +673,7 @@ const EventRow = ({
   onDeleteEvent,
   onRestoreEvent,
   onPurgeEvent
-}: EventRowProps): ReactElement => {
+}: EventRowProps): ReactElement {
   return (
     <div
       className={`grid ${
@@ -795,7 +795,7 @@ interface FilterEventsParams {
   authors: OptionsSnapshot["authors"]
 }
 
-const filterEvents = ({
+function filterEvents({
   events,
   includeDeleted,
   verdict,
@@ -804,7 +804,7 @@ const filterEvents = ({
   search,
   videos,
   authors
-}: FilterEventsParams): CompareEvent[] => {
+}: FilterEventsParams): CompareEvent[] {
   const normalizedSearch = search.trim().toLowerCase()
   const filtered = events.filter((event) => {
     if (!includeDeleted && event.disabled) {
@@ -836,10 +836,7 @@ const filterEvents = ({
   return filtered.sort((a, b) => b.id - a.id)
 }
 
-const buildExportRows = ({
-  events,
-  snapshot
-}: ExportRowParams): ExportRow[] => {
+function buildExportRows({ events, snapshot }: ExportRowParams): ExportRow[] {
   return events.map((event) => {
     const currentVideo = snapshot.videos[event.currentVideoId]
     const opponentVideo = snapshot.videos[event.opponentVideoId]

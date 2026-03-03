@@ -96,6 +96,7 @@ export function useOverlayState(): OverlayStateResult {
     const cleanup = (): void => {
       chrome.storage.onChanged.removeListener(handleStorageChange)
     }
+    // oxlint-disable-next-line typescript-eslint/consistent-return
     return cleanup
   }, [])
 

@@ -83,6 +83,12 @@
       }
     ],
     "typescript/no-dynamic-delete": "off",
+    "eslint/no-use-before-define": [
+      "error",
+      {
+        "functions": false
+      }
+    ],
     "typescript/promise-function-async": [
       "error",
       {
@@ -90,7 +96,12 @@
       }
     ],
     "unicorn/no-array-for-each": "off",
-    "unicorn/no-array-reduce": "off"
+    "unicorn/no-array-reduce": "off",
+    // nursery
+    "typescript/prefer-readonly-parameter-types": "off",
+    "typescript/strict-void-return": "off",
+    // TODO: validation ライブラリ導入後に有効化する
+    "typescript/no-unnecessary-condition": "off"
   },
   "overrides": [
     {

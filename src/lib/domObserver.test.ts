@@ -98,8 +98,8 @@ describe("observeLdJsonChanges", () => {
     })
 
     expect(onVideoDataChange).toHaveBeenCalledTimes(1)
-    const [payload] = onVideoDataChange.mock.calls[0] ?? []
-    expect(payload?.video.videoId).toBe("sm3333333")
+    const [[payload]] = onVideoDataChange.mock.calls
+    expect(payload.video.videoId).toBe("sm3333333")
     cleanup?.()
   })
 
@@ -134,8 +134,8 @@ describe("observeLdJsonChanges", () => {
     expect(onVideoDataChange).toHaveBeenCalledTimes(2)
     const firstCall = onVideoDataChange.mock.calls[0]?.[0]
     const secondCall = onVideoDataChange.mock.calls[1]?.[0]
-    expect(firstCall?.video.videoId).toBe("sm4444444")
-    expect(secondCall?.video.videoId).toBe("sm5555555")
+    expect(firstCall.video.videoId).toBe("sm4444444")
+    expect(secondCall.video.videoId).toBe("sm5555555")
     cleanup?.()
   })
 
@@ -206,10 +206,8 @@ describe("observeLdJsonChanges", () => {
 
   it("requestIdleCallback が存在しない環境では setTimeout を使用する", async () => {
     const onVideoDataChange = vi.fn<(data: VideoData) => void>()
-    const onError = vi.fn()
+    const onError = vi.fn<(message: string) => void>()
 
-    // requestIdleCallback を削除して setTimeout にフォールバックさせる
-    const originalIdleCallback = window.requestIdleCallback
     try {
       // @ts-expect-error - テストのために削除
       delete window.requestIdleCallback
@@ -228,7 +226,7 @@ describe("observeLdJsonChanges", () => {
       })
 
       const [payload] = onVideoDataChange.mock.calls[0] ?? []
-      expect(payload?.video.videoId).toBe("sm8888888")
+      expect(payload.video.videoId).toBe("sm8888888")
       cleanup?.()
     } finally {
       // 元に戻す

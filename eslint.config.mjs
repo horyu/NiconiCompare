@@ -61,7 +61,7 @@ export default defineConfig([
   tseslint.configs.stylisticTypeChecked,
   {
     name: "React Recommended Rules",
-    ...reactPlugin.configs.flat["recommended"]
+    ...reactPlugin.configs.flat.recommended
   },
   {
     name: "React Hooks Recommended Rules",

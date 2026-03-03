@@ -48,6 +48,7 @@ export function useVideoObserver({
       onStatusMessage?.(OVERLAY_STATUS_MESSAGES.jsonLdLoading)
     }
 
+    // oxlint-disable-next-line typescript-eslint/consistent-return
     return cleanup
   }, [enabled, isReady, onStatusMessage, onVideoChange])
 }

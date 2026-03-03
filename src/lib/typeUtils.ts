@@ -11,6 +11,7 @@
  * type Test3 = Equals<'a' | 'b', 'b' | 'a'> // true (union の順序は無関係)
  */
 export type Equals<A, B> =
+  // oxlint-disable-next-line no-unnecessary-type-parameters
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
     ? true
     : false
