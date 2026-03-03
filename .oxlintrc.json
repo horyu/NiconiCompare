@@ -100,7 +100,7 @@
     // nursery
     "typescript/prefer-readonly-parameter-types": "off",
     "typescript/strict-void-return": "off",
-    // FIXME: エラー量が多いため一時無効化
+    // TODO: validation ライブラリ導入後に有効化する
     "typescript/no-unnecessary-condition": "off"
   },
   "overrides": [
