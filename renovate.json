@@ -13,6 +13,19 @@
   "minimumReleaseAge": "1 day",
   "packageRules": [
     {
+      "groupName": "automerge @types/chrome",
+      "description": "Automerge @types/chrome updates",
+      "matchPackageNames": ["@types/chrome"],
+      "automerge": true
+    },
+    {
+      "groupName": "automerge @types/node v25",
+      "description": "Automerge @types/node updates only for v25.x",
+      "matchPackageNames": ["@types/node"],
+      "allowedVersions": "/^25\\./",
+      "automerge": true
+    },
+    {
       "description": "Do not pin versions in mise toolchain config",
       "matchManagers": ["mise"],
       "rangeStrategy": "auto"
