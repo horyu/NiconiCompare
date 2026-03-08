@@ -32,7 +32,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
-    "@eslint/js": "9.39.3",
+    "@eslint/js": "10.0.1",
     "@storybook/addon-themes": "10.2.14",
     "@storybook/react-vite": "10.2.14",
     "@tailwindcss/vite": "4.1.18",
@@ -45,7 +45,7 @@
     "@vitest/eslint-plugin": "1.6.9",
     "@vitest/ui": "4.0.18",
     "@wxt-dev/module-react": "1.1.5",
-    "eslint": "9.39.3",
+    "eslint": "10.0.3",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-oxlint": "1.51.0",
     "eslint-plugin-react": "7.37.5",
