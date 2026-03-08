@@ -77,6 +77,12 @@ export function useAutoClose({
     scheduleAutoClose
   ])
 
+  useEffect(() => {
+    return () => {
+      clearAutoCloseTimer()
+    }
+  }, [clearAutoCloseTimer])
+
   return {
     clearAutoCloseTimer,
     scheduleAutoClose,

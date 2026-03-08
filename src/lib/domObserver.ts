@@ -68,6 +68,8 @@ export function observeLdJsonChanges(
 
   // Internal state for debouncing (encapsulated in closure)
   let isScheduled = false
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+  let idleCallbackId: number | undefined
 
   const scheduleLdJsonProcessing = (): void => {
     if (isScheduled) return
@@ -82,16 +84,29 @@ export function observeLdJsonChanges(
     }
 
     if ("requestIdleCallback" in window) {
-      ;(window.requestIdleCallback as (cb: () => void) => number)(runner)
+      idleCallbackId = (
+        window.requestIdleCallback as (cb: () => void) => number
+      )(runner)
     } else {
-      setTimeout(runner, 0)
+      timeoutId = setTimeout(runner, 0)
     }
   }
 
   const observer = new MutationObserver(() => scheduleLdJsonProcessing())
   observer.observe(head, { childList: true, subtree: true })
 
-  return () => observer.disconnect()
+  return () => {
+    observer.disconnect()
+    if (timeoutId !== undefined) {
+      window.clearTimeout(timeoutId)
+      timeoutId = undefined
+    }
+    if (idleCallbackId !== undefined && "cancelIdleCallback" in window) {
+      window.cancelIdleCallback(idleCallbackId)
+      idleCallbackId = undefined
+    }
+    isScheduled = false
+  }
 }
 
 /**
