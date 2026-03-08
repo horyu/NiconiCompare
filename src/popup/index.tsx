@@ -35,8 +35,10 @@ export default function Popup(): ReactElement {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>()
 
-  const refreshState = async (): Promise<void> => {
-    setLoading(true)
+  const refreshState = async (silent = false): Promise<void> => {
+    if (!silent) {
+      setLoading(true)
+    }
     const response = await runNcAction<PopupSnapshot>(
       () =>
         sendNcMessage({
@@ -49,7 +51,9 @@ export default function Popup(): ReactElement {
     )
     if (!response?.ok) {
       setError("状態取得に失敗しました")
-      setLoading(false)
+      if (!silent) {
+        setLoading(false)
+      }
       return
     }
     setSnapshot(response.data)
@@ -80,7 +84,7 @@ export default function Popup(): ReactElement {
       setError("更新に失敗しました。")
       return
     }
-    await refreshState()
+    await refreshState(true)
   }
 
   const toggleVideoVerdictCounts = async (enabled: boolean): Promise<void> => {
@@ -100,7 +104,7 @@ export default function Popup(): ReactElement {
       setError("更新に失敗しました。")
       return
     }
-    await refreshState()
+    await refreshState(true)
   }
 
   if (loading) {
