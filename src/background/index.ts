@@ -171,6 +171,10 @@ chrome.runtime.onMessage.addListener(
             )
             sendResponse({ ok: true })
             break
+          case MESSAGE_TYPES.openOptionsPage:
+            await chrome.runtime.openOptionsPage()
+            sendResponse({ ok: true })
+            break
           case MESSAGE_TYPES.requestState: {
             const state = await readStateSnapshot()
             sendResponse({ ok: true, data: state })

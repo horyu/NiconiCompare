@@ -128,6 +128,24 @@ export default function Overlay(): ReactElement | null {
     [refreshState, setStatusMessage]
   )
 
+  const handleOpenOptionsPage = useCallback(() => {
+    void (async () => {
+      const response = await runNcAction(
+        () =>
+          sendNcMessage({
+            type: MESSAGE_TYPES.openOptionsPage
+          }),
+        {
+          context: "ui:overlay:open-options",
+          errorMessage: "オプションページを開けませんでした。"
+        }
+      )
+      if (!response) {
+        setStatusMessage("オプションページを開けませんでした。")
+      }
+    })()
+  }, [setStatusMessage])
+
   const handleVideoChange = useCallback(
     async (videoData: { video: VideoSnapshot; author: AuthorProfile }) => {
       if (!isReady || !overlaySettings.overlayAndCaptureEnabled) {
@@ -238,15 +256,27 @@ export default function Overlay(): ReactElement | null {
       onMouseLeave={() => {
         setIsHovered(false)
       }}>
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex h-[25px] min-w-0 items-center gap-1">
         {showControls && (
-          <CategorySelector
-            activeCategoryId={activeCategoryId}
-            categories={categories}
-            onChange={handleCategoryChange}
-          />
+          <>
+            <div className="min-w-0 flex-1 max-w-[180px]">
+              <CategorySelector
+                activeCategoryId={activeCategoryId}
+                categories={categories}
+                onChange={handleCategoryChange}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleOpenOptionsPage}
+              className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-white/30 bg-black/60 text-xs text-white hover:bg-black/70"
+              title="オプションを開く"
+              aria-label="オプションを開く">
+              ⚙
+            </button>
+          </>
         )}
-        <strong className="text-right w-full">
+        <strong className="shrink-0 whitespace-nowrap">
           {closedOverlayVerdict}
           NiconiCompare
         </strong>

@@ -140,6 +140,10 @@ export interface BulkMoveEventsMessage {
   }
 }
 
+export interface OpenOptionsPageMessage {
+  type: typeof MESSAGE_TYPES.openOptionsPage
+}
+
 export interface RequestStateMessage {
   type: typeof MESSAGE_TYPES.requestState
 }
@@ -166,6 +170,7 @@ export type Message =
   | UpdateOverlayVisibleIdsMessage
   | UpdateActiveCategoryMessage
   | BulkMoveEventsMessage
+  | OpenOptionsPageMessage
   | RequestStateMessage
 
 // Message ユニオン型が MESSAGE_TYPES のすべてのキーをカバーしていることを確認

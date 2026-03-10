@@ -100,7 +100,8 @@ export const MESSAGE_TYPES = {
   reorderCategories: "nc/reorderCategories",
   updateOverlayVisibleIds: "nc/updateOverlayVisibleIds",
   updateActiveCategory: "nc/updateActiveCategory",
-  bulkMoveEvents: "nc/bulkMoveEvents"
+  bulkMoveEvents: "nc/bulkMoveEvents",
+  openOptionsPage: "nc/openOptionsPage"
 } as const
 
 export type MessageType = (typeof MESSAGE_TYPES)[keyof typeof MESSAGE_TYPES]
