@@ -132,13 +132,15 @@ const withPopupFrame = (Story: () => ReactElement): ReactElement => (
 const meta: Meta<typeof Popup> = {
   title: "Popup/Popup",
   component: Popup,
-  decorators: [withPopupData(), withPopupFrame]
+  decorators: [withPopupFrame]
 }
 
 export default meta
 type Story = StoryObj<typeof Popup>
 
-export const Default: Story = {}
+export const Default: Story = {
+  decorators: [withPopupData()]
+}
 
 export const EmptyEvents: Story = {
   decorators: [
