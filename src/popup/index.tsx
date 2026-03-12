@@ -107,6 +107,25 @@ export default function Popup(): ReactElement {
     await refreshState(true)
   }
 
+  const openOptionsPage = async (): Promise<void> => {
+    setError(undefined)
+    const response = await runNcAction(
+      () =>
+        sendNcMessage({
+          type: MESSAGE_TYPES.openOptionsPage
+        }),
+      {
+        context: "ui:popup:open-options",
+        errorMessage: "オプションページを開けませんでした。"
+      }
+    )
+    if (response) {
+      window.close()
+    } else {
+      setError("オプションページを開けませんでした。")
+    }
+  }
+
   if (loading) {
     return (
       <main className="w-80 p-4 flex flex-col gap-4 font-sans bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
@@ -148,7 +167,19 @@ export default function Popup(): ReactElement {
   return (
     <main className="w-80 p-4 flex flex-col gap-4 font-sans bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="flex items-center justify-between">
-        <strong>NiconiCompare</strong>
+        <div className="flex items-center gap-1">
+          <strong className="shrink-0 text-sm">NiconiCompare</strong>
+          <button
+            type="button"
+            onClick={() => {
+              void openOptionsPage()
+            }}
+            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-slate-300 bg-white text-xs text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+            title="オプションを開く"
+            aria-label="オプションを開く">
+            ⚙
+          </button>
+        </div>
         <label className="text-xs flex items-center gap-2">
           <input
             type="checkbox"
