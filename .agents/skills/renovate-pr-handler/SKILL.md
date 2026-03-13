@@ -71,14 +71,13 @@ description: Handle Renovate pull requests in this project. Use when asked to pr
   - `git commit -m "<proposed-message>"`
   - `git push`
 - 追加修正なしの場合（修正不要）は、次の確認メッセージを提示する。
-  `追加差分は不要です。このままPRをマージし、mainに戻って最新化し、ローカルのPRブランチを削除しますか？`
+  `追加差分は不要です。このままPRをマージし、mainに戻って最新化しますか？`
 - 追加修正ありの場合（修正必要）は、コミット/プッシュ完了後に次の確認メッセージを提示する。
-  `コミットとプッシュが完了しました。このままPRをマージし、mainに戻って最新化し、ローカルのPRブランチを削除しますか？`
+  `コミットとプッシュが完了しました。このままPRをマージし、mainに戻って最新化しますか？`
 - 実行内容:
-  - `gh pr merge <number-or-url> --merge`
+  - `gh pr merge <number-or-url> --merge --delete-branch`
   - `git switch main`
   - `git pull --ff-only`
-  - `git branch -d <headRefName>`
 
 ## Constraints
 
