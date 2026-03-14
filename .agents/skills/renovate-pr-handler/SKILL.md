@@ -21,28 +21,32 @@ description: Handle Renovate pull requests in this project. Use when asked to pr
 
 - `gh pr view <number-or-url> --json title,body,files,commits,headRefName,baseRefName,statusCheckRollup`
 - 変更ファイルと更新内容を要約する。
+- changelog から、breaking change・非推奨・設定変更・新機能などの変更点を確認する。
 
-3. 影響範囲を判定する。
+3. 依存関係を同期する。
+
+- 必ず `pnpm install --frozen-lockfile` を実行する。
+- 依存同期に失敗した場合は、失敗内容と想定原因を簡潔に報告し、ユーザーの反応を待つ。
+
+4. 影響範囲を判定する。
 
 - 種別を判定する: `security` / `replacement` / `major` / `minor|patch` / `lockfile-only`。
 - 実装影響を判定する: runtime 影響か、開発ツールのみか。
+- changelog を踏まえ、このプロジェクトの既存コード・設定・story・テストに影響がないか確認する。
 - 必要に応じて `rg` で依存の使用箇所を調べる。
 
-4. 対応要否を決定する。
+5. 対応要否を判定し、必要な変更を実施する。
 
-- 初期判定として、修正不要/修正必要の仮説を立てる。
-- 修正不要（初期判定）: 根拠を具体的に示す（例: 未使用、開発時のみ、lockfile-only）。
-- 修正必要（初期判定）: 依存更新に関連する範囲で、非推奨APIの置換・型安全性向上・可読性向上などのコード改善を優先する。
-
-5. 依存関係を同期する（必須）。
-
-- 必ず `pnpm install --frozen-lockfile` を実行する。
+- changelog、使用箇所、依存同期後の状態を踏まえて、追加修正の要否を判断する。
+- 影響がない場合は、根拠を具体的に示せる状態にする（例: 未使用、開発時のみ、lockfile-only、changelog 上も該当機能に影響なし）。
+- 影響がある場合は、既存コードが壊れないよう、依存更新に必要な追随修正を行う。
+- そのうえで、新しいAPI・型・設定を使うことで既存コードの可読性向上やコード総量削減ができる場合は、依存更新に関連する範囲に限って改善を取り込む。
 
 6. 検証する（必須）。
 
 - `pnpm check` を実行する。
 - 失敗した場合は、依存更新に関連する範囲で `pnpm check` が通るまで修正と再実行を繰り返す。
-- 依存同期と検証結果を踏まえて、修正要否の最終判定を確定する。
+- 依存同期と検証結果を踏まえて、追加修正の要否を確定する。
 
 7. 変更をステージする（必須）。
 
@@ -52,14 +56,12 @@ description: Handle Renovate pull requests in this project. Use when asked to pr
 
 8. 結果を報告する。
 
-- 最終判定（修正必要/不要）
-- 最終判定の根拠
-- 対応結果（修正を実施/追加修正なし）
+- 対応判断（追加変更あり/なし）
+- 根拠
 - 実施内容（編集ファイル）
 - 検証結果（`pnpm check`）
-- ステージ状況
 
-9. 追加修正ありの場合（修正必要）、ユーザーに staged changes の確認を依頼する。
+9. 追加変更ありの場合、ユーザーに staged changes の確認を依頼する。
 
 - 1行英語コミットメッセージ案を提示する。
 - 依頼メッセージ:
@@ -67,12 +69,12 @@ description: Handle Renovate pull requests in this project. Use when asked to pr
 
 10. コミット/プッシュと、マージ確認後の後処理を行う。
 
-- 追加修正ありの場合（修正必要）は、ユーザー承認後に Codex がコミットとプッシュを実行する。
+- 追加変更ありの場合は、ユーザー承認後に Codex がコミットとプッシュを実行する。
   - `git commit -m "<proposed-message>"`
   - `git push`
-- 追加修正なしの場合（修正不要）は、次の確認メッセージを提示する。
+- 追加変更なしの場合は、次の確認メッセージを提示する。
   `追加差分は不要です。このままPRをマージし、mainに戻って最新化しますか？`
-- 追加修正ありの場合（修正必要）は、コミット/プッシュ完了後に次の確認メッセージを提示する。
+- 追加変更ありの場合は、コミット/プッシュ完了後に次の確認メッセージを提示する。
   `コミットとプッシュが完了しました。このままPRをマージし、mainに戻って最新化しますか？`
 - 実行内容:
   - `gh pr merge <number-or-url> --merge --delete-branch`
