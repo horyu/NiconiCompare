@@ -18,9 +18,7 @@ import {
 } from "./hooks/useVerdictSubmission"
 import { useVideoObserver } from "./hooks/useVideoObserver"
 
-const keepOverlayEnvValue = String(
-  import.meta.env.WXT_PUBLIC_KEEP_OVERLAY_OPEN ?? ""
-)
+const keepOverlayEnvValue = import.meta.env.WXT_PUBLIC_KEEP_OVERLAY_OPEN ?? ""
 const forceKeepOverlayOpen = keepOverlayEnvValue.toLowerCase() === "true"
 const VERDICT_SYMBOLS: Record<Verdict, "<" | "=" | ">"> = {
   better: ">",
