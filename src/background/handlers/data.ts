@@ -142,6 +142,7 @@ export async function handleImportData(
     ...DEFAULT_META,
     ...rawMeta,
     schemaVersion,
+    // oxlint-disable-next-line typescript/no-unnecessary-type-conversion
     lastCleanupAt: Number(rawMeta.lastCleanupAt ?? 0)
   }
   const nextVideos = data[STORAGE_KEYS.videos] ?? {}
