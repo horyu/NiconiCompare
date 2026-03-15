@@ -22,6 +22,7 @@ description: Handle Renovate pull requests in this project. Use when asked to pr
 - `gh pr view <number-or-url> --json title,body,files,commits,headRefName,baseRefName,statusCheckRollup`
 - 変更ファイルと更新内容を要約する。
 - changelog から、breaking change・非推奨・設定変更・新機能などの変更点を確認する。
+- changelog だけで差分の中身が十分に分からない場合は、`gh api repos/<owner>/<repo>/compare/<base>...<head> --jq '{commits: [.commits[].commit.message], files: [.files[] | {filename: .filename, status: .status, patch: .patch}]}'` のように `--jq` を使って、必要な差分情報だけを確認する。
 
 3. 依存関係を同期する。
 
