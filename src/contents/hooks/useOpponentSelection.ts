@@ -51,7 +51,6 @@ export function useOpponentSelection({
     // この同期は外部システム(recent window)との整合性維持のために必要
     if (pinnedOpponentVideoId) {
       if (opponentVideoId !== pinnedOpponentVideoId) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setOpponentVideoId(pinnedOpponentVideoId)
       }
       return

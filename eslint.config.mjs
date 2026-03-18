@@ -3,8 +3,6 @@ import eslint from "@eslint/js"
 import vitest from "@vitest/eslint-plugin"
 import prettierConfig from "eslint-config-prettier"
 import oxlint from "eslint-plugin-oxlint"
-import reactPlugin from "eslint-plugin-react"
-import reactHooks from "eslint-plugin-react-hooks"
 import storybook from "eslint-plugin-storybook"
 import { defineConfig } from "eslint/config"
 import tseslint from "typescript-eslint"
@@ -60,14 +58,6 @@ export default defineConfig([
   tseslint.configs.recommendedTypeChecked,
   tseslint.configs.stylisticTypeChecked,
   {
-    name: "React Recommended Rules",
-    ...reactPlugin.configs.flat.recommended
-  },
-  {
-    name: "React Hooks Recommended Rules",
-    ...reactHooks.configs.flat["recommended-latest"]
-  },
-  {
     name: "TypeScript React Overrides",
     rules: {
       // JSX属性やプロパティに渡すハンドラはPromiseを返しても問題にならないため許容する
@@ -79,13 +69,7 @@ export default defineConfig([
       "@typescript-eslint/prefer-nullish-coalescing": [
         "error",
         { ignorePrimitives: { string: true } }
-      ],
-      // React 17+ では不要
-      "react/react-in-jsx-scope": "off",
-      // TypeScript では PropTypes は不要
-      "react/prop-types": "off",
-      // .tsx ファイルで JSX を許可
-      "react/jsx-filename-extension": ["error", { extensions: [".tsx"] }]
+      ]
     }
   },
   {

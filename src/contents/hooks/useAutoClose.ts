@@ -48,7 +48,6 @@ export function useAutoClose({
     if (forceKeepOpen || !enabled || !isReady || isHovered) {
       clearAutoCloseTimer()
       // 表示条件が変わった時はタイムアウト状態を必ず解除
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTimedOut(false)
     }
   }, [clearAutoCloseTimer, enabled, forceKeepOpen, isHovered, isReady])

@@ -33,7 +33,6 @@ export function useVerdictSubmission({
 
   // 動画ペア変更またはカテゴリ切替時に前回評価のローカル状態を破棄する
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLastVerdict(undefined)
     setLastEventId(undefined)
   }, [activeCategoryId, currentVideoId, opponentVideoId])
