@@ -17,7 +17,8 @@
       "description": "Automerge @types/chrome updates",
       "matchPackageNames": ["@types/chrome"],
       "automerge": true,
-      "automergeType": "branch"
+      "automergeType": "branch",
+      "ignoreTests": true
     },
     {
       "groupName": "automerge @types/node v25",
@@ -25,7 +26,8 @@
       "matchPackageNames": ["@types/node"],
       "allowedVersions": "/^25\\./",
       "automerge": true,
-      "automergeType": "branch"
+      "automergeType": "branch",
+      "ignoreTests": true
     },
     {
       "description": "Do not pin versions in mise toolchain config",
