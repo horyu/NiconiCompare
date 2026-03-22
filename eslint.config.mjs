@@ -1,6 +1,5 @@
 // @ts-check
 import eslint from "@eslint/js"
-import vitest from "@vitest/eslint-plugin"
 import prettierConfig from "eslint-config-prettier"
 import oxlint from "eslint-plugin-oxlint"
 import storybook from "eslint-plugin-storybook"
@@ -71,10 +70,6 @@ export default defineConfig([
         { ignorePrimitives: { string: true } }
       ]
     }
-  },
-  {
-    ...vitest.configs.recommended,
-    files: ["**/*.test.ts", "**/*.test.tsx"]
   },
   storybook.configs["flat/recommended"],
   {
