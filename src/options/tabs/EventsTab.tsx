@@ -411,13 +411,21 @@ export const EventsTab = ({
 
   return (
     <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4 dark:bg-slate-900 dark:border-slate-700">
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           評価一覧
         </h2>
         <div className="flex items-center gap-3">
           <div className="text-sm text-slate-500 dark:text-slate-400">
             {filteredEvents.length} 件
+          </div>
+          <div className="w-40 max-w-full text-sm text-slate-700 dark:text-slate-200">
+            <CategorySelect
+              value={eventCategoryId}
+              onChange={handleCategoryChange}
+              options={categoryOptions}
+              className="w-full max-w-full"
+            />
           </div>
           <ExportMenu
             open={exportMenuOpen}
@@ -454,15 +462,6 @@ export const EventsTab = ({
             <option value="same">引き分け</option>
             <option value="worse">負け</option>
           </select>
-        </label>
-        <label className="text-sm flex flex-col gap-1 min-w-[140px] text-slate-700 dark:text-slate-200">
-          カテゴリ
-          <CategorySelect
-            value={eventCategoryId}
-            onChange={handleCategoryChange}
-            options={categoryOptions}
-            className="w-[15ch] max-w-[15ch]"
-          />
         </label>
         <label className="text-sm flex items-center gap-2 mb-1 text-slate-700 dark:text-slate-200">
           <input

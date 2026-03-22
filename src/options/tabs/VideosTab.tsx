@@ -235,13 +235,21 @@ export const VideosTab = ({
 
   return (
     <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4 dark:bg-slate-900 dark:border-slate-700">
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           評価済み動画一覧
         </h2>
         <div className="flex items-center gap-3">
           <div className="text-sm text-slate-500 dark:text-slate-400">
             {filteredVideos.length} 件
+          </div>
+          <div className="w-40 max-w-full text-sm text-slate-700 dark:text-slate-200">
+            <CategorySelect
+              value={effectiveCategoryId}
+              onChange={handleCategoryChange}
+              options={categorySelectOptions}
+              className="w-full max-w-full"
+            />
           </div>
           <ExportMenu
             open={exportMenuOpen}
@@ -259,7 +267,7 @@ export const VideosTab = ({
         </div>
       )}
 
-      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3">
+      <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-3">
         <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           タイトル・ID
           <input
@@ -304,15 +312,6 @@ export const VideosTab = ({
               <option key={author.authorUrl} value={author.name} />
             ))}
           </datalist>
-        </label>
-        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
-          Rating表示カテゴリ
-          <CategorySelect
-            value={effectiveCategoryId}
-            onChange={handleCategoryChange}
-            options={categorySelectOptions}
-            className="w-full max-w-full"
-          />
         </label>
         <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           ソート
