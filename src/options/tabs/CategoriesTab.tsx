@@ -95,8 +95,8 @@ export const CategoriesTab = ({
       : null
     const confirmed = window.confirm(
       moveToCategoryId
-        ? `カテゴリ「${targetName}」に属する比較履歴を「${moveTargetName}」へ移動して削除します。レーティングは自動で再計算されます。よろしいですか？`
-        : `カテゴリ「${targetName}」に属する比較履歴とレーティング一覧を破棄して削除します。よろしいですか？`
+        ? `カテゴリ「${targetName}」に属する評価履歴を「${moveTargetName}」へ移動して削除します。レーティングは自動で再計算されます。よろしいですか？`
+        : `カテゴリ「${targetName}」に属する評価履歴とレーティング一覧を破棄して削除します。よろしいですか？`
     )
     if (!confirmed) {
       return
