@@ -261,7 +261,7 @@ export const VideosTab = ({
 
       <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3">
         <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
-          検索
+          タイトル・ID
           <input
             value={videoSearch}
             onChange={(event) => {
@@ -284,7 +284,7 @@ export const VideosTab = ({
                 resetToFirstPage()
               }}
               className="border border-slate-200 rounded-md px-2 py-1 w-full bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              placeholder="全て / 投稿者を入力"
+              placeholder="投稿者で検索"
             />
             {videoAuthor !== "all" && (
               <button
