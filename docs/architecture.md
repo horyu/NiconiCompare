@@ -406,7 +406,7 @@ async function saveCompareEvent(event: CompareEvent) {
 
 ### 6.3 Options
 
-**役割**: データ閲覧（動画一覧 / イベント一覧）と設定・データ操作を提供する。
+**役割**: データ閲覧（動画一覧 / 評価一覧）と設定・データ操作を提供する。
 
 **UI詳細**: `docs/spec.md §9.3` と `src/options/index.tsx` / `src/options/tabs/*.tsx` を正とする。
 
