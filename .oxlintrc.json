@@ -23,6 +23,9 @@
     "browser": true,
     "webextensions": true
   },
+  "options": {
+    "typeAware": true
+  },
   "ignorePatterns": ["*.js", "*.mjs", "*.cjs", "!eslint.config.mjs"],
   "rules": {
     // suspicious
