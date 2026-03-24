@@ -6,6 +6,9 @@ import storybook from "eslint-plugin-storybook"
 import { defineConfig } from "eslint/config"
 import tseslint from "typescript-eslint"
 
+// oxlint では import.meta.dirname が any 扱いになるため、文字列化して扱う
+const tsconfigRootDir = String(import.meta.dirname)
+
 // To debug config:
 // pnpm exec eslint --inspect-config
 
@@ -30,7 +33,7 @@ export default defineConfig([
     languageOptions: {
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: import.meta.dirname
+        tsconfigRootDir
       }
     },
     settings: {
@@ -46,7 +49,7 @@ export default defineConfig([
       parserOptions: {
         projectService: false,
         project: "./tsconfig.json",
-        tsconfigRootDir: import.meta.dirname
+        tsconfigRootDir
       }
     }
   },
