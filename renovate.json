@@ -54,9 +54,9 @@
       ]
     },
     {
-      "groupName": "vitest",
-      "description": "Keep Vitest packages aligned",
-      "matchPackageNames": ["vitest", "@vitest/ui", "happy-dom"]
+      "groupName": "test tooling",
+      "description": "Keep test tooling packages aligned",
+      "matchPackageNames": ["vitest", "happy-dom"]
     },
     {
       "groupName": "eslint-tooling",
