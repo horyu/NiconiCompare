@@ -40,7 +40,7 @@
     "@types/node": "25.5.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "5.2.0",
+    "@vitejs/plugin-react": "6.0.1",
     "@wxt-dev/module-react": "1.2.2",
     "eslint": "10.1.0",
     "eslint-config-prettier": "10.1.8",
@@ -55,7 +55,7 @@
     "tailwindcss": "4.2.2",
     "typescript": "5.9.3",
     "typescript-eslint": "8.57.1",
-    "vite": "7.3.1",
+    "vite": "8.0.3",
     "vitest": "4.1.0",
     "wxt": "0.20.20"
   },
