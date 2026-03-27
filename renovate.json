@@ -87,6 +87,11 @@
       "groupName": "vite core",
       "description": "Keep Vite core and React plugin aligned",
       "matchPackageNames": ["vite", "@vitejs/plugin-react"]
+    },
+    {
+      "groupName": "wxt tooling",
+      "description": "Keep WXT core and React module aligned",
+      "matchPackageNames": ["wxt", "@wxt-dev/module-react"]
     }
   ]
 }
