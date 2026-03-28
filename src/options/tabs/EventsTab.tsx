@@ -16,6 +16,7 @@ import type { CompareEvent, Verdict } from "../../lib/types"
 import { VERDICTS } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
 import { CategorySelect } from "../components/CategorySelect"
+import { ClearableTextInput } from "../components/ClearableTextInput"
 import { EventVideoLabel } from "../components/EventVideoLabel"
 import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
@@ -438,14 +439,14 @@ export const EventsTab = ({
       <div className="flex items-end gap-3 flex-nowrap">
         <label className="text-sm flex flex-col gap-1 min-w-[220px] text-slate-700 dark:text-slate-200">
           検索
-          <input
+          <ClearableTextInput
             value={eventSearch}
-            onChange={(event) => {
-              setEventSearch(event.target.value)
+            onValueChange={(value) => {
+              setEventSearch(value)
               resetToFirstPage()
             }}
-            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             placeholder="ID・タイトル・動画ID・投稿者で検索"
+            clearLabel="評価一覧検索条件をクリア"
           />
         </label>
         <label className="text-sm flex flex-col gap-1 min-w-[140px] text-slate-700 dark:text-slate-200">

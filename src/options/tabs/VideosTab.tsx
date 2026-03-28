@@ -12,6 +12,7 @@ import { formatPaddedDateTime } from "../../lib/date"
 import type { RatingSnapshot, VideoSnapshot } from "../../lib/types"
 import { createWatchUrl } from "../../lib/url"
 import { CategorySelect } from "../components/CategorySelect"
+import { ClearableTextInput } from "../components/ClearableTextInput"
 import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
@@ -270,14 +271,14 @@ export const VideosTab = ({
       <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-3">
         <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           タイトル・ID
-          <input
+          <ClearableTextInput
             value={videoSearch}
-            onChange={(event) => {
-              setVideoSearch(event.target.value)
+            onValueChange={(value) => {
+              setVideoSearch(value)
               resetToFirstPage()
             }}
-            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             placeholder="タイトル・IDで検索"
+            clearLabel="動画検索条件をクリア"
           />
         </label>
         <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
