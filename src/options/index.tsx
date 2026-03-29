@@ -120,7 +120,7 @@ export default function OptionsPage(): ReactElement {
       <div className="max-w-6xl mx-auto p-6 flex flex-col gap-6 font-sans">
         <header className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">NiconiCompare Options</h1>
+            <h1 className="text-2xl font-semibold">NiconiCompare</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               設定・履歴・データ操作をまとめて管理します。
             </p>
