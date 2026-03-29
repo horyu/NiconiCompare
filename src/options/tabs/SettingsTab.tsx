@@ -173,80 +173,102 @@ export const SettingsTab = ({
     <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-6 dark:bg-slate-900 dark:border-slate-700">
       <header>
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-          オーバーレイ / ポップアップ / Glicko 設定
+          設定
         </h2>
       </header>
-      <form className="grid grid-cols-2 gap-4" onSubmit={handleSettingsSubmit}>
-        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
-          オーバーレイ: 比較候補数 (1-{MAX_RECENT_WINDOW_SIZE})
-          <input
-            type="number"
-            min={1}
-            max={MAX_RECENT_WINDOW_SIZE}
-            value={settingsForm.recentWindowSize}
-            onChange={handleSettingsChange("recentWindowSize")}
-            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-          />
-        </label>
-        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
-          ポップアップ: 表示する直近評価数 (1-{MAX_POPUP_RECENT_COUNT})
-          <input
-            type="number"
-            min={1}
-            max={MAX_POPUP_RECENT_COUNT}
-            value={settingsForm.popupRecentCount}
-            onChange={handleSettingsChange("popupRecentCount")}
-            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-          />
-        </label>
-        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
-          オーバーレイ自動非表示 (ms, 0-{MAX_OVERLAY_AUTO_CLOSE_MS})
-          <input
-            type="number"
-            min={0}
-            max={MAX_OVERLAY_AUTO_CLOSE_MS}
-            value={settingsForm.overlayAutoCloseMs}
-            onChange={handleSettingsChange("overlayAutoCloseMs")}
-            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-          />
-        </label>
-        <label className="col-span-2 text-sm flex items-center gap-2 text-slate-700 dark:text-slate-200">
-          <input
-            type="checkbox"
-            checked={settingsForm.showClosedOverlayVerdict}
-            onChange={handleCheckboxChange("showClosedOverlayVerdict")}
-            className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-          />
-          閉じたオーバーレイに直近の勝敗記号（&lt; / = / &gt;）を表示
-        </label>
-        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
-          初期 rating
-          <input
-            type="number"
-            value={settingsForm.glickoRating}
-            onChange={handleSettingsChange("glickoRating")}
-            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-          />
-        </label>
-        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
-          初期 RD
-          <input
-            type="number"
-            value={settingsForm.glickoRd}
-            onChange={handleSettingsChange("glickoRd")}
-            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-          />
-        </label>
-        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
-          初期 volatility
-          <input
-            type="number"
-            step="0.01"
-            value={settingsForm.glickoVolatility}
-            onChange={handleSettingsChange("glickoVolatility")}
-            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-          />
-        </label>
+      <form className="flex flex-col gap-6" onSubmit={handleSettingsSubmit}>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-3">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                オーバーレイ
+              </h3>
+              <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+                比較候補数 (1-{MAX_RECENT_WINDOW_SIZE})
+                <input
+                  type="number"
+                  min={1}
+                  max={MAX_RECENT_WINDOW_SIZE}
+                  value={settingsForm.recentWindowSize}
+                  onChange={handleSettingsChange("recentWindowSize")}
+                  className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                />
+              </label>
+              <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+                自動非表示 (ms, 0-{MAX_OVERLAY_AUTO_CLOSE_MS})
+                <input
+                  type="number"
+                  min={0}
+                  max={MAX_OVERLAY_AUTO_CLOSE_MS}
+                  value={settingsForm.overlayAutoCloseMs}
+                  onChange={handleSettingsChange("overlayAutoCloseMs")}
+                  className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                />
+              </label>
+              <label className="text-sm flex items-center gap-2 text-slate-700 dark:text-slate-200">
+                <input
+                  type="checkbox"
+                  checked={settingsForm.showClosedOverlayVerdict}
+                  onChange={handleCheckboxChange("showClosedOverlayVerdict")}
+                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                />
+                閉じたオーバーレイに直近の勝敗記号（&lt; / = / &gt;）を表示
+              </label>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                ポップアップ
+              </h3>
+              <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+                表示する直近評価数 (1-{MAX_POPUP_RECENT_COUNT})
+                <input
+                  type="number"
+                  min={1}
+                  max={MAX_POPUP_RECENT_COUNT}
+                  value={settingsForm.popupRecentCount}
+                  onChange={handleSettingsChange("popupRecentCount")}
+                  className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+              Glicko
+            </h3>
+            <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+              初期 rating
+              <input
+                type="number"
+                value={settingsForm.glickoRating}
+                onChange={handleSettingsChange("glickoRating")}
+                className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              />
+            </label>
+            <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+              初期 RD
+              <input
+                type="number"
+                value={settingsForm.glickoRd}
+                onChange={handleSettingsChange("glickoRd")}
+                className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              />
+            </label>
+            <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+              初期 volatility
+              <input
+                type="number"
+                step="0.01"
+                value={settingsForm.glickoVolatility}
+                onChange={handleSettingsChange("glickoVolatility")}
+                className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              />
+            </label>
+          </div>
+        </div>
+
         <div className="col-span-2 flex items-center gap-3">
           <button
             type="submit"
