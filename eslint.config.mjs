@@ -16,7 +16,6 @@ export default defineConfig([
   {
     name: "Global Ignores",
     ignores: [
-      "build/**",
       ".output/**",
       ".wxt/**",
       "dist/**",
