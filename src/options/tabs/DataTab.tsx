@@ -67,7 +67,7 @@ export const DataTab = ({
 
   const handleDeleteAllData = async (): Promise<void> => {
     const confirmed = confirm(
-      "全データを削除します。設定・カテゴリ・評価履歴・レーティング・動画/投稿者データ・メタ情報を初期化します。続行しますか？"
+      "全データを削除します。設定・カテゴリ・評価履歴・レーティング・動画データ・投稿者データ・メタ情報を初期化します。続行しますか？"
     )
     if (!confirmed) {
       return
@@ -210,7 +210,7 @@ export const DataTab = ({
       <div className="grid grid-cols-2 gap-6">
         <div className="flex flex-col gap-3">
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-            エクスポート/インポート
+            エクスポート・インポート
           </h3>
           {bytesInUse !== null && (
             <div className="text-sm text-slate-600 dark:text-slate-400">
@@ -275,7 +275,7 @@ export const DataTab = ({
             type="button"
             className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
             onClick={handleCleanup}>
-            孤立データ（動画/投稿者）を削除
+            孤立データ（動画・投稿者）を削除
           </button>
         </div>
       </div>
@@ -286,7 +286,7 @@ export const DataTab = ({
             全データ削除
           </h3>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            設定・カテゴリ・評価履歴・レーティング・動画/投稿者データ・メタ情報を初期化します。
+            設定・カテゴリ・評価履歴・レーティング・動画・投稿者データ・メタ情報を初期化します。
           </p>
           <button
             type="button"
