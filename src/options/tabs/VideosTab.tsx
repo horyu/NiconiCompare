@@ -15,6 +15,7 @@ import { CategorySelect } from "../components/CategorySelect"
 import { ClearableTextInput } from "../components/ClearableTextInput"
 import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
+import { ScrollToTopButton } from "../components/ScrollToTopButton"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { useSessionState } from "../hooks/useSessionState"
 import { buildCategoryOptions } from "../utils/categories"
@@ -80,6 +81,7 @@ export const VideosTab = ({
     initialState.order
   )
   const [videoPage, setVideoPage] = useState(initialState.page)
+  const sectionTopRef = useRef<HTMLDivElement | null>(null)
   const paginationTopRef = useRef<HTMLDivElement | null>(null)
 
   // 無効なカテゴリIDの場合はデフォルトに置き換え
@@ -236,6 +238,7 @@ export const VideosTab = ({
 
   return (
     <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4 dark:bg-slate-900 dark:border-slate-700">
+      <div ref={sectionTopRef} />
       <header className="flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           評価済み動画一覧
@@ -403,6 +406,8 @@ export const VideosTab = ({
         total={videoTotalPages}
         onChange={handlePageChange}
       />
+
+      <ScrollToTopButton targetRef={sectionTopRef} />
     </section>
   )
 }
