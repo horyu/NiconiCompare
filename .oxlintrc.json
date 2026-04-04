@@ -113,6 +113,10 @@
         // テストでは関数スコープを気にする必要はない
         "consistent-function-scoping": "off",
         "jest/require-hook": "error",
+        // 既存テストの mock 記法に対してコストが高く、型安全性向上の実益が小さいため強制しない
+        "vitest/require-mock-type-parameters": "off",
+        // グローバルな testTimeout は静的解析で拾われないため、このリポジトリでは強制しない
+        "vitest/require-test-timeout": "off",
         // chrome API の型定義省力化用
         "no-unsafe-type-assertion": "off"
       }
