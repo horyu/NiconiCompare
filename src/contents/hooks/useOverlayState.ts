@@ -43,11 +43,10 @@ interface OverlayStateResult {
 }
 
 export function useOverlayState(): OverlayStateResult {
-  const [currentVideoId, setCurrentVideoId] = useState<string>("")
+  const [currentVideoId, setCurrentVideoId] = useState("")
   const [recentWindow, setRecentWindow] = useState<string[]>([])
-  const [pinnedOpponentVideoId, setPinnedOpponentVideoId] = useState<string>("")
-  const [overlaySettings, setOverlaySettings] =
-    useState<NcSettings>(DEFAULT_SETTINGS)
+  const [pinnedOpponentVideoId, setPinnedOpponentVideoId] = useState("")
+  const [overlaySettings, setOverlaySettings] = useState(DEFAULT_SETTINGS)
   const [isReady, setIsReady] = useState(false)
   const [videoSnapshots, setVideoSnapshots] = useState<
     Record<string, VideoSnapshot>
@@ -55,9 +54,7 @@ export function useOverlayState(): OverlayStateResult {
   const [statusMessage, setStatusMessage] = useState<string | undefined>(
     undefined
   )
-  const [categories, setCategories] = useState<NcCategories>(
-    normalizeCategories()
-  )
+  const [categories, setCategories] = useState(normalizeCategories())
 
   useEffect(() => {
     if (!chrome.storage?.onChanged) return
