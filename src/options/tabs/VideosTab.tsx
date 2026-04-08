@@ -614,14 +614,16 @@ function filterVideos({
   order
 }: FilterVideosParams): VideoSnapshot[] {
   const normalizedSearch = search.trim().toLowerCase()
+  const normalizedAuthor = author === "all" ? "" : author.trim().toLowerCase()
   const filtered = Object.values(videos).filter((video) => {
     const hasRating = Boolean(ratingsByCategory[video.videoId])
     const matchesSearch =
       normalizedSearch.length === 0 ||
       video.videoId.toLowerCase().includes(normalizedSearch) ||
       video.title.toLowerCase().includes(normalizedSearch)
+    const authorName = authors[video.authorUrl]?.name?.toLowerCase() ?? ""
     const matchesAuthor =
-      author === "all" || authors[video.authorUrl]?.name === author
+      normalizedAuthor.length === 0 || authorName.includes(normalizedAuthor)
     return hasRating && matchesSearch && matchesAuthor
   })
 
