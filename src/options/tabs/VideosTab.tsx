@@ -327,6 +327,7 @@ export const VideosTab = ({
             }}
             className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
             <option value="title">タイトル</option>
+            <option value="author">投稿者</option>
             <option value="rating">Rating</option>
             <option value="rd">RD</option>
             <option value="evalCount">評価数</option>
@@ -626,6 +627,7 @@ function filterVideos({
 
   const sorter = getVideoSorter({
     sort,
+    authors,
     ratingsByCategory,
     lastEventByVideo,
     verdictCountsByVideo
@@ -637,11 +639,13 @@ function filterVideos({
 
 function getVideoSorter({
   sort,
+  authors,
   ratingsByCategory,
   lastEventByVideo,
   verdictCountsByVideo
 }: {
   sort: string
+  authors: OptionsSnapshot["authors"]
   ratingsByCategory: Record<string, RatingSnapshot>
   lastEventByVideo: Map<string, number>
   verdictCountsByVideo: Map<
@@ -656,6 +660,11 @@ function getVideoSorter({
   // oxlint-disable-next-line consistent-function-scoping 一貫性のために無視
   const compareByTitle = (left: VideoItem, right: VideoItem): number =>
     left.title.localeCompare(right.title)
+  const compareByAuthor = (left: VideoItem, right: VideoItem): number => {
+    const leftAuthor = authors[left.authorUrl]?.name ?? ""
+    const rightAuthor = authors[right.authorUrl]?.name ?? ""
+    return leftAuthor.localeCompare(rightAuthor) || compareByRating(left, right)
+  }
   const compareByRd = (left: VideoItem, right: VideoItem): number =>
     (ratingsByCategory[right.videoId]?.rd ?? 0) -
     (ratingsByCategory[left.videoId]?.rd ?? 0)
@@ -680,19 +689,24 @@ function getVideoSorter({
     (verdictCountsByVideo.get(right.videoId)?.losses ?? 0) -
     (verdictCountsByVideo.get(left.videoId)?.losses ?? 0)
 
-  return sort === "title"
-    ? compareByTitle
-    : sort === "rd"
-      ? compareByRd
-      : sort === "lastVerdict"
-        ? compareByLastVerdict
-        : sort === "evalCount"
-          ? compareByEvalCount
-          : sort === "wins"
-            ? compareByWins
-            : sort === "losses"
-              ? compareByLosses
-              : compareByRating
+  switch (sort) {
+    case "title":
+      return compareByTitle
+    case "author":
+      return compareByAuthor
+    case "rd":
+      return compareByRd
+    case "lastVerdict":
+      return compareByLastVerdict
+    case "evalCount":
+      return compareByEvalCount
+    case "wins":
+      return compareByWins
+    case "losses":
+      return compareByLosses
+    default:
+      return compareByRating
+  }
 }
 
 function buildExportRows({
