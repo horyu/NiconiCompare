@@ -245,6 +245,22 @@ export const DataTab = ({
               JSON 復元
             </button>
           </div>
+
+          <div className="mt-3 flex flex-col gap-3">
+            <h3 className="text-sm font-semibold text-rose-700 dark:text-rose-200">
+              危険な操作
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              設定・カテゴリ・評価履歴・レーティング・動画・投稿者データ・メタ情報を初期化します。
+            </p>
+            <button
+              type="button"
+              onClick={handleDeleteAllData}
+              disabled={deletingAll}
+              className="px-3 py-2 rounded-md border border-rose-200 text-sm text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-200 dark:hover:bg-rose-950/40">
+              全データ削除
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col gap-3">
@@ -275,24 +291,6 @@ export const DataTab = ({
             className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
             onClick={handleCleanup}>
             孤立データ（動画・投稿者）を削除
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-6">
-        <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold text-rose-700 dark:text-rose-200">
-            全データ削除
-          </h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            設定・カテゴリ・評価履歴・レーティング・動画・投稿者データ・メタ情報を初期化します。
-          </p>
-          <button
-            type="button"
-            onClick={handleDeleteAllData}
-            disabled={deletingAll}
-            className="px-3 py-2 rounded-md border border-rose-200 text-sm text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-200 dark:hover:bg-rose-950/40">
-            全データ削除
           </button>
         </div>
       </div>
