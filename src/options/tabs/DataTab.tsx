@@ -27,7 +27,6 @@ export const DataTab = ({
   const [exporting, setExporting] = useState(false)
   const [exportingHtml, setExportingHtml] = useState(false)
   const [importing, setImporting] = useState(false)
-  const [importFileName, setImportFileName] = useState("")
   const categoryOptions = buildCategoryOptions(snapshot.categories)
   const initialHtmlExportCategoryId = snapshot.categories.items[
     snapshot.settings.activeCategoryId
@@ -125,16 +124,17 @@ export const DataTab = ({
     }
   }
 
-  const handleImport = async (): Promise<void> => {
-    const file = importFileRef.current?.files?.[0]
+  const handleImport = async (file: File | null | undefined): Promise<void> => {
     if (!file) {
-      showToast("error", "インポートするJSONを選択してください。")
       return
     }
     const confirmed = window.confirm(
       "現在のデータを上書きします。インポートしてもよろしいですか？"
     )
     if (!confirmed) {
+      if (importFileRef.current) {
+        importFileRef.current.value = ""
+      }
       return
     }
     setImporting(true)
@@ -162,13 +162,15 @@ export const DataTab = ({
             if (importFileRef.current) {
               importFileRef.current.value = ""
             }
-            setImportFileName("")
           }
         }
       )
     } catch (error) {
       handleUIError(error, "ui:options:data:import", showToast)
     } finally {
+      if (importFileRef.current) {
+        importFileRef.current.value = ""
+      }
       setImporting(false)
     }
   }
@@ -231,17 +233,14 @@ export const DataTab = ({
               type="file"
               accept="application/json"
               onChange={(event) => {
-                setImportFileName(event.currentTarget.files?.[0]?.name ?? "")
+                void handleImport(event.currentTarget.files?.[0])
               }}
-              className="text-sm text-slate-700 dark:text-slate-200 file:mr-2 file:rounded-md file:border file:border-slate-200 file:bg-white file:px-3 file:py-2 file:text-sm file:hover:bg-slate-100 dark:file:border-slate-700 dark:file:bg-slate-900 dark:file:text-slate-100 dark:file:hover:bg-slate-800"
+              className="hidden"
             />
             <button
               type="button"
-              onClick={handleImport}
-              disabled={importing || !importFileName}
-              title={
-                !importFileName ? "ファイルを選択してください。" : undefined
-              }
+              onClick={() => importFileRef.current?.click()}
+              disabled={importing}
               className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
               JSON インポート
             </button>
