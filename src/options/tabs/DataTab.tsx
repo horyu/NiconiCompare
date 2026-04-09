@@ -129,7 +129,7 @@ export const DataTab = ({
       return
     }
     const confirmed = window.confirm(
-      "現在のデータを上書きします。インポートしてもよろしいですか？"
+      "現在のデータを上書きして JSON バックアップを復元します。よろしいですか？"
     )
     if (!confirmed) {
       if (importFileRef.current) {
@@ -154,8 +154,8 @@ export const DataTab = ({
           }),
         {
           context: "ui:options:data:import",
-          errorMessage: "インポートに失敗しました。",
-          successMessage: "インポートしました。",
+          errorMessage: "復元に失敗しました。",
+          successMessage: "復元しました。",
           showToast,
           refreshState: () => refreshState(true),
           onSuccess: () => {
@@ -212,7 +212,7 @@ export const DataTab = ({
       <div className="grid grid-cols-2 gap-6">
         <div className="flex flex-col gap-3">
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-            エクスポート・インポート
+            バックアップ・復元
           </h3>
           {bytesInUse !== null && (
             <div className="text-sm text-slate-600 dark:text-slate-400">
@@ -225,7 +225,7 @@ export const DataTab = ({
             onClick={handleExport}
             disabled={exporting}
             className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
-            JSON エクスポート
+            JSON バックアップ
           </button>
           <div className="flex flex-col gap-2">
             <input
@@ -242,7 +242,7 @@ export const DataTab = ({
               onClick={() => importFileRef.current?.click()}
               disabled={importing}
               className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
-              JSON インポート
+              JSON 復元
             </button>
           </div>
         </div>
