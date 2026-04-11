@@ -1,5 +1,4 @@
 import fs from "node:fs"
-import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import type { StorybookConfig } from "@storybook/react-vite"
@@ -16,8 +15,9 @@ export default {
   // - preview.tsでstorybook.cssだけ読む → CSSが二重読み込みになり、prefers-color-schemeが勝つ
   // - 本体もclassベースに寄せる → 本体はOS判定を維持したい
   viteFinal(config) {
-    const dirname = path.dirname(fileURLToPath(import.meta.url))
-    const storybookStyle = path.resolve(dirname, "storybook.css")
+    const storybookStyle = fileURLToPath(
+      new URL("./storybook.css", import.meta.url)
+    )
     const replaceStylePlugin = {
       name: "storybook-style-alias",
       enforce: "pre",
