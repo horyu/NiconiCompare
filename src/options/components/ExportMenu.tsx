@@ -16,7 +16,7 @@ export const ExportMenu = ({
       <button
         type="button"
         onClick={onToggle}
-        className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+        className="inline-flex h-8 items-center rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
         エクスポート
       </button>
       {open && (
