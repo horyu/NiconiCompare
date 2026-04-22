@@ -126,15 +126,15 @@ describe("rebuildRecentWindowFromEvents", () => {
       (_, index) => ({
         id: index + 1,
         timestamp: index + 1,
-        // 101件目以降（index >= 100）は走査されないため、
-        // index === 19 の v1 は含まれず、v2 のみが結果に残る
-        currentVideoId: index === 19 ? "v1" : "v2",
+        currentVideoId: "v2",
         opponentVideoId: "v2",
         verdict: "better",
         disabled: false,
         categoryId: "default"
       })
     )
+    // 101件目以降（index >= 100）は走査されないため、index 19 の v1 は含まれない
+    longEvents[19] = { ...longEvents[19], currentVideoId: "v1" }
 
     const result = rebuildRecentWindowFromEvents(longEvents, 2, videos)
 
