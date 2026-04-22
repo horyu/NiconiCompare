@@ -18,7 +18,7 @@
     "check": "run-p types:check lint:check format:check",
     "types:check": "tsc --noEmit",
     "lint": "oxlint --fix && eslint --fix \"./**/*.{ts,tsx}\"",
-    "lint:check": "oxlint && eslint \"./**/*.{ts,tsx}\"",
+    "lint:check": "oxlint --deny-warnings && eslint \"./**/*.{ts,tsx}\"",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "storybook": "storybook dev -p 6006",
