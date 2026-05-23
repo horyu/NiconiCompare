@@ -10,7 +10,7 @@
   "prHourlyLimit": 0,
   "separateMajorMinor": true,
   "rangeStrategy": "pin",
-  "minimumReleaseAge": "1 day",
+  "minimumReleaseAge": "2 days",
   "packageRules": [
     {
       "groupName": "automerge @types/chrome",
