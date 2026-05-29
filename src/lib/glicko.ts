@@ -1,4 +1,4 @@
-import rate from "glicko2-lite"
+import { glicko2 } from "glicko2-lite"
 
 import type { NcSettings, RatingSnapshot, Verdict } from "./types"
 
@@ -18,7 +18,7 @@ export function updatePairRatings(params: {
   const leftScore = verdict === "better" ? 1 : verdict === "worse" ? 0 : 0.5
   const rightScore = verdict === "worse" ? 1 : verdict === "better" ? 0 : 0.5
 
-  const leftResult = rate(
+  const leftResult = glicko2(
     left.rating,
     left.rd,
     left.volatility,
@@ -26,7 +26,7 @@ export function updatePairRatings(params: {
     baseOptions
   )
 
-  const rightResult = rate(
+  const rightResult = glicko2(
     right.rating,
     right.rd,
     right.volatility,
