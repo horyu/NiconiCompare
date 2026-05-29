@@ -25,7 +25,7 @@
     "storybook:build": "storybook build"
   },
   "dependencies": {
-    "glicko2-lite": "5.0.0",
+    "glicko2-lite": "6.0.0",
     "immer": "11.1.4",
     "react": "19.2.5",
     "react-dom": "19.2.5"
