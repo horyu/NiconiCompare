@@ -58,10 +58,5 @@
     "vite": "8.0.13",
     "vitest": "4.1.6",
     "wxt": "0.20.26"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
   }
 }
