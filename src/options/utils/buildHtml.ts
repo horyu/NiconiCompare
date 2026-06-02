@@ -277,7 +277,7 @@ function resolveCategoryId(
 }
 
 function sanitizeFilenameSegment(value: string): string {
-  return value.replaceAll(/[\\/:*?"<>|]/g, "")
+  return value.replaceAll(/[\\/:*?"<>|]/gu, "")
 }
 
 function escapeHtml(value: string): string {

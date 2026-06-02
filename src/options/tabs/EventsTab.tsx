@@ -429,7 +429,6 @@ export const EventsTab = ({
               value={eventCategoryId}
               onChange={handleCategoryChange}
               options={categoryOptions}
-              className="w-full max-w-full"
             />
           </div>
           <ExportMenu
@@ -500,12 +499,13 @@ export const EventsTab = ({
       {showCategoryOps && (
         <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
           <span>一括移動:</span>
-          <CategorySelect
-            value={bulkMoveTargetId}
-            onChange={setBulkMoveTargetId}
-            options={bulkMoveTargets}
-            className="w-[15ch] max-w-[15ch]"
-          />
+          <div className="w-[15ch] max-w-[15ch]">
+            <CategorySelect
+              value={bulkMoveTargetId}
+              onChange={setBulkMoveTargetId}
+              options={bulkMoveTargets}
+            />
+          </div>
           <button
             type="button"
             onClick={() => handleBulkMove(bulkMoveTargetId)}
@@ -740,13 +740,14 @@ function EventRow({
             </span>
           ) : (
             <>
-              <CategorySelect
-                value={rowMoveTargetId}
-                onChange={onMoveTargetChange}
-                options={rowMoveTargets}
-                size="sm"
-                className="w-[15ch] max-w-[15ch]"
-              />
+              <div className="w-[15ch] max-w-[15ch]">
+                <CategorySelect
+                  value={rowMoveTargetId}
+                  onChange={onMoveTargetChange}
+                  options={rowMoveTargets}
+                  size="sm"
+                />
+              </div>
               <button
                 type="button"
                 onClick={() => onMoveEvent(event.id, rowMoveTargetId)}

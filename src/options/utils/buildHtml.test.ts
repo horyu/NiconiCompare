@@ -118,7 +118,7 @@ const baseSnapshot: OptionsSnapshot = {
 
 const extractEmbeddedPayload = (html: string): Record<string, unknown> => {
   const pattern =
-    /<script id="nc-share-data" type="application\/json">([\s\S]*?)<\/script>/
+    /<script id="nc-share-data" type="application\/json">([\s\S]*?)<\/script>/u
   const matched = pattern.exec(html)
   expect(matched).not.toBeNull()
   if (!matched) {

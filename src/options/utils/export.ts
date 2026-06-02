@@ -72,5 +72,5 @@ function escapeField(value: string, delimiter: string): string {
 }
 
 function sanitizeFilenameSegment(value: string): string {
-  return value.replaceAll(/[\\/:*?"<>|]/g, "")
+  return value.replaceAll(/[\\/:*?"<>|]/gu, "")
 }

@@ -11,7 +11,6 @@ interface CategorySelectProps {
   onChange: (value: string) => void
   disabled?: boolean
   size?: "sm" | "md"
-  className?: string
 }
 
 export const CategorySelect = ({
@@ -19,13 +18,12 @@ export const CategorySelect = ({
   options,
   onChange,
   disabled = false,
-  size = "md",
-  className
+  size = "md"
 }: CategorySelectProps): ReactElement => {
   const baseClass =
-    "border border-slate-200 rounded-md px-2 truncate bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+    "w-full border border-slate-200 rounded-md px-2 truncate bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
   const sizeClass = size === "sm" ? "h-7 text-xs" : "h-8 text-sm"
-  const classes = `${baseClass} ${sizeClass}${className ? ` ${className}` : ""}`
+  const classes = `${baseClass} ${sizeClass}`
 
   return (
     <select
