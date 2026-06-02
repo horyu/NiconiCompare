@@ -20,7 +20,7 @@ import { normalizeSettings } from "../utils/normalize"
 import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
 import { rebuildRecentWindowFromEvents } from "../utils/recentWindow"
 
-const SEMVER_PATTERN = /^(\d+)\.(\d+)\.(\d+)$/
+const SEMVER_PATTERN = /^(\d+)\.(\d+)\.(\d+)$/u
 const CURRENT_SCHEMA_VERSION = DEFAULT_META.schemaVersion
 const INVALID_SCHEMA_MESSAGE =
   "インポートデータが不正です。アプリのエクスポート機能で出力したJSONをそのまま使用してください。"

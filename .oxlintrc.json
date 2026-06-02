@@ -30,12 +30,14 @@
   "rules": {
     // suspicious
     "no-array-sort": "off",
+    "no-underscore-dangle": "off",
     "react-in-jsx-scope": "off",
     // pedantic
     "max-lines-per-function": "off",
     "max-lines": "off",
     "no-inline-comments": "off",
-    "no-negated-condition": "off",
+    "eslint/no-negated-condition": "off",
+    "unicorn/no-negated-condition": "off",
     "no-useless-undefined": "off",
     "typescript/no-confusing-void-expression": [
       "error",

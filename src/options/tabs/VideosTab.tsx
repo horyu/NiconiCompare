@@ -253,7 +253,6 @@ export const VideosTab = ({
               value={effectiveCategoryId}
               onChange={handleCategoryChange}
               options={categorySelectOptions}
-              className="w-full max-w-full"
             />
           </div>
           <ExportMenu

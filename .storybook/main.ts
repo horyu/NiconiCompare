@@ -22,7 +22,7 @@ export default {
       name: "storybook-style-alias",
       enforce: "pre",
       transform(code: string, id: string) {
-        if (!/[\\/]src[\\/]style\.css$/.test(id)) {
+        if (!/[\\/]src[\\/]style\.css$/u.test(id)) {
           return null
         }
         return fs.readFileSync(storybookStyle, "utf8")

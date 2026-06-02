@@ -271,7 +271,6 @@ export const DataTab = ({
             value={htmlExportCategoryId}
             options={categoryOptions}
             onChange={setHtmlExportCategoryId}
-            className="w-full"
           />
           <button
             type="button"

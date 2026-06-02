@@ -18,7 +18,7 @@ const isValidCategoryName = (value: string): boolean => {
   if (trimmed.length === 0 || trimmed.length > 50) {
     return false
   }
-  if (/[\\/:*?"<>|]/.test(trimmed)) {
+  if (/[\\/:*?"<>|]/u.test(trimmed)) {
     return false
   }
   return /^[\p{L}\p{N} ・_-]+$/u.test(trimmed)
@@ -300,20 +300,21 @@ export const CategoriesTab = ({
                   {!isDefault && (
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center gap-2">
-                        <CategorySelect
-                          value={moveTarget}
-                          onChange={(value) =>
-                            setMoveTargets((prev) => ({
-                              ...prev,
-                              [category.id]: value
-                            }))
-                          }
-                          options={categoryOptions.filter(
-                            (item) => item.id !== category.id
-                          )}
-                          size="sm"
-                          className="w-[15ch] max-w-[15ch]"
-                        />
+                        <div className="w-[15ch] max-w-[15ch]">
+                          <CategorySelect
+                            value={moveTarget}
+                            onChange={(value) =>
+                              setMoveTargets((prev) => ({
+                                ...prev,
+                                [category.id]: value
+                              }))
+                            }
+                            options={categoryOptions.filter(
+                              (item) => item.id !== category.id
+                            )}
+                            size="sm"
+                          />
+                        </div>
                         <button
                           type="button"
                           onClick={() =>
