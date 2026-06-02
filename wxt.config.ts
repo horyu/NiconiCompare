@@ -7,10 +7,13 @@ export default defineConfig({
   outDirTemplate: "{{browser}}-mv{{manifestVersion}}{{modeSuffix}}",
   manifestVersion: 3,
   targetBrowsers: ["chrome", "firefox"],
-  vite: () =>
-    ({
+  vite: () => {
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- WXT currently types this against an older Vite type instance
+    const config = {
       plugins: [tailwindcss()]
-    }) as WxtViteConfig,
+    } as WxtViteConfig
+    return config
+  },
   manifest: {
     permissions: ["storage"],
     host_permissions: ["https://www.nicovideo.jp/watch/*"]
