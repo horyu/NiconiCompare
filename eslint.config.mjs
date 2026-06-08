@@ -6,6 +6,8 @@ import storybook from "eslint-plugin-storybook"
 import { defineConfig } from "eslint/config"
 import tseslint from "typescript-eslint"
 
+import oxlintConfig from "./oxlint.config.ts"
+
 // oxlint では import.meta.dirname が any 扱いになるため、文字列化して扱う
 const tsconfigRootDir = String(import.meta.dirname)
 
@@ -88,5 +90,5 @@ export default defineConfig([
   },
   // oxlint と重複しているルールを無効化
   // https://github.com/oxc-project/eslint-plugin-oxlint?tab=readme-ov-file#eslint-plugin-oxlint
-  ...oxlint.buildFromOxlintConfigFile("./.oxlintrc.json")
+  ...oxlint.buildFromOxlintConfig(oxlintConfig)
 ])

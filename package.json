@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "description": "ニコニコ動画の視聴中に動画を比較し続け、あなたの嗜好を自動的にレーティング・ランキング化するブラウザ拡張機能。",
   "author": "horyu <28817604+horyu@users.noreply.github.com>",
+  "type": "module",
   "scripts": {
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",

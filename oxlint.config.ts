@@ -1,6 +1,7 @@
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
+import { defineConfig } from "oxlint"
+
+export default defineConfig({
+  plugins: [
     "eslint",
     "oxc",
     "promise",
@@ -9,25 +10,26 @@
     "unicorn",
     "vitest"
   ],
-  "categories": {
-    "correctness": "error",
-    "suspicious": "warn",
-    "pedantic": "warn",
-    "perf": "warn",
-    "style": "off", // 無効にするルールが多いため、個別にルールを有効化する
-    "restriction": "error",
-    "nursery": "error"
+  categories: {
+    correctness: "error",
+    suspicious: "warn",
+    pedantic: "warn",
+    perf: "warn",
+    // 無効にするルールが多いため、個別にルールを有効化する
+    style: "off",
+    restriction: "error",
+    nursery: "error"
   },
-  "env": {
-    "builtin": true,
-    "browser": true,
-    "webextensions": true
+  env: {
+    builtin: true,
+    browser: true,
+    webextensions: true
   },
-  "options": {
-    "typeAware": true
+  options: {
+    typeAware: true
   },
-  "ignorePatterns": ["*.js", "*.mjs", "*.cjs", "!eslint.config.mjs"],
-  "rules": {
+  ignorePatterns: ["*.js", "*.mjs", "*.cjs", "!eslint.config.mjs"],
+  rules: {
     // suspicious
     "no-array-sort": "off",
     "no-underscore-dangle": "off",
@@ -42,14 +44,14 @@
     "typescript/no-confusing-void-expression": [
       "error",
       {
-        "ignoreArrowShorthand": true
+        ignoreArrowShorthand: true
       }
     ],
     "typescript/no-misused-promises": [
       "error",
       {
-        "checksVoidReturn": {
-          "attributes": false
+        checksVoidReturn: {
+          attributes: false
         }
       }
     ],
@@ -57,13 +59,13 @@
     "typescript/strict-boolean-expressions": "off",
     // style
     "eslint/prefer-destructuring": "error",
-    "jest/require-hook": "off", // for override in test files
+    "jest/require-hook": "off",
     "typescript/consistent-type-imports": "error",
     "unicorn/consistent-existence-index-check": "error",
     "unicorn/filename-case": [
       "error",
       {
-        "cases": { "camelCase": true, "pascalCase": true }
+        cases: { camelCase: true, pascalCase: true }
       }
     ],
     "unicorn/numeric-separators-style": "error",
@@ -78,26 +80,26 @@
     "oxc/no-async-await": "off",
     "oxc/no-optional-chaining": "off",
     "oxc/no-rest-spread-properties": "off",
-    "react/jsx-filename-extension": ["error", { "extensions": [".tsx"] }],
+    "react/jsx-filename-extension": ["error", { extensions: [".tsx"] }],
     "typescript/explicit-function-return-type": [
       "error",
       {
-        "allowExpressions": true,
-        "allowDirectConstAssertionInArrowFunctions": true,
-        "allowTypedFunctionExpressions": true
+        allowExpressions: true,
+        allowDirectConstAssertionInArrowFunctions: true,
+        allowTypedFunctionExpressions: true
       }
     ],
     "typescript/no-dynamic-delete": "off",
     "eslint/no-use-before-define": [
       "error",
       {
-        "functions": false
+        functions: false
       }
     ],
     "typescript/promise-function-async": [
       "error",
       {
-        "checkArrowFunctions": false
+        checkArrowFunctions: false
       }
     ],
     "unicorn/no-array-for-each": "off",
@@ -105,13 +107,13 @@
     // nursery
     "typescript/prefer-readonly-parameter-types": "off",
     "typescript/strict-void-return": "off",
-    // TODO: validation ライブラリ導入後に有効化する
+    // validation ライブラリ導入後に有効化する
     "typescript/no-unnecessary-condition": "off"
   },
-  "overrides": [
+  overrides: [
     {
-      "files": ["**/*.test.ts", "**/*.test.tsx"],
-      "rules": {
+      files: ["**/*.test.ts", "**/*.test.tsx"],
+      rules: {
         // テストでは関数スコープを気にする必要はない
         "consistent-function-scoping": "off",
         "jest/require-hook": "error",
@@ -124,8 +126,8 @@
       }
     },
     {
-      "files": ["**/*.stories.ts", "**/*.stories.tsx"],
-      "rules": {
+      files: ["**/*.stories.ts", "**/*.stories.tsx"],
+      rules: {
         // 適当な数値を書くことが多い
         "unicorn/numeric-separators-style": "off",
         // Storybookのラッパーコンポーネントは無名関数が多いため許可する
@@ -135,10 +137,10 @@
       }
     },
     {
-      "files": ["src/lib/logger.ts"],
-      "rules": {
+      files: ["src/lib/logger.ts"],
+      rules: {
         "eslint/no-console": "off"
       }
     }
   ]
-}
+})
