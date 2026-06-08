@@ -1,4 +1,5 @@
 saveExact: true
+minimumReleaseAge: 2880 # 2 days
 allowBuilds:
   esbuild: true
   spawn-sync: false
