@@ -1,190 +1,87 @@
 # NiconiCompare 開発者ガイド
 
-LLM による開発を前提とした環境構築・開発手順の要点をまとめる。
+## セットアップ
 
----
-
-## 1. 環境セットアップ
-
-### 1.1 mise 経由でのツールインストール
-
-[mise](https://mise.jdx.dev/)を使用して Node.js/pnpm を管理:
+[mise](https://mise.jdx.dev/) で Node.js と pnpm を導入します。
 
 ```bash
-# mise インストール (未導入の場合)
-# https://mise.jdx.dev/installing-mise.html 参照
-
-# プロジェクトルートで実行
 mise install
-
-# .mise.toml の内容:
-# [tools]
-# node = "25"
-# pnpm = "latest"
-```
-
-### 1.2 依存関係インストール
-
-```bash
 pnpm install
-pnpm approve-builds   # 初回のみ、esbuild 等の build script を許可
-pnpm lint             # oxlint（TypeScript typecheck 含む・チェックのみ）
-pnpm fix              # oxfmt の整形 → oxlint の自動修正
 ```
 
-> `pnpm approve-builds` は対話式で、依存の build script 実行を明示的に承認する必要がある。`esbuild` などが選択対象として表示されるので、画面の指示に従って次工程へ進むこと。
+依存パッケージの build script が保留された場合は、`pnpm approve-builds` で必要なパッケージを許可します。
 
-**⚠️ コミット前の必須事項**:
+## 開発コマンド
 
-- **`pnpm fix`**: コード自動修正を実行
-- **`pnpm check`**: oxlint の TypeScript typecheck を含む lint・format のチェックに合格すること
+| コマンド               | 用途                           |
+| ---------------------- | ------------------------------ |
+| `pnpm dev`             | Chrome 向け開発ビルド          |
+| `pnpm dev:firefox`     | Firefox 向け開発ビルド         |
+| `pnpm build`           | Chrome 向け本番ビルド          |
+| `pnpm build:firefox`   | Firefox 向け本番ビルド         |
+| `pnpm package`         | Chrome 向け zip 作成           |
+| `pnpm zip:firefox`     | Firefox 向け zip 作成          |
+| `pnpm test`            | Vitest watch                   |
+| `pnpm test:run`        | Vitest 一括実行                |
+| `pnpm storybook`       | Storybook 開発サーバー         |
+| `pnpm storybook:build` | Storybook ビルド               |
+| `pnpm lint`            | Oxlint と TypeScript typecheck |
+| `pnpm lint:fix`        | Oxlint の自動修正              |
+| `pnpm format`          | Oxfmt の自動整形               |
+| `pnpm format:check`    | フォーマット確認               |
+| `pnpm fix`             | Oxfmt と Oxlint の自動修正     |
+| `pnpm check`           | lint とフォーマット確認        |
 
-### 1.3 環境変数の管理
+コミット前に `pnpm fix` と `pnpm check` を実行します。変更内容に応じて `pnpm test:run` と `pnpm storybook:build` も実行してください。
 
-- ルートの `.env.sample` を `.env` にコピーし、必要に応じて値を変更する。
-- **`WXT_PUBLIC_KEEP_OVERLAY_OPEN`**: 開発用環境変数
-  - `true` に設定すると、コンテンツオーバーレイが自動で閉じなくなり、動作確認が容易になる
-  - デフォルトは `false`（通常の自動クローズ動作）
-  - オーバーレイの `handleMouseLeave` イベントで参照され、開発中のデバッグに使用
-- **`WXT_PUBLIC_NC_LOG_LEVEL`**: ログレベル設定
-  - `error` / `warn` / `info` / `debug` を指定
-  - デフォルトは `warn`
-- WXT/Vite は `.env` の内容を `import.meta.env` に注入するため、他の `WXT_` プレフィックス変数もこのファイルで管理する。
+## 開発ビルドの読み込み
 
-### 1.4 主要依存関係
+`pnpm dev` の実行後、Chrome の `chrome://extensions/` でデベロッパーモードを有効にし、`.output/chrome-mv3-dev` を読み込みます。
 
-- WXT 0.20+ (MV3 拡張ビルド)
-- TypeScript 5+, React 19.2
-- Tailwind CSS v4 (@tailwindcss/vite 4.1)
-- **設定**: `wxt.config.ts` の `vite.plugins` に `tailwindcss()` を追加
-- glicko2-lite (Glicko-2 レーティング計算)
-- immer (Immutable state 更新)
-- **コード品質ツール**:
-  - oxlint (高速 Lint / type-aware lint / Storybook plugin 連携)
-  - oxfmt (コードフォーマッター)
-  - npm-run-all (並列スクリプト実行)
-- **UI開発**:
-  - Storybook 10.1+ (React/Vite)
-- **テストフレームワーク**: Vitest 導入済み（`pnpm test:run` を使用）
+Firefox 向けの出力先も `.output/` 配下です。
 
----
+## 環境変数
 
-## 2. 開発・ビルド
+必要な場合のみ `.env.sample` を `.env` にコピーします。`WXT_PUBLIC_*` はビルド成果物から参照できる公開のビルド時設定であり、秘密情報を置いてはいけません。
 
-### 2.1 開発サーバー
+| 変数                           | 用途                                | 既定値  |
+| ------------------------------ | ----------------------------------- | ------- |
+| `WXT_PUBLIC_KEEP_OVERLAY_OPEN` | 開発時にオーバーレイを閉じない      | `false` |
+| `WXT_PUBLIC_NC_LOG_LEVEL`      | `error` / `warn` / `info` / `debug` | `warn`  |
 
-```bash
-pnpm dev
-```
+## コード構成
 
-Chrome: `chrome://extensions/` → デベロッパーモード → `.output/chrome-mv3-dev` 読み込み
+| ディレクトリ      | 内容                                 |
+| ----------------- | ------------------------------------ |
+| `src/entrypoints` | WXT エントリポイント                 |
+| `src/contents`    | Content Script と比較オーバーレイ    |
+| `src/background`  | Background handlers、services、utils |
+| `src/popup`       | Popup UI                             |
+| `src/options`     | Options UI                           |
+| `src/lib`         | 型、定数、メッセージ、共通処理       |
 
-自動ブラウザ起動を無効化したい場合は、[WXT の設定ガイド](https://wxt.dev/guide/essentials/config/browser-startup.html#disable-opening-browser)を参照。
+設計の詳細は [アーキテクチャ](architecture.md) を参照してください。
 
-### 2.2 ディレクトリ構造
+## 開発規約
 
-```
-src/
-├── background/   # Service Worker
-│   ├── handlers/ # Message handlers
-│   ├── services/ # Background services
-│   └── utils/    # Background helpers
-├── contents/     # Content Script
-│   ├── components/ # Overlay components
-│   └── hooks/      # Overlay hooks
-├── entrypoints/  # WXT entrypoints
-│   ├── options/  # Options entry (HTML)
-│   ├── popup/    # Popup entry (HTML)
-│   ├── background.ts
-│   └── overlay.content.tsx
-├── lib/          # ユーティリティ
-├── popup/        # Popup UI
-├── options/      # Options UI
-│   ├── tabs/       # タブコンポーネント (Videos, Events, Categories, Settings, Data)
-│   ├── hooks/      # カスタムhooks (useOptionsData, useSessionState)
-│   ├── components/ # 共通コンポーネント (CategorySelect, EventVideoLabel, ExportMenu, Pagination)
-│   └── utils/      # ユーティリティ (categories, date, export, scroll, sessionStorage)
-├── style.css
-└── env.d.ts
-```
+- TypeScript strict mode を使用する。
+- 型とコンポーネントは PascalCase、関数と変数は camelCase、Storage key は snake_case とする。
+- Background へのメッセージ送信には `sendNcMessage` を使用する。
+- ログ出力には `src/lib/logger.ts`、エラー処理には `src/lib/errorHandler.ts` を使用する。
+- エラー context は Background で `bg:*`、UI で `ui:*` を使用する。
+- UI コンポーネントの追加・変更時は、必要に応じて Storybook story を更新する。
 
-### 2.2.1 カテゴリ機能のデータ概要
+Lint と format の設定は `oxlint.config.ts` と `.oxfmtrc.jsonc` を参照してください。
 
-- `nc_categories` にカテゴリ一覧・表示順・オーバーレイ表示対象を保持
-- `nc_settings.activeCategoryId` が現在の比較カテゴリ
-- `CompareEvent.categoryId` と `nc_ratings[categoryId]` でカテゴリ単位の履歴/レーティングを分離
+## デバッグ
 
-### 2.3 コーディング規約
+- **Overlay**: watch ページの開発者ツールを使用する。必要に応じて `WXT_PUBLIC_KEEP_OVERLAY_OPEN=true` を設定する。
+- **Storage**: 開発者ツールの Application > Extension Storage > Local を確認する。
+- **Popup**: Popup 内で右クリックして開発者ツールを開く。
+- **Service Worker**: `chrome://extensions/` の拡張機能詳細から検査する。
 
-TypeScript strict mode, PascalCase (型/コンポーネント), camelCase (関数/変数), snake_case (storage キー)
+## 参考資料
 
-- ログ出力は `src/lib/logger.ts` を使用する
-- エラーハンドリングは `src/lib/errorHandler.ts` を使用する
-- エラー context は `bg:*`（background）/ `ui:*`（UI）のプレフィックスで統一する
-- background へのメッセージ送信は `sendNcMessage` を使用して型チェックする
-- UIコンポーネントを追加した場合や props が増えた場合は、Storybook の stories も更新する
-
-### 2.4 コード品質チェック
-
-設定ファイルは `oxlint.config.ts` / `.oxfmtrc.jsonc` を参照する。
-
-**実行コマンド**:
-
-```bash
-pnpm fix               # oxfmt → oxlint（自動修正あり）
-pnpm lint              # oxlint（TypeScript typecheck 含む・チェックのみ）
-pnpm lint:fix          # oxlint のみ（自動修正あり）
-pnpm format            # oxfmt のみ（自動修正あり）
-pnpm format:check      # oxfmt のみ（チェックのみ）
-pnpm check             # lint + format:check
-pnpm storybook         # Storybook 開発サーバー
-pnpm storybook:build   # Storybook ビルド
-```
-
-**推奨フロー**:
-
-1. コード編集
-2. `pnpm fix` でコード自動修正
-3. `pnpm check` で全チェック合格を確認
-4. コミット
-
-## 2.5 UI テーマ
-
-- Options/Popup の主要UIはダークモード対応済み（Storybookで確認可能）
-
----
-
-## 3. テスト
-
-**現状**: テストは Vitest で実装済み。`pnpm test:run` を使用する。
-Storybook は UI プレビュー用途で導入済み。
-
----
-
-## 4. ビルド
-
-```bash
-pnpm check  # ビルド前に oxlint の TypeScript typecheck / リント / フォーマット崩れがないかを確認
-pnpm build
-```
-
-出力: `.output/chrome-mv3-prod/`, `.output/firefox-mv3-prod/`
-
-ブラウザへの読み込み: chrome://extensions (開発者モード)
-
----
-
-## 5. デバッグ（Chrome）
-
-- Overlay: watch ページ → 開発者ツール + 必要に応じて .env の `WXT_PUBLIC_KEEP_OVERLAY_OPEN=true` を設定
-- Storage: 開発者ツール → Application → Storage → Extension Storage → niconi-compare → Local
-- Popup: ポップアップ内で右クリック → 開発者ツール → 検証
-- Service Worker: chrome://extensions → niconi-compare 詳細 → ビューを検査 → Service Worker
-
----
-
-## 6. 参考資料
-
-- [WXT Docs](https://wxt.dev/)
-- [Chrome MV3 Guide](https://developer.chrome.com/docs/extensions/mv3/)
-- [Glicko-2 PDF](http://www.glicko.net/glicko/glicko2.pdf)
+- [WXT](https://wxt.dev/)
+- [Chrome Extensions](https://developer.chrome.com/docs/extensions/)
+- [Glicko-2](http://www.glicko.net/glicko/glicko2.pdf)
