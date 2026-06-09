@@ -36,7 +36,7 @@ describe("useVerdictSubmission", () => {
     runNcActionMock.mockImplementation(
       (action: () => Promise<BackgroundResponse>, _options: unknown) => action()
     )
-    const refreshState = vi.fn(async () => {})
+    const refreshState = vi.fn().mockResolvedValue(undefined)
 
     const { result, rerender } = renderHook(
       ({ activeCategoryId, currentVideoId, opponentVideoId }) =>
@@ -83,7 +83,7 @@ describe("useVerdictSubmission", () => {
     runNcActionMock.mockImplementation(
       (action: () => Promise<BackgroundResponse>, _options: unknown) => action()
     )
-    const refreshState = vi.fn(async () => {})
+    const refreshState = vi.fn().mockResolvedValue(undefined)
 
     const { result, rerender } = renderHook(
       ({ activeCategoryId }) =>
