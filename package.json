@@ -27,8 +27,8 @@
   "dependencies": {
     "glicko2-lite": "6.0.0",
     "immer": "11.1.8",
-    "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
     "@storybook/addon-themes": "10.4.2",
@@ -37,7 +37,7 @@
     "@testing-library/react": "16.3.2",
     "@types/chrome": "0.1.43",
     "@types/node": "25.9.2",
-    "@types/react": "19.2.15",
+    "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",
     "@wxt-dev/module-react": "1.2.2",
