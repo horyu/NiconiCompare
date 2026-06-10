@@ -42,7 +42,7 @@
     "@vitejs/plugin-react": "6.0.2",
     "@wxt-dev/module-react": "1.2.2",
     "eslint-plugin-storybook": "10.4.2",
-    "happy-dom": "20.10.1",
+    "happy-dom": "20.10.2",
     "npm-run-all2": "9.0.1",
     "oxfmt": "0.53.0",
     "oxlint": "1.68.0",
