@@ -18,7 +18,8 @@ export async function handleUpdateCurrentVideo(videoId: string): Promise<void> {
             draft.recentWindow,
             settings.recentWindowSize,
             [state.currentVideoId],
-            videos
+            videos,
+            videoId
           )
         }
         draft.currentVideoId = videoId

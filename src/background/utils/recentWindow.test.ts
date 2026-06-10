@@ -48,6 +48,18 @@ describe("updateRecentWindow", () => {
     expect(result).toEqual(["v2", "v1"])
   })
 
+  it("除外対象の動画は保持件数に含めないこと", () => {
+    const result = updateRecentWindow(
+      ["v1", "v2", "v3"],
+      2,
+      ["v1", "v2"],
+      videos,
+      "v1"
+    )
+
+    expect(result).toEqual(["v2", "v3"])
+  })
+
   it("サイズが0以下でも最低1件は保持すること", () => {
     const result = updateRecentWindow([], 0, ["v1"], videos)
 
@@ -159,5 +171,11 @@ describe("rebuildRecentWindowFromEvents", () => {
     )
 
     expect(result).toEqual(["v2"])
+  })
+
+  it("除外対象の現在動画を含めずに候補数を満たすこと", () => {
+    const result = rebuildRecentWindowFromEvents(events, 2, videos, "v3")
+
+    expect(result).toEqual(["v2", "v1"])
   })
 })

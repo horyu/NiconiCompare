@@ -4,7 +4,8 @@ export function updateRecentWindow(
   current: string[],
   size: number,
   candidates: (string | undefined)[],
-  videos: NcVideos
+  videos: NcVideos,
+  excludedVideoId?: string
 ): string[] {
   const maxSize = Math.max(1, size)
   const result: string[] = []
@@ -12,7 +13,12 @@ export function updateRecentWindow(
 
   // candidates を優先的に追加
   for (const candidate of candidates) {
-    if (candidate && videos[candidate] && !seen.has(candidate)) {
+    if (
+      candidate &&
+      candidate !== excludedVideoId &&
+      videos[candidate] &&
+      !seen.has(candidate)
+    ) {
       seen.add(candidate)
       result.push(candidate)
       if (result.length >= maxSize) {
@@ -23,7 +29,7 @@ export function updateRecentWindow(
 
   // current から追加
   for (const id of current) {
-    if (videos[id] && !seen.has(id)) {
+    if (id !== excludedVideoId && videos[id] && !seen.has(id)) {
       seen.add(id)
       result.push(id)
       if (result.length >= maxSize) {
@@ -38,7 +44,8 @@ export function updateRecentWindow(
 export function rebuildRecentWindowFromEvents(
   events: CompareEvent[],
   size: number,
-  videos: NcVideos
+  videos: NcVideos,
+  excludedVideoId?: string
 ): string[] {
   if (size <= 0) {
     return []
@@ -58,6 +65,9 @@ export function rebuildRecentWindowFromEvents(
     const candidates = [event.currentVideoId, event.opponentVideoId]
     for (const candidate of candidates) {
       if (!candidate) {
+        continue
+      }
+      if (candidate === excludedVideoId) {
         continue
       }
       if (!videos[candidate]) {

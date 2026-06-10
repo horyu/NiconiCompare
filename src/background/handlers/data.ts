@@ -174,7 +174,8 @@ export async function handleImportData(
     recentWindow: rebuildRecentWindowFromEvents(
       normalizedEvents.items,
       nextSettings.recentWindowSize,
-      nextVideos
+      nextVideos,
+      rawState.currentVideoId ?? ""
     )
   }
   const normalizedSettings: NcSettings = {

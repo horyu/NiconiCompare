@@ -134,4 +134,80 @@ describe("handleImportData schemaVersion control", () => {
     const payload = getFirstSetStoragePayload()
     expect(payload.meta?.schemaVersion).toBe(DEFAULT_META.schemaVersion)
   })
+
+  it("currentVideoId は recentWindow から除外して再構築すること", async () => {
+    const input = {
+      [STORAGE_KEYS.settings]: {
+        recentWindowSize: 2,
+        popupRecentCount: 5,
+        overlayAndCaptureEnabled: true,
+        overlayAutoCloseMs: 2000,
+        showClosedOverlayVerdict: true,
+        showPopupVideoVerdictCounts: false,
+        showEventThumbnails: true,
+        activeCategoryId: DEFAULT_CATEGORY_ID,
+        glicko: {
+          rating: 1500,
+          rd: 350,
+          volatility: 0.06
+        }
+      },
+      [STORAGE_KEYS.state]: {
+        currentVideoId: "v3",
+        pinnedOpponentVideoId: "",
+        recentWindow: ["v3", "v2"]
+      },
+      [STORAGE_KEYS.videos]: {
+        v1: {
+          videoId: "v1",
+          title: "video1",
+          authorUrl: "author1",
+          thumbnailUrls: [],
+          capturedAt: 1
+        },
+        v2: {
+          videoId: "v2",
+          title: "video2",
+          authorUrl: "author2",
+          thumbnailUrls: [],
+          capturedAt: 2
+        },
+        v3: {
+          videoId: "v3",
+          title: "video3",
+          authorUrl: "author3",
+          thumbnailUrls: [],
+          capturedAt: 3
+        }
+      },
+      [STORAGE_KEYS.events]: {
+        items: [
+          {
+            id: 1,
+            timestamp: 1,
+            currentVideoId: "v1",
+            opponentVideoId: "v2",
+            verdict: "better",
+            disabled: false,
+            categoryId: DEFAULT_CATEGORY_ID
+          },
+          {
+            id: 2,
+            timestamp: 2,
+            currentVideoId: "v3",
+            opponentVideoId: "v2",
+            verdict: "same",
+            disabled: false,
+            categoryId: DEFAULT_CATEGORY_ID
+          }
+        ],
+        nextId: 3
+      }
+    } as Partial<StorageShape>
+
+    await handleImportData(input)
+
+    const payload = getFirstSetStoragePayload()
+    expect(payload.state?.recentWindow).toEqual(["v2", "v1"])
+  })
 })

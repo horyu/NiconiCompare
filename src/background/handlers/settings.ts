@@ -39,7 +39,8 @@ export async function handleUpdateSettings(
       recentWindow: rebuildRecentWindowFromEvents(
         events.items,
         nextSettings.recentWindowSize,
-        videos
+        videos,
+        state.currentVideoId
       )
     }
   }

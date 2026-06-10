@@ -202,7 +202,8 @@ function updateStateForNewEvent(
       draft.recentWindow,
       settings.recentWindowSize,
       [payload.currentVideoId, payload.opponentVideoId],
-      videos
+      videos,
+      payload.currentVideoId
     )
   })
 }
