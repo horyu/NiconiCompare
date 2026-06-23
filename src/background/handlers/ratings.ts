@@ -1,9 +1,14 @@
-import { getStorageData, setStorageData } from "../services/storage"
+import { withStorageUpdates } from "../services/storage"
 import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
 
 export async function handleRebuildRatings(): Promise<void> {
-  const { settings, events } = await getStorageData(["events", "settings"])
-  const nextRatings = rebuildRatingsFromEvents(events.items, settings)
-
-  await setStorageData({ ratings: nextRatings })
+  await withStorageUpdates({
+    keys: ["events", "settings"],
+    context: "bg:ratings:rebuild",
+    update: ({ settings, events }) => ({
+      updates: {
+        ratings: rebuildRatingsFromEvents(events.items, settings)
+      }
+    })
+  })
 }

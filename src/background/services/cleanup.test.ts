@@ -3,20 +3,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { performCleanup } from "./cleanup"
 import type { StorageDataByKey } from "./storage"
 
-const { getStorageDataMock, setStorageDataMock } = vi.hoisted(() => ({
-  getStorageDataMock: vi.fn(),
-  setStorageDataMock: vi.fn()
+const { withStorageUpdatesMock } = vi.hoisted(() => ({
+  withStorageUpdatesMock: vi.fn()
 }))
 
 vi.mock("./storage", () => ({
-  getStorageData: getStorageDataMock,
-  setStorageData: setStorageDataMock
+  withStorageUpdates: withStorageUpdatesMock
 }))
 
 describe("performCleanup", () => {
   beforeEach(() => {
-    getStorageDataMock.mockReset()
-    setStorageDataMock.mockReset()
+    withStorageUpdatesMock.mockReset()
     vi.restoreAllMocks()
   })
 
@@ -105,12 +102,26 @@ describe("performCleanup", () => {
         recentWindow: []
       }
     }
-    getStorageDataMock.mockResolvedValue(storage)
+    let capturedUpdates: Partial<StorageDataByKey> | undefined
+    withStorageUpdatesMock.mockImplementation(
+      async ({
+        update
+      }: {
+        update: (
+          data: typeof storage
+        ) =>
+          | { updates: Partial<StorageDataByKey> }
+          | Promise<{ updates: Partial<StorageDataByKey> }>
+      }) => {
+        const { updates } = await update(storage)
+        capturedUpdates = updates
+      }
+    )
 
     await performCleanup()
 
-    expect(setStorageDataMock).toHaveBeenCalledTimes(1)
-    expect(setStorageDataMock).toHaveBeenCalledWith({
+    expect(withStorageUpdatesMock).toHaveBeenCalledTimes(1)
+    expect(capturedUpdates).toEqual({
       videos: {
         v1: storage.videos.v1,
         v2: storage.videos.v2

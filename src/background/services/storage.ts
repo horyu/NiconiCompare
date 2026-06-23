@@ -62,6 +62,8 @@ type KeysFromArray = (typeof ALL_STORAGE_KEYS)[number]
 type _AssertAllStorageKeys = Assert<Equals<KeysFromArray, KeysFromObject>>
 const _assertAllStorageKeys: _AssertAllStorageKeys = true
 
+let storageOperationQueue: Promise<void> = Promise.resolve()
+
 function ensureStorageAvailable(): chrome.storage.LocalStorageArea {
   const storage = chrome?.storage?.local
   if (!storage) {
@@ -70,7 +72,19 @@ function ensureStorageAvailable(): chrome.storage.LocalStorageArea {
   return storage
 }
 
-export async function getStorageData<K extends StorageKey>(
+async function enqueueStorageOperation<TResult>(
+  operation: () => Promise<TResult>
+): Promise<TResult> {
+  const result = storageOperationQueue.then(operation)
+  storageOperationQueue = result.then(
+    () => undefined,
+    () => undefined
+  )
+  const value = await result
+  return value
+}
+
+async function getStorageDataInternal<K extends StorageKey>(
   keys: readonly K[]
 ): Promise<Pick<StorageDataByKey, K>> {
   const storage = ensureStorageAvailable()
@@ -89,8 +103,8 @@ export async function getStorageData<K extends StorageKey>(
   return data
 }
 
-export async function getRawStorageData<K extends StorageKey>(
-  keys: K[]
+async function getRawStorageDataInternal<K extends StorageKey>(
+  keys: readonly K[]
 ): Promise<Partial<Pick<StorageDataByKey, K>>> {
   const storage = ensureStorageAvailable()
   const storageKeys = keys.map((key) => STORAGE_KEYS[key])
@@ -109,7 +123,7 @@ export async function getRawStorageData<K extends StorageKey>(
   return data
 }
 
-export async function setStorageData(
+async function setStorageDataInternal(
   updates: Partial<StorageDataByKey>
 ): Promise<void> {
   const storage = ensureStorageAvailable()
@@ -124,11 +138,26 @@ export async function setStorageData(
   await storage.set(storageUpdates)
 }
 
+export async function getStorageData<K extends StorageKey>(
+  keys: readonly K[]
+): Promise<Pick<StorageDataByKey, K>> {
+  const data = await enqueueStorageOperation(() => getStorageDataInternal(keys))
+  return data
+}
+
+export async function setStorageData(
+  updates: Partial<StorageDataByKey>
+): Promise<void> {
+  await enqueueStorageOperation(() => setStorageDataInternal(updates))
+}
+
 export async function readAllStorage(): Promise<StorageDataByKey> {
   const data = await getStorageData(ALL_STORAGE_KEYS)
   return data as StorageDataByKey
 }
 
+// The update callback runs while the storage queue is held. It must only use
+// the provided data and return updates instead of calling public storage APIs.
 export async function withStorageUpdates<K extends StorageKey, TResult>({
   keys,
   context,
@@ -142,16 +171,51 @@ export async function withStorageUpdates<K extends StorageKey, TResult>({
     | { updates: Partial<StorageDataByKey>; result?: TResult }
     | Promise<{ updates: Partial<StorageDataByKey>; result?: TResult }>
 }): Promise<TResult | undefined> {
-  try {
-    const data = await getStorageData(keys)
-    const { updates, result } = await update(data)
-    if (Object.keys(updates).length > 0) {
-      logger.info(`[${context}] storage update`, Object.keys(updates).sort())
-      await setStorageData(updates)
+  const result = await enqueueStorageOperation(async () => {
+    try {
+      const data = await getStorageDataInternal(keys)
+      const { updates, result: operationResult } = await update(data)
+      if (Object.keys(updates).length > 0) {
+        logger.info(`[${context}] storage update`, Object.keys(updates).sort())
+        await setStorageDataInternal(updates)
+      }
+      return operationResult
+    } catch (error) {
+      handleBackgroundError(error, context)
+      throw error
     }
-    return result
-  } catch (error) {
-    handleBackgroundError(error, context)
-    throw error
-  }
+  })
+  return result
+}
+
+// Raw transactions are reserved for initialization that must distinguish
+// missing keys from keys containing default values.
+export async function withRawStorageUpdates<K extends StorageKey, TResult>({
+  keys,
+  context,
+  update
+}: {
+  keys: readonly K[]
+  context: string
+  update: (
+    data: Partial<Pick<StorageDataByKey, K>>
+  ) =>
+    | { updates: Partial<StorageDataByKey>; result?: TResult }
+    | Promise<{ updates: Partial<StorageDataByKey>; result?: TResult }>
+}): Promise<TResult | undefined> {
+  const result = await enqueueStorageOperation(async () => {
+    try {
+      const data = await getRawStorageDataInternal(keys)
+      const { updates, result: operationResult } = await update(data)
+      if (Object.keys(updates).length > 0) {
+        logger.info(`[${context}] storage update`, Object.keys(updates).sort())
+        await setStorageDataInternal(updates)
+      }
+      return operationResult
+    } catch (error) {
+      handleBackgroundError(error, context)
+      throw error
+    }
+  })
+  return result
 }

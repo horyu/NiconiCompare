@@ -1,26 +1,39 @@
-import { getStorageData, setStorageData } from "./storage"
+import type { StorageDataByKey } from "./storage"
+import { withStorageUpdates } from "./storage"
 
 const AUTO_CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000
 
 export async function runAutoCleanupIfNeeded(): Promise<void> {
-  const { meta } = await getStorageData(["meta"])
-  const lastCleanupAt = meta.lastCleanupAt ?? 0
-  if (Date.now() - lastCleanupAt >= AUTO_CLEANUP_INTERVAL_MS) {
-    await performCleanup()
-  }
+  await withStorageUpdates({
+    keys: ["events", "videos", "authors", "ratings", "meta", "state"],
+    context: "bg:cleanup:auto",
+    update: (data) => {
+      const lastCleanupAt = data.meta.lastCleanupAt ?? 0
+      return {
+        updates:
+          Date.now() - lastCleanupAt >= AUTO_CLEANUP_INTERVAL_MS
+            ? buildCleanupUpdates(data)
+            : {}
+      }
+    }
+  })
 }
 
 export async function performCleanup(): Promise<void> {
-  const { events, videos, authors, ratings, meta, state } =
-    await getStorageData([
-      "events",
-      "videos",
-      "authors",
-      "ratings",
-      "meta",
-      "state"
-    ])
+  await withStorageUpdates({
+    keys: ["events", "videos", "authors", "ratings", "meta", "state"],
+    context: "bg:cleanup:perform",
+    update: (data) => ({ updates: buildCleanupUpdates(data) })
+  })
+}
 
+function buildCleanupUpdates(
+  data: Pick<
+    StorageDataByKey,
+    "events" | "videos" | "authors" | "ratings" | "meta" | "state"
+  >
+): Partial<StorageDataByKey> {
+  const { events, videos, authors, ratings, meta, state } = data
   const referencedVideos = new Set<string>()
   const referencedAuthors = new Set<string>()
 
@@ -70,7 +83,7 @@ export async function performCleanup(): Promise<void> {
     )
   )
 
-  await setStorageData({
+  return {
     videos: cleanedVideos,
     ratings: cleanedRatings,
     authors: cleanedAuthors,
@@ -78,5 +91,5 @@ export async function performCleanup(): Promise<void> {
       ...meta,
       lastCleanupAt: Date.now()
     }
-  })
+  }
 }

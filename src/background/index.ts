@@ -40,7 +40,8 @@ import {
   handleUpdatePinnedOpponent
 } from "./handlers/video"
 import { runAutoCleanupIfNeeded } from "./services/cleanup"
-import { getRawStorageData, setStorageData } from "./services/storage"
+import type { StorageDataByKey } from "./services/storage"
+import { withRawStorageUpdates } from "./services/storage"
 import { normalizeSettings } from "./utils/normalize"
 
 if (chrome?.alarms) {
@@ -194,19 +195,28 @@ chrome.runtime.onMessage.addListener(
     return true
   }
 )
-// oxlint-disable-next-line complexity
 async function ensureDefaults(): Promise<void> {
-  const result = await getRawStorageData([
-    "settings",
-    "state",
-    "events",
-    "meta",
-    "videos",
-    "authors",
-    "ratings",
-    "categories"
-  ])
-  const updates: Parameters<typeof setStorageData>[0] = {}
+  await withRawStorageUpdates({
+    keys: [
+      "settings",
+      "state",
+      "events",
+      "meta",
+      "videos",
+      "authors",
+      "ratings",
+      "categories"
+    ],
+    context: "bg:background:ensureDefaults",
+    update: (result) => ({ updates: buildDefaultUpdates(result) })
+  })
+}
+
+// oxlint-disable-next-line complexity
+function buildDefaultUpdates(
+  result: Partial<StorageDataByKey>
+): Partial<StorageDataByKey> {
+  const updates: Partial<StorageDataByKey> = {}
 
   if (!result.settings) {
     updates.settings = DEFAULT_SETTINGS
@@ -257,9 +267,7 @@ async function ensureDefaults(): Promise<void> {
     }
   }
 
-  if (Object.keys(updates).length > 0) {
-    await setStorageData(updates)
-  }
+  return updates
 }
 
 async function initializeBackground(context: string): Promise<void> {
