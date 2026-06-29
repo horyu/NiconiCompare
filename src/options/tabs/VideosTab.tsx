@@ -21,6 +21,7 @@ import { useSessionState } from "../hooks/useSessionState"
 import { buildCategoryOptions } from "../utils/categories"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
 import { scrollIntoViewIfNeeded } from "../utils/scroll"
+import { sortVideos, type VideoSortOrder } from "../utils/videos"
 
 interface VideosTabProps {
   snapshot: OptionsSnapshot
@@ -34,7 +35,7 @@ interface VideoSessionState {
   author: string
   categoryId: string
   sort: string
-  order: "desc" | "asc"
+  order: VideoSortOrder
   page: number
 }
 
@@ -77,7 +78,7 @@ export const VideosTab = ({
     initialState.categoryId || snapshot.settings.activeCategoryId
   )
   const [videoSort, setVideoSort] = useState(initialState.sort)
-  const [videoSortOrder, setVideoSortOrder] = useState<"desc" | "asc">(
+  const [videoSortOrder, setVideoSortOrder] = useState<VideoSortOrder>(
     initialState.order
   )
   const [videoPage, setVideoPage] = useState(initialState.page)
@@ -627,88 +628,15 @@ function filterVideos({
     return hasRating && matchesSearch && matchesAuthor
   })
 
-  const sorter = getVideoSorter({
+  return sortVideos({
+    videos: filtered,
     sort,
+    order,
     authors,
     ratingsByCategory,
     lastEventByVideo,
     verdictCountsByVideo
   })
-
-  const direction = order === "asc" ? -1 : 1
-  return filtered.sort((left, right) => direction * sorter(left, right))
-}
-
-function getVideoSorter({
-  sort,
-  authors,
-  ratingsByCategory,
-  lastEventByVideo,
-  verdictCountsByVideo
-}: {
-  sort: string
-  authors: OptionsSnapshot["authors"]
-  ratingsByCategory: Record<string, RatingSnapshot>
-  lastEventByVideo: Map<string, number>
-  verdictCountsByVideo: Map<
-    string,
-    { wins: number; draws: number; losses: number }
-  >
-}): (left: VideoSnapshot, right: VideoSnapshot) => number {
-  type VideoItem = VideoSnapshot
-  const compareByRating = (left: VideoItem, right: VideoItem): number =>
-    (ratingsByCategory[right.videoId]?.rating ?? 0) -
-    (ratingsByCategory[left.videoId]?.rating ?? 0)
-  // oxlint-disable-next-line consistent-function-scoping 一貫性のために無視
-  const compareByTitle = (left: VideoItem, right: VideoItem): number =>
-    left.title.localeCompare(right.title)
-  const compareByAuthor = (left: VideoItem, right: VideoItem): number => {
-    const leftAuthor = authors[left.authorUrl]?.name ?? ""
-    const rightAuthor = authors[right.authorUrl]?.name ?? ""
-    return leftAuthor.localeCompare(rightAuthor) || compareByRating(left, right)
-  }
-  const compareByRd = (left: VideoItem, right: VideoItem): number =>
-    (ratingsByCategory[right.videoId]?.rd ?? 0) -
-    (ratingsByCategory[left.videoId]?.rd ?? 0)
-  const compareByLastVerdict = (left: VideoItem, right: VideoItem): number =>
-    (lastEventByVideo.get(right.videoId) ?? 0) -
-    (lastEventByVideo.get(left.videoId) ?? 0)
-  const compareByEvalCount = (left: VideoItem, right: VideoItem): number => {
-    const leftCounts = verdictCountsByVideo.get(left.videoId)
-    const rightCounts = verdictCountsByVideo.get(right.videoId)
-    const leftTotal = leftCounts
-      ? leftCounts.wins + leftCounts.draws + leftCounts.losses
-      : 0
-    const rightTotal = rightCounts
-      ? rightCounts.wins + rightCounts.draws + rightCounts.losses
-      : 0
-    return rightTotal - leftTotal
-  }
-  const compareByWins = (left: VideoItem, right: VideoItem): number =>
-    (verdictCountsByVideo.get(right.videoId)?.wins ?? 0) -
-    (verdictCountsByVideo.get(left.videoId)?.wins ?? 0)
-  const compareByLosses = (left: VideoItem, right: VideoItem): number =>
-    (verdictCountsByVideo.get(right.videoId)?.losses ?? 0) -
-    (verdictCountsByVideo.get(left.videoId)?.losses ?? 0)
-
-  switch (sort) {
-    case "title":
-      return compareByTitle
-    case "author":
-      return compareByAuthor
-    case "rd":
-      return compareByRd
-    case "lastVerdict":
-      return compareByLastVerdict
-    case "evalCount":
-      return compareByEvalCount
-    case "wins":
-      return compareByWins
-    case "losses":
-      return compareByLosses
-    default:
-      return compareByRating
-  }
 }
 
 function buildExportRows({
