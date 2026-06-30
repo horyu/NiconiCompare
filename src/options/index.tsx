@@ -164,6 +164,16 @@ export default function OptionsPage(): ReactElement {
           </div>
         )}
 
+        {error && (
+          <div
+            role="alert"
+            className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-100">
+            最新状態の取得に失敗しました。表示中のデータは前回取得した内容です。
+            <br />
+            <small>{error}</small>
+          </div>
+        )}
+
         {activeTab === "videos" && (
           <VideosTab
             snapshot={snapshot}

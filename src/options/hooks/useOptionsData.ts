@@ -45,9 +45,22 @@ export const useOptionsData = (): UseOptionsDataResult => {
       setLoading(true)
       setError(undefined)
     }
-    const response = await sendNcMessage<BackgroundResponse<OptionsSnapshot>>({
-      type: MESSAGE_TYPES.requestState
-    })
+    let response: BackgroundResponse<OptionsSnapshot>
+    try {
+      response = await sendNcMessage<BackgroundResponse<OptionsSnapshot>>({
+        type: MESSAGE_TYPES.requestState
+      })
+    } catch (requestError) {
+      handleUIError(requestError, "ui:options:request-state")
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "状態取得に失敗しました。"
+      )
+      setLoading(false)
+      return
+    }
+
     if (!response.ok || !response.data) {
       setError(response.error ?? "状態取得に失敗しました。")
       setLoading(false)

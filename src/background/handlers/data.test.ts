@@ -2,19 +2,24 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
   DEFAULT_CATEGORY_ID,
+  DEFAULT_CATEGORIES,
+  DEFAULT_EVENTS_BUCKET,
   DEFAULT_META,
+  DEFAULT_SETTINGS,
+  DEFAULT_STATE,
   STORAGE_KEYS
 } from "../../lib/constants"
 import type { StorageShape } from "../../lib/types"
 import type { StorageDataByKey } from "../services/storage"
-import { handleImportData } from "./data"
+import { handleExportData, handleImportData } from "./data"
 
-const { setStorageDataMock } = vi.hoisted(() => ({
+const { readAllStorageMock, setStorageDataMock } = vi.hoisted(() => ({
+  readAllStorageMock: vi.fn(),
   setStorageDataMock: vi.fn()
 }))
 
 vi.mock("../services/storage", () => ({
-  readAllStorage: vi.fn(),
+  readAllStorage: readAllStorageMock,
   setStorageData: setStorageDataMock
 }))
 
@@ -31,6 +36,7 @@ const getFirstSetStoragePayload = (): Partial<StorageDataByKey> => {
 
 describe("handleImportData schemaVersion control", () => {
   beforeEach(() => {
+    readAllStorageMock.mockReset()
     setStorageDataMock.mockReset()
   })
 
@@ -209,5 +215,43 @@ describe("handleImportData schemaVersion control", () => {
 
     const payload = getFirstSetStoragePayload()
     expect(payload.state?.recentWindow).toEqual(["v2", "v1"])
+  })
+})
+
+describe("handleExportData", () => {
+  beforeEach(() => {
+    readAllStorageMock.mockReset()
+    setStorageDataMock.mockReset()
+  })
+
+  it("Storage 読み取り失敗時に空データへ fallback せず失敗させること", async () => {
+    readAllStorageMock.mockRejectedValue(new Error("storage unavailable"))
+
+    await expect(handleExportData()).rejects.toThrow("storage unavailable")
+  })
+
+  it("Storage から読めた値を export 形式で返すこと", async () => {
+    const data: StorageDataByKey = {
+      settings: DEFAULT_SETTINGS,
+      state: DEFAULT_STATE,
+      videos: {},
+      authors: {},
+      events: DEFAULT_EVENTS_BUCKET,
+      ratings: {},
+      meta: DEFAULT_META,
+      categories: DEFAULT_CATEGORIES
+    }
+    readAllStorageMock.mockResolvedValue(data)
+
+    await expect(handleExportData()).resolves.toEqual({
+      [STORAGE_KEYS.settings]: DEFAULT_SETTINGS,
+      [STORAGE_KEYS.state]: DEFAULT_STATE,
+      [STORAGE_KEYS.videos]: {},
+      [STORAGE_KEYS.authors]: {},
+      [STORAGE_KEYS.events]: DEFAULT_EVENTS_BUCKET,
+      [STORAGE_KEYS.ratings]: {},
+      [STORAGE_KEYS.meta]: DEFAULT_META,
+      [STORAGE_KEYS.categories]: DEFAULT_CATEGORIES
+    })
   })
 })

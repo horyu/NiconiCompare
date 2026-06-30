@@ -95,36 +95,22 @@ export async function handleDeleteAllData(): Promise<void> {
 }
 
 export async function handleExportData(): Promise<StorageShape> {
-  try {
-    const data = await readAllStorage()
-    logger.debug("[bg:data:export] snapshot counts", {
-      events: data.events.items.length,
-      videos: Object.keys(data.videos).length,
-      authors: Object.keys(data.authors).length,
-      categories: Object.keys(data.categories.items).length
-    })
-    return {
-      [STORAGE_KEYS.settings]: data.settings,
-      [STORAGE_KEYS.state]: data.state,
-      [STORAGE_KEYS.videos]: data.videos,
-      [STORAGE_KEYS.authors]: data.authors,
-      [STORAGE_KEYS.events]: data.events,
-      [STORAGE_KEYS.ratings]: data.ratings,
-      [STORAGE_KEYS.meta]: data.meta,
-      [STORAGE_KEYS.categories]: data.categories
-    }
-  } catch (error) {
-    logger.warn("chrome.storage.local is unavailable.", error)
-    return {
-      [STORAGE_KEYS.settings]: DEFAULT_SETTINGS,
-      [STORAGE_KEYS.state]: DEFAULT_STATE,
-      [STORAGE_KEYS.videos]: {},
-      [STORAGE_KEYS.authors]: {},
-      [STORAGE_KEYS.events]: DEFAULT_EVENTS_BUCKET,
-      [STORAGE_KEYS.ratings]: {},
-      [STORAGE_KEYS.meta]: DEFAULT_META,
-      [STORAGE_KEYS.categories]: DEFAULT_CATEGORIES
-    }
+  const data = await readAllStorage()
+  logger.debug("[bg:data:export] snapshot counts", {
+    events: data.events.items.length,
+    videos: Object.keys(data.videos).length,
+    authors: Object.keys(data.authors).length,
+    categories: Object.keys(data.categories.items).length
+  })
+  return {
+    [STORAGE_KEYS.settings]: data.settings,
+    [STORAGE_KEYS.state]: data.state,
+    [STORAGE_KEYS.videos]: data.videos,
+    [STORAGE_KEYS.authors]: data.authors,
+    [STORAGE_KEYS.events]: data.events,
+    [STORAGE_KEYS.ratings]: data.ratings,
+    [STORAGE_KEYS.meta]: data.meta,
+    [STORAGE_KEYS.categories]: data.categories
   }
 }
 
