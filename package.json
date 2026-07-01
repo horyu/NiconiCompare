@@ -33,7 +33,7 @@
   "devDependencies": {
     "@storybook/addon-themes": "10.4.2",
     "@storybook/react-vite": "10.4.2",
-    "@tailwindcss/vite": "4.3.0",
+    "@tailwindcss/vite": "4.3.2",
     "@testing-library/react": "16.3.2",
     "@types/chrome": "0.2.0",
     "@types/node": "25.9.4",
@@ -48,7 +48,7 @@
     "oxlint": "1.68.0",
     "oxlint-tsgolint": "0.23.0",
     "storybook": "10.4.2",
-    "tailwindcss": "4.3.0",
+    "tailwindcss": "4.3.2",
     "typescript": "6.0.3",
     "vite": "8.1.0",
     "vitest": "4.1.8",
