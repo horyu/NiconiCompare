@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement
-} from "react"
+import { useEffect, useMemo, useRef, useState, type ReactElement } from "react"
 
 import { VIDEO_PAGE_SIZE } from "../../lib/constants"
 import { CategorySelect } from "../components/CategorySelect"
@@ -15,10 +8,10 @@ import { Pagination } from "../components/Pagination"
 import { ScrollToTopButton } from "../components/ScrollToTopButton"
 import { VideoRow } from "../components/VideoRow"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
+import { usePagination } from "../hooks/usePagination"
 import { useSessionState } from "../hooks/useSessionState"
 import { buildCategoryOptions } from "../utils/categories"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
-import { scrollIntoViewIfNeeded } from "../utils/scroll"
 import {
   buildLastEventByVideo,
   buildVerdictCountsByVideo,
@@ -85,7 +78,6 @@ export const VideosTab = ({
   const [videoSortOrder, setVideoSortOrder] = useState<VideoSortOrder>(
     initialState.order
   )
-  const [videoPage, setVideoPage] = useState(initialState.page)
   const sectionTopRef = useRef<HTMLDivElement | null>(null)
   const paginationTopRef = useRef<HTMLDivElement | null>(null)
 
@@ -93,30 +85,6 @@ export const VideosTab = ({
   const effectiveCategoryId = snapshot.categories.items[videoCategoryId]
     ? videoCategoryId
     : snapshot.categories.defaultId
-
-  // フィルタ変更時にページを1にリセット
-  const resetToFirstPage = useCallback(() => {
-    setVideoPage(1)
-  }, [])
-
-  useEffect(() => {
-    persistState({
-      search: videoSearch,
-      author: videoAuthor,
-      categoryId: effectiveCategoryId,
-      sort: videoSort,
-      order: videoSortOrder,
-      page: videoPage
-    })
-  }, [
-    persistState,
-    videoSearch,
-    videoAuthor,
-    videoSort,
-    videoSortOrder,
-    videoPage,
-    effectiveCategoryId
-  ])
 
   const authorOptions = useMemo(() => {
     return Object.values(snapshot.authors).sort((a, b) =>
@@ -171,13 +139,38 @@ export const VideosTab = ({
     ]
   )
 
-  const start = (videoPage - 1) * VIDEO_PAGE_SIZE
-  const pagedVideos = filteredVideos.slice(start, start + VIDEO_PAGE_SIZE)
+  const {
+    currentPage: videoPage,
+    totalPages: videoTotalPages,
+    startIndex: start,
+    pageItems: pagedVideos,
+    resetToFirstPage,
+    handlePageChange
+  } = usePagination({
+    items: filteredVideos,
+    pageSize: VIDEO_PAGE_SIZE,
+    initialPage: initialState.page,
+    scrollTargetRef: paginationTopRef
+  })
 
-  const videoTotalPages = Math.max(
-    1,
-    Math.ceil(filteredVideos.length / VIDEO_PAGE_SIZE)
-  )
+  useEffect(() => {
+    persistState({
+      search: videoSearch,
+      author: videoAuthor,
+      categoryId: effectiveCategoryId,
+      sort: videoSort,
+      order: videoSortOrder,
+      page: videoPage
+    })
+  }, [
+    persistState,
+    videoSearch,
+    videoAuthor,
+    videoSort,
+    videoSortOrder,
+    videoPage,
+    effectiveCategoryId
+  ])
 
   const hasMissingVideoData =
     snapshot.events.items.length > 0 &&
@@ -229,16 +222,6 @@ export const VideosTab = ({
   const handleCategoryChange = (categoryId: string): void => {
     setVideoCategoryId(categoryId)
     resetToFirstPage()
-  }
-
-  const handlePageChange = (nextPage: number): void => {
-    if (nextPage === videoPage) {
-      return
-    }
-    setVideoPage(nextPage)
-    requestAnimationFrame(() => {
-      scrollIntoViewIfNeeded(paginationTopRef.current, { block: "nearest" })
-    })
   }
 
   return (

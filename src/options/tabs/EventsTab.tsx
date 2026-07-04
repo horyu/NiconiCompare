@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement
-} from "react"
+import { useEffect, useMemo, useRef, useState, type ReactElement } from "react"
 
 import { EVENT_PAGE_SIZE, MESSAGE_TYPES } from "../../lib/constants"
 import { sendNcMessage } from "../../lib/messages"
@@ -18,11 +11,11 @@ import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
 import { ScrollToTopButton } from "../components/ScrollToTopButton"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
+import { usePagination } from "../hooks/usePagination"
 import { useSessionState } from "../hooks/useSessionState"
 import { buildCategoryOptions } from "../utils/categories"
 import { buildEventExportRows, filterEvents } from "../utils/events"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
-import { scrollIntoViewIfNeeded } from "../utils/scroll"
 
 interface EventsTabProps {
   snapshot: OptionsSnapshot
@@ -93,7 +86,6 @@ export const EventsTab = ({
   const [eventCategoryId, setEventCategoryId] = useState(
     initialState.categoryId || snapshot.settings.activeCategoryId
   )
-  const [eventPage, setEventPage] = useState(initialState.page)
   const sectionTopRef = useRef<HTMLDivElement | null>(null)
   const paginationTopRef = useRef<HTMLDivElement | null>(null)
   const [eventBusyId, setEventBusyId] = useState<number | null>(null)
@@ -106,48 +98,11 @@ export const EventsTab = ({
     (option) => option.id !== eventCategoryId
   )
 
-  const resetToFirstPage = useCallback(() => {
-    setEventPage(1)
-  }, [])
-
-  useEffect(() => {
-    persistState({
-      search: eventSearch,
-      verdict: eventVerdict,
-      includeDeleted: eventIncludeDeleted,
-      showCategoryOps,
-      categoryId: eventCategoryId,
-      page: eventPage
-    })
-  }, [
-    persistState,
-    eventSearch,
-    eventVerdict,
-    eventIncludeDeleted,
-    showCategoryOps,
-    eventPage,
-    eventCategoryId
-  ])
-
   useEffect(() => {
     if (!snapshot.categories.items[eventCategoryId]) {
       setEventCategoryId(snapshot.categories.defaultId)
     }
   }, [eventCategoryId, snapshot.categories])
-
-  useEffect(() => {
-    if (!navigateToVideoRequest) {
-      return
-    }
-    setEventSearch(navigateToVideoRequest.videoId)
-    const nextCategoryId = snapshot.categories.items[
-      navigateToVideoRequest.categoryId
-    ]
-      ? navigateToVideoRequest.categoryId
-      : snapshot.categories.defaultId
-    setEventCategoryId(nextCategoryId)
-    setEventPage(1)
-  }, [navigateToVideoRequest, snapshot.categories])
 
   useEffect(() => {
     if (bulkMoveTargets.length === 0) {
@@ -182,23 +137,51 @@ export const EventsTab = ({
     ]
   )
 
-  const start = (eventPage - 1) * EVENT_PAGE_SIZE
-  const pagedEvents = filteredEvents.slice(start, start + EVENT_PAGE_SIZE)
+  const {
+    currentPage: eventPage,
+    totalPages: eventTotalPages,
+    pageItems: pagedEvents,
+    resetToFirstPage,
+    handlePageChange
+  } = usePagination({
+    items: filteredEvents,
+    pageSize: EVENT_PAGE_SIZE,
+    initialPage: initialState.page,
+    scrollTargetRef: paginationTopRef
+  })
 
-  const eventTotalPages = Math.max(
-    1,
-    Math.ceil(filteredEvents.length / EVENT_PAGE_SIZE)
-  )
+  useEffect(() => {
+    persistState({
+      search: eventSearch,
+      verdict: eventVerdict,
+      includeDeleted: eventIncludeDeleted,
+      showCategoryOps,
+      categoryId: eventCategoryId,
+      page: eventPage
+    })
+  }, [
+    persistState,
+    eventSearch,
+    eventVerdict,
+    eventIncludeDeleted,
+    showCategoryOps,
+    eventPage,
+    eventCategoryId
+  ])
 
-  const handlePageChange = (nextPage: number): void => {
-    if (nextPage === eventPage) {
+  useEffect(() => {
+    if (!navigateToVideoRequest) {
       return
     }
-    setEventPage(nextPage)
-    requestAnimationFrame(() => {
-      scrollIntoViewIfNeeded(paginationTopRef.current, { block: "nearest" })
-    })
-  }
+    setEventSearch(navigateToVideoRequest.videoId)
+    const nextCategoryId = snapshot.categories.items[
+      navigateToVideoRequest.categoryId
+    ]
+      ? navigateToVideoRequest.categoryId
+      : snapshot.categories.defaultId
+    setEventCategoryId(nextCategoryId)
+    resetToFirstPage()
+  }, [navigateToVideoRequest, resetToFirstPage, snapshot.categories])
 
   // Handlers
   const handleCategoryChange = (categoryId: string): void => {
