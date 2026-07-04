@@ -39,7 +39,7 @@ export default function Popup(): ReactElement {
     if (!silent) {
       setLoading(true)
     }
-    const response = await runNcAction<PopupSnapshot>(
+    const response = await runNcAction(
       () =>
         sendNcMessage({
           type: MESSAGE_TYPES.requestState

@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, expectTypeOf, it, vi } from "vitest"
 
 import { MESSAGE_TYPES } from "./constants"
-import { sendNcMessage } from "./messages"
+import { sendNcMessage, type MessageResponse } from "./messages"
 
 describe("sendNcMessage", () => {
   it("chrome.runtime.sendMessage を呼び出して結果を返すこと", async () => {
@@ -36,5 +36,43 @@ describe("sendNcMessage", () => {
     await expect(
       sendNcMessage({ type: MESSAGE_TYPES.requestState })
     ).rejects.toThrow("Connection failed")
+  })
+
+  it("メッセージごとのレスポンス型を引数から推論すること", () => {
+    const recordEventMessage = {
+      type: MESSAGE_TYPES.recordEvent,
+      payload: {
+        currentVideoId: "sm1",
+        opponentVideoId: "sm2",
+        verdict: "better"
+      }
+    } as const
+    const requestStateMessage = {
+      type: MESSAGE_TYPES.requestState
+    } as const
+    const updateSettingsMessage = {
+      type: MESSAGE_TYPES.updateSettings,
+      payload: { overlayAndCaptureEnabled: true }
+    } as const
+
+    type RecordEventResponse = MessageResponse<typeof recordEventMessage>
+    type RequestStateResponse = MessageResponse<typeof requestStateMessage>
+    type UpdateSettingsResponse = MessageResponse<typeof updateSettingsMessage>
+
+    expectTypeOf<Extract<RecordEventResponse, { ok: true }>>().toEqualTypeOf<{
+      ok: true
+      eventId: number
+    }>()
+    expectTypeOf<
+      Extract<RequestStateResponse, { ok: true }>["data"]
+    >().toHaveProperty("settings")
+    expectTypeOf<
+      Extract<UpdateSettingsResponse, { ok: true }>
+    >().toEqualTypeOf<{
+      ok: true
+    }>()
+    expectTypeOf<
+      Extract<UpdateSettingsResponse, { ok: true }>
+    >().not.toHaveProperty("eventId")
   })
 })

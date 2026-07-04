@@ -12,20 +12,8 @@ import {
   MESSAGE_TYPES,
   STORAGE_KEYS
 } from "../../lib/constants"
-import type { BackgroundResponse } from "../../lib/messages"
 import { sendNcMessage } from "../../lib/messages"
-import type {
-  NcCategories,
-  NcSettings,
-  NcState,
-  VideoSnapshot
-} from "../../lib/types"
-
-interface StateResponse {
-  settings: NcSettings
-  state: NcState
-  categories: NcCategories
-}
+import type { NcCategories, NcSettings, VideoSnapshot } from "../../lib/types"
 
 interface OverlayStateResult {
   currentVideoId: string
@@ -108,7 +96,7 @@ export function useOverlayState(): OverlayStateResult {
   }, [])
 
   const refreshState = useCallback(async () => {
-    const response = await sendNcMessage<BackgroundResponse<StateResponse>>({
+    const response = await sendNcMessage({
       type: MESSAGE_TYPES.requestState
     })
 
