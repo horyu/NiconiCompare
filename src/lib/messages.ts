@@ -91,7 +91,7 @@ export interface ExportDataMessage {
 export interface ImportDataMessage {
   type: typeof MESSAGE_TYPES.importData
   payload: {
-    data: Partial<StorageShape>
+    data: unknown
   }
 }
 

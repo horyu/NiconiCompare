@@ -141,6 +141,35 @@ describe("handleImportData schemaVersion control", () => {
     expect(payload.meta?.schemaVersion).toBe(DEFAULT_META.schemaVersion)
   })
 
+  it("古い部分 settings は既定値で補完して取り込めること", async () => {
+    const input = {
+      [STORAGE_KEYS.settings]: {
+        recentWindowSize: 3,
+        popupRecentCount: 4
+      },
+      [STORAGE_KEYS.state]: {
+        currentVideoId: "v1"
+      },
+      [STORAGE_KEYS.events]: {
+        items: []
+      }
+    } as unknown as Partial<StorageShape>
+
+    await handleImportData(input)
+
+    expect(setStorageDataMock).toHaveBeenCalledTimes(1)
+    const payload = getFirstSetStoragePayload()
+    expect(payload.settings?.recentWindowSize).toBe(3)
+    expect(payload.settings?.popupRecentCount).toBe(4)
+    expect(payload.settings?.overlayAndCaptureEnabled).toBe(
+      DEFAULT_SETTINGS.overlayAndCaptureEnabled
+    )
+    expect(payload.settings?.glicko).toEqual(DEFAULT_SETTINGS.glicko)
+    expect(payload.state?.currentVideoId).toBe("v1")
+    expect(payload.state?.pinnedOpponentVideoId).toBe("")
+    expect(payload.events?.nextId).toBe(1)
+  })
+
   it("currentVideoId は recentWindow から除外して再構築すること", async () => {
     const input = {
       [STORAGE_KEYS.settings]: {
@@ -215,6 +244,125 @@ describe("handleImportData schemaVersion control", () => {
 
     const payload = getFirstSetStoragePayload()
     expect(payload.state?.recentWindow).toEqual(["v2", "v1"])
+  })
+
+  it("settings の不正型を拒否し Storage を変更しないこと", async () => {
+    const input = {
+      [STORAGE_KEYS.settings]: {
+        ...DEFAULT_SETTINGS,
+        recentWindowSize: "5"
+      }
+    } as unknown as Partial<StorageShape>
+
+    await expect(handleImportData(input)).rejects.toThrow(
+      "インポートデータが不正です"
+    )
+    expect(setStorageDataMock).not.toHaveBeenCalled()
+  })
+
+  it("壊れた event を拒否し Storage を変更しないこと", async () => {
+    const input = {
+      [STORAGE_KEYS.events]: {
+        items: [
+          {
+            id: 1,
+            timestamp: 1,
+            currentVideoId: "v1",
+            opponentVideoId: "v2",
+            verdict: "invalid",
+            disabled: false,
+            categoryId: DEFAULT_CATEGORY_ID
+          }
+        ],
+        nextId: 2
+      }
+    } as unknown as Partial<StorageShape>
+
+    await expect(handleImportData(input)).rejects.toThrow(
+      "インポートデータが不正です"
+    )
+    expect(setStorageDataMock).not.toHaveBeenCalled()
+  })
+
+  it("video の不正型を拒否し Storage を変更しないこと", async () => {
+    const input = {
+      [STORAGE_KEYS.videos]: {
+        v1: {
+          videoId: "v1",
+          title: "video1",
+          authorUrl: "author1",
+          thumbnailUrls: "invalid",
+          capturedAt: 1
+        }
+      }
+    } as unknown as Partial<StorageShape>
+
+    await expect(handleImportData(input)).rejects.toThrow(
+      "インポートデータが不正です"
+    )
+    expect(setStorageDataMock).not.toHaveBeenCalled()
+  })
+
+  it("categories の不正型を拒否し Storage を変更しないこと", async () => {
+    const input = {
+      [STORAGE_KEYS.categories]: {
+        ...DEFAULT_CATEGORIES,
+        order: [DEFAULT_CATEGORY_ID, 1]
+      }
+    } as unknown as Partial<StorageShape>
+
+    await expect(handleImportData(input)).rejects.toThrow(
+      "インポートデータが不正です"
+    )
+    expect(setStorageDataMock).not.toHaveBeenCalled()
+  })
+
+  it("categoryId がない過去 event は default category で補完すること", async () => {
+    const input = {
+      [STORAGE_KEYS.events]: {
+        items: [
+          {
+            id: 1,
+            timestamp: 1,
+            currentVideoId: "v1",
+            opponentVideoId: "v2",
+            verdict: "better",
+            disabled: false
+          }
+        ],
+        nextId: 2
+      }
+    } as unknown as Partial<StorageShape>
+
+    await handleImportData(input)
+
+    const payload = getFirstSetStoragePayload()
+    expect(payload.events?.items[0]?.categoryId).toBe(DEFAULT_CATEGORY_ID)
+  })
+
+  it("存在しない categoryId の event は default category で補正すること", async () => {
+    const input = {
+      [STORAGE_KEYS.events]: {
+        items: [
+          {
+            id: 1,
+            timestamp: 1,
+            currentVideoId: "v1",
+            opponentVideoId: "v2",
+            verdict: "better",
+            disabled: false,
+            categoryId: "missing-category"
+          }
+        ],
+        nextId: 2
+      },
+      [STORAGE_KEYS.categories]: DEFAULT_CATEGORIES
+    } as Partial<StorageShape>
+
+    await handleImportData(input)
+
+    const payload = getFirstSetStoragePayload()
+    expect(payload.events?.items[0]?.categoryId).toBe(DEFAULT_CATEGORY_ID)
   })
 })
 

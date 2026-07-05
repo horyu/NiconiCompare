@@ -331,6 +331,15 @@ interface MessageMap {
 
 ## P1: import データを実行時スキーマで検証する
 
+### 状態
+
+- 対応済み。
+- Background 側の `handleImportData` 冒頭で import payload を runtime 検証するようにした。
+- `settings`、`state`、`events`、`videos`、`authors`、`ratings`、`categories`、`meta` の存在する key を保存前に検証する。
+- `importData` message payload は `unknown` とし、Options 側の StorageShape assertion を削除した。
+- 過去データ互換として、event の `categoryId` 欠落や存在しないカテゴリ参照は default category へ補正する。
+- 不正な settings、event、video、categories を拒否し、Storage を変更しない回帰テストを追加した。
+
 ### 問題
 
 `src/options/tabs/DataTab.tsx` は JSON のルートが object であることだけ確認し、`StorageShape` 相当として Background へ送る。
