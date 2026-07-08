@@ -1,31 +1,21 @@
-// oxlint-disable-file max-lines
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement
-} from "react"
+import { useEffect, useMemo, useRef, useState, type ReactElement } from "react"
 
 import { EVENT_PAGE_SIZE, MESSAGE_TYPES } from "../../lib/constants"
-import { formatPaddedDateTime } from "../../lib/date"
 import { sendNcMessage } from "../../lib/messages"
 import { runNcAction } from "../../lib/ncAction"
 import type { CompareEvent, Verdict } from "../../lib/types"
-import { VERDICTS } from "../../lib/types"
-import { createWatchUrl } from "../../lib/url"
 import { CategorySelect } from "../components/CategorySelect"
 import { ClearableTextInput } from "../components/ClearableTextInput"
-import { EventVideoLabel } from "../components/EventVideoLabel"
+import { EventRow } from "../components/EventRow"
 import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
 import { ScrollToTopButton } from "../components/ScrollToTopButton"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
+import { usePagination } from "../hooks/usePagination"
 import { useSessionState } from "../hooks/useSessionState"
 import { buildCategoryOptions } from "../utils/categories"
+import { buildEventExportRows, filterEvents } from "../utils/events"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
-import { scrollIntoViewIfNeeded } from "../utils/scroll"
 
 interface EventsTabProps {
   snapshot: OptionsSnapshot
@@ -72,9 +62,6 @@ const DEFAULT_EVENT_SESSION_STATE: EventSessionState = {
   showCategoryOps: false,
   page: 1
 }
-const isVerdict = (value: string): value is Verdict =>
-  (VERDICTS as readonly string[]).includes(value)
-
 export const EventsTab = ({
   snapshot,
   eventShowThumbnails,
@@ -99,7 +86,6 @@ export const EventsTab = ({
   const [eventCategoryId, setEventCategoryId] = useState(
     initialState.categoryId || snapshot.settings.activeCategoryId
   )
-  const [eventPage, setEventPage] = useState(initialState.page)
   const sectionTopRef = useRef<HTMLDivElement | null>(null)
   const paginationTopRef = useRef<HTMLDivElement | null>(null)
   const [eventBusyId, setEventBusyId] = useState<number | null>(null)
@@ -112,48 +98,11 @@ export const EventsTab = ({
     (option) => option.id !== eventCategoryId
   )
 
-  const resetToFirstPage = useCallback(() => {
-    setEventPage(1)
-  }, [])
-
-  useEffect(() => {
-    persistState({
-      search: eventSearch,
-      verdict: eventVerdict,
-      includeDeleted: eventIncludeDeleted,
-      showCategoryOps,
-      categoryId: eventCategoryId,
-      page: eventPage
-    })
-  }, [
-    persistState,
-    eventSearch,
-    eventVerdict,
-    eventIncludeDeleted,
-    showCategoryOps,
-    eventPage,
-    eventCategoryId
-  ])
-
   useEffect(() => {
     if (!snapshot.categories.items[eventCategoryId]) {
       setEventCategoryId(snapshot.categories.defaultId)
     }
   }, [eventCategoryId, snapshot.categories])
-
-  useEffect(() => {
-    if (!navigateToVideoRequest) {
-      return
-    }
-    setEventSearch(navigateToVideoRequest.videoId)
-    const nextCategoryId = snapshot.categories.items[
-      navigateToVideoRequest.categoryId
-    ]
-      ? navigateToVideoRequest.categoryId
-      : snapshot.categories.defaultId
-    setEventCategoryId(nextCategoryId)
-    setEventPage(1)
-  }, [navigateToVideoRequest, snapshot.categories])
 
   useEffect(() => {
     if (bulkMoveTargets.length === 0) {
@@ -188,23 +137,51 @@ export const EventsTab = ({
     ]
   )
 
-  const start = (eventPage - 1) * EVENT_PAGE_SIZE
-  const pagedEvents = filteredEvents.slice(start, start + EVENT_PAGE_SIZE)
+  const {
+    currentPage: eventPage,
+    totalPages: eventTotalPages,
+    pageItems: pagedEvents,
+    resetToFirstPage,
+    handlePageChange
+  } = usePagination({
+    items: filteredEvents,
+    pageSize: EVENT_PAGE_SIZE,
+    initialPage: initialState.page,
+    scrollTargetRef: paginationTopRef
+  })
 
-  const eventTotalPages = Math.max(
-    1,
-    Math.ceil(filteredEvents.length / EVENT_PAGE_SIZE)
-  )
+  useEffect(() => {
+    persistState({
+      search: eventSearch,
+      verdict: eventVerdict,
+      includeDeleted: eventIncludeDeleted,
+      showCategoryOps,
+      categoryId: eventCategoryId,
+      page: eventPage
+    })
+  }, [
+    persistState,
+    eventSearch,
+    eventVerdict,
+    eventIncludeDeleted,
+    showCategoryOps,
+    eventPage,
+    eventCategoryId
+  ])
 
-  const handlePageChange = (nextPage: number): void => {
-    if (nextPage === eventPage) {
+  useEffect(() => {
+    if (!navigateToVideoRequest) {
       return
     }
-    setEventPage(nextPage)
-    requestAnimationFrame(() => {
-      scrollIntoViewIfNeeded(paginationTopRef.current, { block: "nearest" })
-    })
-  }
+    setEventSearch(navigateToVideoRequest.videoId)
+    const nextCategoryId = snapshot.categories.items[
+      navigateToVideoRequest.categoryId
+    ]
+      ? navigateToVideoRequest.categoryId
+      : snapshot.categories.defaultId
+    setEventCategoryId(nextCategoryId)
+    resetToFirstPage()
+  }, [navigateToVideoRequest, resetToFirstPage, snapshot.categories])
 
   // Handlers
   const handleCategoryChange = (categoryId: string): void => {
@@ -213,7 +190,10 @@ export const EventsTab = ({
   }
 
   const handleExport = (format: "csv" | "tsv", withBom: boolean): void => {
-    const exportRows = buildExportRows({ events: filteredEvents, snapshot })
+    const exportRows = buildEventExportRows({
+      events: filteredEvents,
+      snapshot
+    })
     const delimiter = format === "csv" ? "," : "\t"
     const content = buildDelimitedText({
       header: EXPORT_HEADERS,
@@ -614,263 +594,4 @@ export const EventsTab = ({
       <ScrollToTopButton targetRef={sectionTopRef} />
     </section>
   )
-}
-
-interface ExportRow {
-  id: string
-  occurredAt: string
-  status: string
-  currentVideoId: string
-  currentVideoUrl: string
-  currentVideoTitle: string
-  currentVideoAuthor: string
-  opponentVideoId: string
-  opponentVideoUrl: string
-  opponentVideoTitle: string
-  opponentVideoAuthor: string
-  verdict: string
-}
-
-interface ExportRowParams {
-  events: CompareEvent[]
-  snapshot: OptionsSnapshot
-}
-
-interface EventRowProps {
-  event: CompareEvent
-  showCategoryOps: boolean
-  isBusy: boolean
-  currentVideo?: OptionsSnapshot["videos"][string]
-  opponentVideo?: OptionsSnapshot["videos"][string]
-  currentAuthorName?: string
-  opponentAuthorName?: string
-  showThumbnails: boolean
-  isCurrentWinner: boolean
-  isOpponentWinner: boolean
-  timestamp: Date
-  rowMoveTargets: { id: string; name: string }[]
-  rowMoveTargetId: string
-  onVerdictChange: (target: CompareEvent, verdict: Verdict) => void
-  onMoveTargetChange: (value: string) => void
-  onMoveEvent: (eventId: number, targetCategoryId: string) => void
-  onDeleteEvent: (eventId: number) => void
-  onRestoreEvent: (eventId: number) => void
-  onPurgeEvent: (eventId: number) => void
-}
-
-// oxlint-disable-next-line react/no-multi-comp
-function EventRow({
-  event,
-  showCategoryOps,
-  isBusy,
-  currentVideo,
-  opponentVideo,
-  currentAuthorName,
-  opponentAuthorName,
-  showThumbnails,
-  isCurrentWinner,
-  isOpponentWinner,
-  timestamp,
-  rowMoveTargets,
-  rowMoveTargetId,
-  onVerdictChange,
-  onMoveTargetChange,
-  onMoveEvent,
-  onDeleteEvent,
-  onRestoreEvent,
-  onPurgeEvent
-}: EventRowProps): ReactElement {
-  return (
-    <div
-      className={`grid ${
-        showCategoryOps
-          ? "grid-cols-[40px_70px_1fr_1fr_90px_160px_90px]"
-          : "grid-cols-[40px_70px_1fr_1fr_90px_90px]"
-      } gap-2 items-center px-3 py-2 text-sm text-slate-700 dark:text-slate-200`}>
-      <div className="font-medium flex flex-col gap-1 items-center">
-        <span>#{event.id}</span>
-        {event.disabled && (
-          <span className="text-[10px] px-2 py-[1px] rounded-full bg-slate-100 text-slate-500 border border-slate-200 w-fit dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">
-            無効
-          </span>
-        )}
-      </div>
-      <div className="text-xs text-slate-500 dark:text-slate-400">
-        {formatPaddedDateTime(timestamp)}
-      </div>
-      <div
-        className={isCurrentWinner ? "border-l-4 border-l-slate-400 pl-2" : ""}>
-        <EventVideoLabel
-          videoId={event.currentVideoId}
-          video={currentVideo}
-          authorName={currentAuthorName}
-          showThumbnail={showThumbnails}
-        />
-      </div>
-      <div
-        className={
-          isOpponentWinner ? "border-l-4 border-l-slate-400 pl-2" : ""
-        }>
-        <EventVideoLabel
-          videoId={event.opponentVideoId}
-          video={opponentVideo}
-          authorName={opponentAuthorName}
-          showThumbnail={showThumbnails}
-        />
-      </div>
-      <select
-        value={event.verdict}
-        disabled={event.disabled || isBusy}
-        onChange={(e) => {
-          const { value } = e.target
-          if (isVerdict(value)) {
-            onVerdictChange(event, value)
-          }
-        }}
-        className="border border-slate-200 rounded-md px-2 py-1 text-sm bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
-        <option value="better">勝ち</option>
-        <option value="same">引き分け</option>
-        <option value="worse">負け</option>
-      </select>
-      {showCategoryOps && (
-        <div className="flex items-center gap-2">
-          {rowMoveTargets.length === 0 ? (
-            <span className="text-xs text-slate-400 dark:text-slate-500">
-              移動先なし
-            </span>
-          ) : (
-            <>
-              <div className="w-[15ch] max-w-[15ch]">
-                <CategorySelect
-                  value={rowMoveTargetId}
-                  onChange={onMoveTargetChange}
-                  options={rowMoveTargets}
-                  size="sm"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => onMoveEvent(event.id, rowMoveTargetId)}
-                disabled={!rowMoveTargetId || isBusy}
-                className="px-2 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
-                移動
-              </button>
-            </>
-          )}
-        </div>
-      )}
-      <div className="flex flex-col gap-2">
-        {!event.disabled ? (
-          <button
-            type="button"
-            onClick={() => onDeleteEvent(event.id)}
-            disabled={isBusy}
-            className="px-3 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
-            無効化
-          </button>
-        ) : (
-          <>
-            <button
-              type="button"
-              onClick={() => onRestoreEvent(event.id)}
-              disabled={isBusy}
-              className="px-3 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
-              有効化
-            </button>
-            <button
-              type="button"
-              onClick={() => onPurgeEvent(event.id)}
-              disabled={isBusy}
-              className="px-3 py-1 rounded border border-rose-200 text-xs text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-200 dark:hover:bg-rose-950/40">
-              削除
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
-
-interface FilterEventsParams {
-  events: CompareEvent[]
-  includeDeleted: boolean
-  verdict: string
-  categoryId: string
-  defaultCategoryId: string
-  search: string
-  videos: OptionsSnapshot["videos"]
-  authors: OptionsSnapshot["authors"]
-}
-
-function filterEvents({
-  events,
-  includeDeleted,
-  verdict,
-  categoryId,
-  defaultCategoryId,
-  search,
-  videos,
-  authors
-}: FilterEventsParams): CompareEvent[] {
-  const normalizedSearch = search.trim().toLowerCase()
-  const filtered = events.filter((event) => {
-    if (!includeDeleted && event.disabled) {
-      return false
-    }
-    if (verdict !== "all" && event.verdict !== verdict) {
-      return false
-    }
-    const resolvedCategoryId = event.categoryId ?? defaultCategoryId
-    if (resolvedCategoryId !== categoryId) {
-      return false
-    }
-    if (normalizedSearch.length === 0) {
-      return true
-    }
-    const idMatch = String(event.id).includes(normalizedSearch)
-    const current = videos[event.currentVideoId]
-    const opponent = videos[event.opponentVideoId]
-    const currentAuthor = current ? authors[current.authorUrl]?.name : undefined
-    const opponentAuthor = opponent
-      ? authors[opponent.authorUrl]?.name
-      : undefined
-    const text =
-      `${event.currentVideoId} ${event.opponentVideoId} ` +
-      `${current?.title ?? ""} ${opponent?.title ?? ""} ` +
-      `${currentAuthor ?? ""} ${opponentAuthor ?? ""}`
-    return idMatch || text.toLowerCase().includes(normalizedSearch)
-  })
-  return filtered.sort((a, b) => b.id - a.id)
-}
-
-function buildExportRows({ events, snapshot }: ExportRowParams): ExportRow[] {
-  return events.map((event) => {
-    const currentVideo = snapshot.videos[event.currentVideoId]
-    const opponentVideo = snapshot.videos[event.opponentVideoId]
-    const currentAuthor = currentVideo
-      ? snapshot.authors[currentVideo.authorUrl]?.name
-      : ""
-    const opponentAuthor = opponentVideo
-      ? snapshot.authors[opponentVideo.authorUrl]?.name
-      : ""
-    return {
-      id: String(event.id),
-      occurredAt: formatPaddedDateTime(new Date(event.timestamp)),
-      status: event.disabled ? "無効" : "有効",
-      currentVideoId: event.currentVideoId,
-      currentVideoUrl: createWatchUrl(event.currentVideoId),
-      currentVideoTitle: currentVideo?.title ?? "",
-      currentVideoAuthor: currentAuthor ?? "",
-      opponentVideoId: event.opponentVideoId,
-      opponentVideoUrl: createWatchUrl(event.opponentVideoId),
-      opponentVideoTitle: opponentVideo?.title ?? "",
-      opponentVideoAuthor: opponentAuthor ?? "",
-      verdict:
-        event.verdict === "better"
-          ? "勝ち"
-          : event.verdict === "same"
-            ? "引き分け"
-            : "負け"
-    }
-  })
 }

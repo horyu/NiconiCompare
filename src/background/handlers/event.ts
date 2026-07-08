@@ -12,11 +12,9 @@ import type {
   Verdict
 } from "../../lib/types"
 import { withStorageUpdates } from "../services/storage"
-import {
-  getOrCreateRatingSnapshot,
-  rebuildRatingsFromEvents
-} from "../utils/ratingHelpers"
+import { getOrCreateRatingSnapshot } from "../utils/ratingHelpers"
 import { updateRecentWindow } from "../utils/recentWindow"
+import { buildEventMutationUpdates } from "./eventMutation"
 
 interface RecordEventPayload {
   currentVideoId: string
@@ -39,15 +37,12 @@ export async function handleRecordEvent(
           targetEvent.id,
           payload.verdict
         )
-        const nextRatings = rebuildRatingsFromEvents(
-          updatedEvents.items,
-          settings
-        )
         return {
-          updates: {
-            events: updatedEvents,
-            ratings: nextRatings
-          },
+          updates: buildEventMutationUpdates({
+            currentEvents: events,
+            nextEvents: updatedEvents,
+            settings
+          }),
           result: targetEvent.id
         }
       }

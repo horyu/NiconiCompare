@@ -3,7 +3,7 @@ import { produce } from "immer"
 import { normalizeCategories } from "../../lib/categories"
 import { DEFAULT_CATEGORY_ID } from "../../lib/constants"
 import { withStorageUpdates } from "../services/storage"
-import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
+import { buildEventMutationUpdates } from "./eventMutation"
 
 export async function handleCreateCategory(name: string): Promise<string> {
   const result = await withStorageUpdates({
@@ -65,19 +65,24 @@ export async function handleDeleteCategory(
         throw new Error("Target category not found")
       }
 
-      const updatedEvents = produce(events, (draft) => {
-        if (moveToCategoryId) {
-          draft.items = draft.items.map((event) =>
-            event.categoryId === categoryId
-              ? { ...event, categoryId: moveToCategoryId }
-              : event
-          )
-        } else {
-          draft.items = draft.items.filter(
-            (event) => event.categoryId !== categoryId
-          )
-        }
-      })
+      const hasAffectedEvents = events.items.some(
+        (event) => event.categoryId === categoryId
+      )
+      const updatedEvents = hasAffectedEvents
+        ? produce(events, (draft) => {
+            if (moveToCategoryId) {
+              draft.items = draft.items.map((event) =>
+                event.categoryId === categoryId
+                  ? { ...event, categoryId: moveToCategoryId }
+                  : event
+              )
+            } else {
+              draft.items = draft.items.filter(
+                (event) => event.categoryId !== categoryId
+              )
+            }
+          })
+        : events
 
       const updatedCategories = produce(nextCategories, (draft) => {
         delete draft.items[categoryId]
@@ -95,21 +100,19 @@ export async function handleDeleteCategory(
           ? (moveToCategoryId ?? updatedCategories.defaultId)
           : settings.activeCategoryId
 
-      const nextRatings = rebuildRatingsFromEvents(
-        updatedEvents.items,
-        settings
-      )
-
       return {
-        updates: {
-          categories: updatedCategories,
-          events: updatedEvents,
-          ratings: nextRatings,
-          settings: {
-            ...settings,
-            activeCategoryId: nextActiveCategoryId
+        updates: buildEventMutationUpdates({
+          currentEvents: events,
+          nextEvents: updatedEvents,
+          settings,
+          extraUpdates: {
+            categories: updatedCategories,
+            settings: {
+              ...settings,
+              activeCategoryId: nextActiveCategoryId
+            }
           }
-        }
+        })
       }
     }
   })
@@ -211,6 +214,14 @@ export async function handleBulkMoveEvents(
       }
 
       const eventIdSet = new Set(eventIds)
+      const hasAffectedEvents = events.items.some(
+        (event) =>
+          eventIdSet.has(event.id) && event.categoryId !== targetCategoryId
+      )
+      if (!hasAffectedEvents) {
+        return { updates: {} }
+      }
+
       const updatedEvents = produce(events, (draft) => {
         draft.items = draft.items.map((event) =>
           eventIdSet.has(event.id)
@@ -219,16 +230,12 @@ export async function handleBulkMoveEvents(
         )
       })
 
-      const nextRatings = rebuildRatingsFromEvents(
-        updatedEvents.items,
-        settings
-      )
-
       return {
-        updates: {
-          events: updatedEvents,
-          ratings: nextRatings
-        }
+        updates: buildEventMutationUpdates({
+          currentEvents: events,
+          nextEvents: updatedEvents,
+          settings
+        })
       }
     }
   })

@@ -2,7 +2,7 @@ import { produce } from "immer"
 
 import type { NcEventsBucket } from "../../lib/types"
 import { withStorageUpdates } from "../services/storage"
-import { rebuildRatingsFromEvents } from "../utils/ratingHelpers"
+import { buildEventMutationUpdates } from "./eventMutation"
 
 export async function handleDeleteEvent(eventId: number): Promise<boolean> {
   const result = await withStorageUpdates({
@@ -21,17 +21,14 @@ export async function handleDeleteEvent(eventId: number): Promise<boolean> {
       const updatedEvents = produce(events, (draft) => {
         draft.items[index] = { ...draft.items[index], disabled: true }
       })
-      const nextRatings = rebuildRatingsFromEvents(
-        updatedEvents.items,
-        settings
-      )
 
       return {
-        updates: {
-          events: updatedEvents,
-          ratings: nextRatings,
-          meta
-        },
+        updates: buildEventMutationUpdates({
+          currentEvents: events,
+          nextEvents: updatedEvents,
+          settings,
+          extraUpdates: { meta }
+        }),
         result: true
       }
     }
@@ -57,16 +54,13 @@ export async function handleRestoreEvent(eventId: number): Promise<boolean> {
       const updatedEvents = produce(events, (draft) => {
         draft.items[index] = { ...draft.items[index], disabled: false }
       })
-      const nextRatings = rebuildRatingsFromEvents(
-        updatedEvents.items,
-        settings
-      )
 
       return {
-        updates: {
-          events: updatedEvents,
-          ratings: nextRatings
-        },
+        updates: buildEventMutationUpdates({
+          currentEvents: events,
+          nextEvents: updatedEvents,
+          settings
+        }),
         result: true
       }
     }
@@ -93,17 +87,14 @@ export async function handlePurgeEvent(eventId: number): Promise<boolean> {
         items: events.items.filter((event) => event.id !== eventId),
         nextId: events.nextId
       }
-      const nextRatings = rebuildRatingsFromEvents(
-        updatedEvents.items,
-        settings
-      )
 
       return {
-        updates: {
-          events: updatedEvents,
-          ratings: nextRatings,
-          meta
-        },
+        updates: buildEventMutationUpdates({
+          currentEvents: events,
+          nextEvents: updatedEvents,
+          settings,
+          extraUpdates: { meta }
+        }),
         result: true
       }
     }

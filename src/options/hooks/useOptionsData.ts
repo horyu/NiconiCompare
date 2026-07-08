@@ -2,29 +2,14 @@ import { useCallback, useEffect, useState } from "react"
 
 import { MESSAGE_TYPES } from "../../lib/constants"
 import { handleUIError } from "../../lib/errorHandler"
-import type { BackgroundResponse } from "../../lib/messages"
-import { sendNcMessage } from "../../lib/messages"
-import type {
-  NcAuthors,
-  NcCategories,
-  NcEventsBucket,
-  NcMeta,
-  NcRatings,
-  NcSettings,
-  NcState,
-  NcVideos
-} from "../../lib/types"
+import {
+  sendNcMessage,
+  type MessageResponse,
+  type RequestStateMessage,
+  type StateSnapshot
+} from "../../lib/messages"
 
-export interface OptionsSnapshot {
-  settings: NcSettings
-  state: NcState
-  videos: NcVideos
-  authors: NcAuthors
-  events: NcEventsBucket
-  ratings: NcRatings
-  meta: NcMeta
-  categories: NcCategories
-}
+export type OptionsSnapshot = StateSnapshot
 
 interface UseOptionsDataResult {
   snapshot?: OptionsSnapshot
@@ -45,10 +30,23 @@ export const useOptionsData = (): UseOptionsDataResult => {
       setLoading(true)
       setError(undefined)
     }
-    const response = await sendNcMessage<BackgroundResponse<OptionsSnapshot>>({
-      type: MESSAGE_TYPES.requestState
-    })
-    if (!response.ok || !response.data) {
+    let response: MessageResponse<RequestStateMessage>
+    try {
+      response = await sendNcMessage({
+        type: MESSAGE_TYPES.requestState
+      })
+    } catch (requestError) {
+      handleUIError(requestError, "ui:options:request-state")
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "状態取得に失敗しました。"
+      )
+      setLoading(false)
+      return
+    }
+
+    if (!response.ok) {
       setError(response.error ?? "状態取得に失敗しました。")
       setLoading(false)
       return

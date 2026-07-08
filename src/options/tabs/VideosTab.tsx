@@ -1,27 +1,24 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement
-} from "react"
+import { useEffect, useMemo, useRef, useState, type ReactElement } from "react"
 
 import { VIDEO_PAGE_SIZE } from "../../lib/constants"
-import { formatPaddedDateTime } from "../../lib/date"
-import type { RatingSnapshot, VideoSnapshot } from "../../lib/types"
-import { createWatchUrl } from "../../lib/url"
 import { CategorySelect } from "../components/CategorySelect"
 import { ClearableTextInput } from "../components/ClearableTextInput"
 import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
 import { ScrollToTopButton } from "../components/ScrollToTopButton"
+import { VideoRow } from "../components/VideoRow"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
+import { usePagination } from "../hooks/usePagination"
 import { useSessionState } from "../hooks/useSessionState"
 import { buildCategoryOptions } from "../utils/categories"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
-import { scrollIntoViewIfNeeded } from "../utils/scroll"
-import { sortVideos, type VideoSortOrder } from "../utils/videos"
+import {
+  buildLastEventByVideo,
+  buildVerdictCountsByVideo,
+  buildVideoExportRows,
+  filterVideos,
+  type VideoSortOrder
+} from "../utils/videos"
 
 interface VideosTabProps {
   snapshot: OptionsSnapshot
@@ -81,7 +78,6 @@ export const VideosTab = ({
   const [videoSortOrder, setVideoSortOrder] = useState<VideoSortOrder>(
     initialState.order
   )
-  const [videoPage, setVideoPage] = useState(initialState.page)
   const sectionTopRef = useRef<HTMLDivElement | null>(null)
   const paginationTopRef = useRef<HTMLDivElement | null>(null)
 
@@ -89,30 +85,6 @@ export const VideosTab = ({
   const effectiveCategoryId = snapshot.categories.items[videoCategoryId]
     ? videoCategoryId
     : snapshot.categories.defaultId
-
-  // フィルタ変更時にページを1にリセット
-  const resetToFirstPage = useCallback(() => {
-    setVideoPage(1)
-  }, [])
-
-  useEffect(() => {
-    persistState({
-      search: videoSearch,
-      author: videoAuthor,
-      categoryId: effectiveCategoryId,
-      sort: videoSort,
-      order: videoSortOrder,
-      page: videoPage
-    })
-  }, [
-    persistState,
-    videoSearch,
-    videoAuthor,
-    videoSort,
-    videoSortOrder,
-    videoPage,
-    effectiveCategoryId
-  ])
 
   const authorOptions = useMemo(() => {
     return Object.values(snapshot.authors).sort((a, b) =>
@@ -167,13 +139,38 @@ export const VideosTab = ({
     ]
   )
 
-  const start = (videoPage - 1) * VIDEO_PAGE_SIZE
-  const pagedVideos = filteredVideos.slice(start, start + VIDEO_PAGE_SIZE)
+  const {
+    currentPage: videoPage,
+    totalPages: videoTotalPages,
+    startIndex: start,
+    pageItems: pagedVideos,
+    resetToFirstPage,
+    handlePageChange
+  } = usePagination({
+    items: filteredVideos,
+    pageSize: VIDEO_PAGE_SIZE,
+    initialPage: initialState.page,
+    scrollTargetRef: paginationTopRef
+  })
 
-  const videoTotalPages = Math.max(
-    1,
-    Math.ceil(filteredVideos.length / VIDEO_PAGE_SIZE)
-  )
+  useEffect(() => {
+    persistState({
+      search: videoSearch,
+      author: videoAuthor,
+      categoryId: effectiveCategoryId,
+      sort: videoSort,
+      order: videoSortOrder,
+      page: videoPage
+    })
+  }, [
+    persistState,
+    videoSearch,
+    videoAuthor,
+    videoSort,
+    videoSortOrder,
+    videoPage,
+    effectiveCategoryId
+  ])
 
   const hasMissingVideoData =
     snapshot.events.items.length > 0 &&
@@ -183,7 +180,7 @@ export const VideosTab = ({
     Object.keys(snapshot.authors).length === 0
   const ratingsByCategory = snapshot.ratings[effectiveCategoryId] ?? {}
   const handleExport = (format: "csv" | "tsv", withBom: boolean): void => {
-    const exportRows = buildExportRows({
+    const exportRows = buildVideoExportRows({
       videos: filteredVideos,
       snapshot,
       ratingsByCategory,
@@ -225,16 +222,6 @@ export const VideosTab = ({
   const handleCategoryChange = (categoryId: string): void => {
     setVideoCategoryId(categoryId)
     resetToFirstPage()
-  }
-
-  const handlePageChange = (nextPage: number): void => {
-    if (nextPage === videoPage) {
-      return
-    }
-    setVideoPage(nextPage)
-    requestAnimationFrame(() => {
-      scrollIntoViewIfNeeded(paginationTopRef.current, { block: "nearest" })
-    })
   }
 
   return (
@@ -412,265 +399,4 @@ export const VideosTab = ({
       <ScrollToTopButton targetRef={sectionTopRef} />
     </section>
   )
-}
-
-interface ExportRow {
-  videoId: string
-  thumbnailUrl: string
-  videoUrl: string
-  title: string
-  author: string
-  rating: string
-  rd: string
-  total: string
-  wins: string
-  draws: string
-  losses: string
-  lastVerdictAt: string
-}
-
-interface ExportRowParams {
-  videos: VideoSnapshot[]
-  snapshot: OptionsSnapshot
-  ratingsByCategory: Record<string, RatingSnapshot>
-  lastEventByVideo: Map<string, number>
-  verdictCountsByVideo: Map<
-    string,
-    { wins: number; draws: number; losses: number }
-  >
-}
-
-interface VideoRowProps {
-  rowNumber: number
-  video: VideoSnapshot
-  rating?: RatingSnapshot
-  authorName?: string
-  verdictCounts: { wins: number; draws: number; losses: number }
-  lastVerdictAt?: number
-  categoryId: string
-  onOpenEventsForVideo?: (videoId: string, categoryId: string) => void
-}
-
-// oxlint-disable-next-line react/no-multi-comp
-function VideoRow({
-  rowNumber,
-  video,
-  rating,
-  authorName,
-  verdictCounts,
-  lastVerdictAt,
-  categoryId,
-  onOpenEventsForVideo
-}: VideoRowProps): ReactElement {
-  const verdictTotal =
-    verdictCounts.wins + verdictCounts.draws + verdictCounts.losses
-  return (
-    <div className="grid grid-cols-[28px_90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 items-center px-3 py-2">
-      <div className="text-xs text-slate-600 dark:text-slate-400">
-        {rowNumber}
-      </div>
-      <a
-        href={createWatchUrl(video.videoId)}
-        target="_blank"
-        rel="noreferrer"
-        className="w-20 h-12 bg-slate-200 rounded overflow-hidden block dark:bg-slate-700">
-        {video.thumbnailUrls?.[0] ? (
-          <img
-            src={video.thumbnailUrls[0]}
-            alt={video.title}
-            className="w-full h-full object-cover"
-          />
-        ) : null}
-      </a>
-      <div className="flex flex-col">
-        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
-          {video.title || "データ未取得"}
-        </span>
-        <span className="text-xs text-slate-500 dark:text-slate-400">
-          {video.videoId}
-        </span>
-      </div>
-      <div className="text-sm text-slate-700 dark:text-slate-200">
-        {authorName ?? "不明"}
-      </div>
-      <div className="text-sm text-slate-700 dark:text-slate-200">
-        {rating ? Math.round(rating.rating) : "-"}
-      </div>
-      <div className="text-sm text-slate-700 dark:text-slate-200">
-        {rating ? Math.round(rating.rd) : "-"}
-      </div>
-      <div className="text-sm">
-        {verdictTotal > 0 && onOpenEventsForVideo ? (
-          <button
-            type="button"
-            onClick={() => onOpenEventsForVideo(video.videoId, categoryId)}
-            className="text-sky-700 underline decoration-sky-500 decoration-1 underline-offset-2 hover:text-sky-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:text-sky-300 dark:hover:text-sky-200">
-            {verdictTotal}
-          </button>
-        ) : (
-          <span className="text-slate-700 dark:text-slate-200">
-            {verdictTotal > 0 ? verdictTotal : "-"}
-          </span>
-        )}
-      </div>
-      <div className="text-xs text-slate-600 dark:text-slate-400">
-        {verdictTotal > 0
-          ? `${verdictCounts.wins}/${verdictCounts.draws}/${verdictCounts.losses}`
-          : "-"}
-      </div>
-      <div className="text-xs text-slate-600 dark:text-slate-400">
-        {lastVerdictAt ? formatPaddedDateTime(new Date(lastVerdictAt)) : "-"}
-      </div>
-    </div>
-  )
-}
-
-interface FilterVideosParams {
-  videos: OptionsSnapshot["videos"]
-  authors: OptionsSnapshot["authors"]
-  ratingsByCategory: Record<string, RatingSnapshot>
-  lastEventByVideo: Map<string, number>
-  verdictCountsByVideo: Map<
-    string,
-    { wins: number; draws: number; losses: number }
-  >
-  search: string
-  author: string
-  sort: string
-  order: "desc" | "asc"
-}
-
-function buildLastEventByVideo(
-  events: OptionsSnapshot["events"]["items"],
-  defaultCategoryId: string,
-  categoryId: string
-): Map<string, number> {
-  const map = new Map<string, number>()
-  for (const event of events) {
-    if (event.disabled) continue
-    const resolvedCategoryId = event.categoryId ?? defaultCategoryId
-    if (resolvedCategoryId !== categoryId) continue
-    map.set(
-      event.currentVideoId,
-      Math.max(map.get(event.currentVideoId) ?? 0, event.timestamp)
-    )
-    map.set(
-      event.opponentVideoId,
-      Math.max(map.get(event.opponentVideoId) ?? 0, event.timestamp)
-    )
-  }
-  return map
-}
-
-function buildVerdictCountsByVideo(
-  events: OptionsSnapshot["events"]["items"],
-  defaultCategoryId: string,
-  categoryId: string
-): Map<string, { wins: number; draws: number; losses: number }> {
-  const map = new Map<string, { wins: number; draws: number; losses: number }>()
-
-  const ensure = (
-    videoId: string
-  ): { wins: number; draws: number; losses: number } => {
-    const current = map.get(videoId)
-    if (current) {
-      return current
-    }
-    const next = { wins: 0, draws: 0, losses: 0 }
-    map.set(videoId, next)
-    return next
-  }
-
-  for (const event of events) {
-    if (event.disabled) continue
-    const resolvedCategoryId = event.categoryId ?? defaultCategoryId
-    if (resolvedCategoryId !== categoryId) continue
-    const currentStats = ensure(event.currentVideoId)
-    const opponentStats = ensure(event.opponentVideoId)
-
-    if (event.verdict === "better") {
-      currentStats.wins += 1
-      opponentStats.losses += 1
-    } else if (event.verdict === "same") {
-      currentStats.draws += 1
-      opponentStats.draws += 1
-    } else {
-      currentStats.losses += 1
-      opponentStats.wins += 1
-    }
-  }
-
-  return map
-}
-
-function filterVideos({
-  videos,
-  authors,
-  ratingsByCategory,
-  lastEventByVideo,
-  verdictCountsByVideo,
-  search,
-  author,
-  sort,
-  order
-}: FilterVideosParams): VideoSnapshot[] {
-  const normalizedSearch = search.trim().toLowerCase()
-  const normalizedAuthor = author === "all" ? "" : author.trim().toLowerCase()
-  const filtered = Object.values(videos).filter((video) => {
-    const hasRating = Boolean(ratingsByCategory[video.videoId])
-    const matchesSearch =
-      normalizedSearch.length === 0 ||
-      video.videoId.toLowerCase().includes(normalizedSearch) ||
-      video.title.toLowerCase().includes(normalizedSearch)
-    const authorName = authors[video.authorUrl]?.name?.toLowerCase() ?? ""
-    const matchesAuthor =
-      normalizedAuthor.length === 0 || authorName.includes(normalizedAuthor)
-    return hasRating && matchesSearch && matchesAuthor
-  })
-
-  return sortVideos({
-    videos: filtered,
-    sort,
-    order,
-    authors,
-    ratingsByCategory,
-    lastEventByVideo,
-    verdictCountsByVideo
-  })
-}
-
-function buildExportRows({
-  videos,
-  snapshot,
-  ratingsByCategory,
-  lastEventByVideo,
-  verdictCountsByVideo
-}: ExportRowParams): ExportRow[] {
-  return videos.map((video) => {
-    const rating = ratingsByCategory[video.videoId]
-    const author = snapshot.authors[video.authorUrl]
-    const counts = verdictCountsByVideo.get(video.videoId) ?? {
-      wins: 0,
-      draws: 0,
-      losses: 0
-    }
-    const total = counts.wins + counts.draws + counts.losses
-    const lastVerdict = lastEventByVideo.get(video.videoId)
-    return {
-      videoId: video.videoId,
-      thumbnailUrl: video.thumbnailUrls?.[0] ?? "",
-      videoUrl: createWatchUrl(video.videoId),
-      title: video.title ?? "",
-      author: author?.name ?? "",
-      rating: rating ? String(Math.round(rating.rating)) : "",
-      rd: rating ? String(Math.round(rating.rd)) : "",
-      total: total ? String(total) : "0",
-      wins: String(counts.wins),
-      draws: String(counts.draws),
-      losses: String(counts.losses),
-      lastVerdictAt: lastVerdict
-        ? formatPaddedDateTime(new Date(lastVerdict))
-        : ""
-    }
-  })
 }

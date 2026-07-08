@@ -149,8 +149,7 @@ export const DataTab = ({
         () =>
           sendNcMessage({
             type: MESSAGE_TYPES.importData,
-            // oxlint-disable-next-line no-unsafe-type-assertion
-            payload: { data: data as Record<string, unknown> }
+            payload: { data }
           }),
         {
           context: "ui:options:data:import",

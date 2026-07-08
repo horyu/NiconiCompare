@@ -1,27 +1,29 @@
 import { handleUIError, NcError } from "./errorHandler"
 import { logger } from "./logger"
-import type { BackgroundResponse } from "./messages"
 
 type ToastTone = "success" | "error"
 type ShowToast = (tone: ToastTone, text: string) => void
+type NcActionResponse = { ok: true } | { ok: false; error: string }
 
-interface NcActionOptions<TResponse extends BackgroundResponse> {
+interface NcActionOptions<TResponse extends NcActionResponse> {
   context: string
   errorMessage: string
   successMessage?: string
   showToast?: ShowToast
   refreshState?: () => Promise<void>
-  onSuccess?: (response: TResponse) => Promise<void> | void
+  onSuccess?: (
+    response: Extract<TResponse, { ok: true }>
+  ) => Promise<void> | void
 }
 
-export async function runNcAction<T>(
-  action: () => Promise<BackgroundResponse<T>>,
-  options: NcActionOptions<BackgroundResponse<T>>
-): Promise<Extract<BackgroundResponse<T>, { ok: true }> | null> {
+export async function runNcAction<TResponse extends NcActionResponse>(
+  action: () => Promise<TResponse>,
+  options: NcActionOptions<TResponse>
+): Promise<Extract<TResponse, { ok: true }> | null> {
   try {
     logger.info(`[${options.context}] action start`)
     const response = await action()
-    if (!response.ok) {
+    if (isFailureResponse(response)) {
       const userMessage =
         typeof response.error === "string" && response.error.trim().length > 0
           ? response.error
@@ -31,6 +33,9 @@ export async function runNcAction<T>(
         options.context,
         userMessage
       )
+    }
+    if (!isSuccessResponse(response)) {
+      return null
     }
     logger.info(`[${options.context}] action success`)
     if (options.onSuccess) {
@@ -47,4 +52,16 @@ export async function runNcAction<T>(
     handleUIError(error, options.context, options.showToast)
     return null
   }
+}
+
+function isFailureResponse<TResponse extends NcActionResponse>(
+  response: TResponse
+): response is Extract<TResponse, { ok: false }> {
+  return !response.ok
+}
+
+function isSuccessResponse<TResponse extends NcActionResponse>(
+  response: TResponse
+): response is Extract<TResponse, { ok: true }> {
+  return response.ok
 }

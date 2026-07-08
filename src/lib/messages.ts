@@ -1,7 +1,14 @@
 import type { MESSAGE_TYPES } from "./constants"
 import type {
   AuthorProfile,
+  NcAuthors,
+  NcCategories,
+  NcEventsBucket,
+  NcMeta,
+  NcRatings,
   NcSettings,
+  NcState,
+  NcVideos,
   StorageShape,
   Verdict,
   VideoSnapshot
@@ -84,7 +91,7 @@ export interface ExportDataMessage {
 export interface ImportDataMessage {
   type: typeof MESSAGE_TYPES.importData
   payload: {
-    data: Partial<StorageShape>
+    data: unknown
   }
 }
 
@@ -148,6 +155,17 @@ export interface RequestStateMessage {
   type: typeof MESSAGE_TYPES.requestState
 }
 
+export interface StateSnapshot {
+  settings: NcSettings
+  state: NcState
+  videos: NcVideos
+  authors: NcAuthors
+  events: NcEventsBucket
+  ratings: NcRatings
+  meta: NcMeta
+  categories: NcCategories
+}
+
 export type Message =
   | RegisterSnapshotMessage
   | UpdateCurrentVideoMessage
@@ -194,9 +212,47 @@ export type BackgroundResponse<TData = unknown> =
     }
   | { ok: false; error: string }
 
-export async function sendNcMessage<TResponse = BackgroundResponse>(
-  message: Message
-): Promise<TResponse> {
-  const response = await chrome.runtime.sendMessage<Message, TResponse>(message)
+type EmptySuccessResponse = { ok: true }
+
+type MessageSuccessResponseByType = {
+  [MESSAGE_TYPES.registerSnapshot]: EmptySuccessResponse
+  [MESSAGE_TYPES.updateCurrentVideo]: EmptySuccessResponse
+  [MESSAGE_TYPES.updatePinnedOpponent]: EmptySuccessResponse
+  [MESSAGE_TYPES.recordEvent]: { ok: true; eventId: number }
+  [MESSAGE_TYPES.deleteEvent]: { ok: true; deleted: boolean }
+  [MESSAGE_TYPES.restoreEvent]: { ok: true; restored: boolean }
+  [MESSAGE_TYPES.purgeEvent]: { ok: true; purged: boolean }
+  [MESSAGE_TYPES.deleteAllData]: EmptySuccessResponse
+  [MESSAGE_TYPES.toggleOverlay]: EmptySuccessResponse
+  [MESSAGE_TYPES.updateSettings]: EmptySuccessResponse
+  [MESSAGE_TYPES.metaAction]: EmptySuccessResponse
+  [MESSAGE_TYPES.rebuildRatings]: EmptySuccessResponse
+  [MESSAGE_TYPES.exportData]: { ok: true; data: StorageShape }
+  [MESSAGE_TYPES.importData]: EmptySuccessResponse
+  [MESSAGE_TYPES.createCategory]: { ok: true; data: { categoryId: string } }
+  [MESSAGE_TYPES.updateCategoryName]: EmptySuccessResponse
+  [MESSAGE_TYPES.deleteCategory]: EmptySuccessResponse
+  [MESSAGE_TYPES.reorderCategories]: EmptySuccessResponse
+  [MESSAGE_TYPES.updateOverlayVisibleIds]: EmptySuccessResponse
+  [MESSAGE_TYPES.updateActiveCategory]: EmptySuccessResponse
+  [MESSAGE_TYPES.bulkMoveEvents]: EmptySuccessResponse
+  [MESSAGE_TYPES.openOptionsPage]: EmptySuccessResponse
+  [MESSAGE_TYPES.requestState]: { ok: true; data: StateSnapshot }
+}
+
+type MessageSuccessResponse<TMessage extends Message> =
+  MessageSuccessResponseByType[TMessage["type"]]
+
+export type MessageResponse<TMessage extends Message> =
+  | MessageSuccessResponse<TMessage>
+  | { ok: false; error: string }
+
+export async function sendNcMessage<TMessage extends Message>(
+  message: TMessage
+): Promise<MessageResponse<TMessage>> {
+  const response = await chrome.runtime.sendMessage<
+    TMessage,
+    MessageResponse<TMessage>
+  >(message)
   return response
 }
