@@ -2,7 +2,6 @@ import { act, renderHook, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import type { BackgroundResponse } from "../../lib/messages"
-import type { Verdict } from "../../lib/types"
 import { useVerdictSubmission } from "./useVerdictSubmission"
 
 interface SubmissionMessage {
@@ -56,7 +55,7 @@ describe("useVerdictSubmission", () => {
     )
 
     await act(async () => {
-      await result.current.submitVerdict("better" as Verdict)
+      await result.current.submitVerdict("better")
     })
 
     await waitFor(() => {
@@ -99,13 +98,13 @@ describe("useVerdictSubmission", () => {
     )
 
     await act(async () => {
-      await result.current.submitVerdict("better" as Verdict)
+      await result.current.submitVerdict("better")
     })
 
     rerender({ activeCategoryId: "cat-b" })
 
     await act(async () => {
-      await result.current.submitVerdict("same" as Verdict)
+      await result.current.submitVerdict("same")
     })
 
     expect(

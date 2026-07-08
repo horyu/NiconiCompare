@@ -25,10 +25,10 @@ const readString = (value: unknown): string | undefined =>
   typeof value === "string" ? value : undefined
 
 const asLdAuthor = (value: unknown): LdAuthor | undefined =>
-  isRecord(value) ? (value as LdAuthor) : undefined
+  isRecord(value) ? value : undefined
 
 const asLdVideoObject = (value: unknown): LdVideoObject | undefined =>
-  isRecord(value) ? (value as LdVideoObject) : undefined
+  isRecord(value) ? value : undefined
 
 /**
  * Video data extracted from JSON-LD

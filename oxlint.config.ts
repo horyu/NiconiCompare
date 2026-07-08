@@ -96,6 +96,10 @@ export default defineConfig({
     "oxc/no-optional-chaining": "off",
     "oxc/no-rest-spread-properties": "off",
     "react/jsx-filename-extension": ["error", { extensions: [".tsx"] }],
+    // oxlint 1.70+ で実装されたが、このプロジェクトは i18n 前提ではない
+    "react/jsx-no-literals": "off",
+    // React Compiler 導入方針を決めてから段階的に有効化する
+    "react/react-compiler": "off",
     "typescript/explicit-function-return-type": [
       "error",
       {
