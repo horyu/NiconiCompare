@@ -153,7 +153,7 @@ export async function setStorageData(
 
 export async function readAllStorage(): Promise<StorageDataByKey> {
   const data = await getStorageData(ALL_STORAGE_KEYS)
-  return data as StorageDataByKey
+  return data
 }
 
 // The update callback runs while the storage queue is held. It must only use

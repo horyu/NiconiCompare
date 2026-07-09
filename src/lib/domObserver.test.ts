@@ -66,10 +66,13 @@ describe("observeLdJsonChanges", () => {
     Object.defineProperty(window, "requestIdleCallback", {
       configurable: true,
       writable: true,
-      value: ((callback: () => void): number => {
-        callback()
+      value: (callback: IdleRequestCallback): number => {
+        callback({
+          didTimeout: false,
+          timeRemaining: () => 0
+        })
         return 1
-      }) as typeof window.requestIdleCallback
+      }
     })
   })
 
