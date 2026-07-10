@@ -3,7 +3,7 @@ import { useEffect, useState, type ReactElement } from "react"
 import "../style.css"
 import { MESSAGE_TYPES } from "../lib/constants"
 import { formatPaddedDateTime } from "../lib/date"
-import { sendNcMessage } from "../lib/messages"
+import { sendNcMessage, type StateSnapshot } from "../lib/messages"
 import { runNcAction } from "../lib/ncAction"
 import type {
   NcCategories,
@@ -39,21 +39,10 @@ export default function Popup(): ReactElement {
     if (!silent) {
       setLoading(true)
     }
-    const response = await runNcAction(
-      () =>
-        sendNcMessage({
-          type: MESSAGE_TYPES.requestState
-        }),
-      {
-        context: "ui:popup:request-state",
-        errorMessage: "状態取得に失敗しました"
-      }
-    )
+    const response = await requestPopupState()
     if (!response?.ok) {
       setError("状態取得に失敗しました")
-      if (!silent) {
-        setLoading(false)
-      }
+      setLoading(false)
       return
     }
     setSnapshot(response.data)
@@ -63,7 +52,26 @@ export default function Popup(): ReactElement {
   // chrome.storageからの初期データ読み込み（外部システム同期）
   // NOTE: chrome.storage APIが非同期のため、useSyncExternalStoreの直接適用は困難
   useEffect(() => {
-    void refreshState()
+    let isActive = true
+
+    const loadInitialState = async (): Promise<void> => {
+      const response = await requestPopupState()
+      if (!isActive) {
+        return
+      }
+      if (!response?.ok) {
+        setError("状態取得に失敗しました")
+        setLoading(false)
+        return
+      }
+      setSnapshot(response.data)
+      setLoading(false)
+    }
+
+    void loadInitialState()
+    return () => {
+      isActive = false
+    }
   }, [])
 
   const toggleOverlay = async (enabled: boolean): Promise<void> => {
@@ -261,6 +269,23 @@ export default function Popup(): ReactElement {
       )}
     </main>
   )
+}
+
+async function requestPopupState(): Promise<{
+  ok: true
+  data: StateSnapshot
+} | null> {
+  const response = await runNcAction(
+    () =>
+      sendNcMessage({
+        type: MESSAGE_TYPES.requestState
+      }),
+    {
+      context: "ui:popup:request-state",
+      errorMessage: "状態取得に失敗しました"
+    }
+  )
+  return response
 }
 
 function renderVideoCard(
