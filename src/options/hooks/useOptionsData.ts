@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { MESSAGE_TYPES } from "../../lib/constants"
+import { MESSAGE_TYPES, STORAGE_KEYS } from "../../lib/constants"
 import { handleUIError } from "../../lib/errorHandler"
 import {
   sendNcMessage,
@@ -8,8 +8,11 @@ import {
   type RequestStateMessage,
   type StateSnapshot
 } from "../../lib/messages"
+import { useStorageChangeRefresh } from "../../lib/useStorageChangeRefresh"
 
 export type OptionsSnapshot = StateSnapshot
+
+const OPTIONS_STORAGE_KEYS = Object.values(STORAGE_KEYS)
 
 interface UseOptionsDataResult {
   snapshot?: OptionsSnapshot
@@ -70,16 +73,10 @@ export const useOptionsData = (): UseOptionsDataResult => {
     void refreshState()
   }, [refreshState])
 
-  useEffect(() => {
-    const handler = (): void => {
-      void refreshState(true)
-    }
-    chrome.storage?.onChanged?.addListener(handler)
-    const cleanup = (): void => {
-      chrome.storage?.onChanged?.removeListener(handler)
-    }
-    return cleanup
-  }, [refreshState])
+  useStorageChangeRefresh({
+    keys: OPTIONS_STORAGE_KEYS,
+    refresh: () => refreshState(true)
+  })
 
   return { snapshot, loading, error, bytesInUse, refreshState }
 }

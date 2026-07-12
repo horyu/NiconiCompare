@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactElement } from "react"
 
 import "../style.css"
-import { MESSAGE_TYPES } from "../lib/constants"
+import { MESSAGE_TYPES, STORAGE_KEYS } from "../lib/constants"
 import { formatPaddedDateTime } from "../lib/date"
 import { sendNcMessage, type StateSnapshot } from "../lib/messages"
 import { runNcAction } from "../lib/ncAction"
@@ -13,6 +13,7 @@ import type {
   NcVideos
 } from "../lib/types"
 import { createWatchUrl } from "../lib/url"
+import { useStorageChangeRefresh } from "../lib/useStorageChangeRefresh"
 import {
   buildRecentEvents,
   buildRecentEventVideoVerdictStats,
@@ -29,6 +30,13 @@ interface PopupSnapshot {
   videos: NcVideos
   categories: NcCategories
 }
+
+const POPUP_STORAGE_KEYS = [
+  STORAGE_KEYS.settings,
+  STORAGE_KEYS.events,
+  STORAGE_KEYS.videos,
+  STORAGE_KEYS.categories
+]
 
 export default function Popup(): ReactElement {
   const [snapshot, setSnapshot] = useState<PopupSnapshot>()
@@ -73,6 +81,11 @@ export default function Popup(): ReactElement {
       isActive = false
     }
   }, [])
+
+  useStorageChangeRefresh({
+    keys: POPUP_STORAGE_KEYS,
+    refresh: () => refreshState(true)
+  })
 
   const toggleOverlay = async (enabled: boolean): Promise<void> => {
     setError(undefined)

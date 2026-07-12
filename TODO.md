@@ -429,6 +429,15 @@ TypeScript の型は外部 JSON には適用されないため、壊れたデー
 
 ## P2: Storage 変更購読と状態取得を整理する
 
+### 状態
+
+- 一部対応済み。
+- Storage 変更時の再取得トリガーを `useStorageChangeRefresh` に共通化した。
+- Options は関係する Storage key 変更時だけ全状態と使用量を再取得し、無関係な key では再取得しない。
+- Popup は初期取得だけでなく、settings / events / videos / categories 変更時に silent 再取得する。
+- 連続 Storage 変更中に refresh が実行中の場合は、後続を最大1回に合流して過剰な全再取得を抑える。
+- 残課題は Overlay の直接購読と Background requestState の役割整理、UI ごとの snapshot 範囲のさらなる縮小。
+
 ### 問題
 
 Options、Popup、Overlay で状態取得と Storage 変更購読の実装が分散している。
