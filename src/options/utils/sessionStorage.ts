@@ -1,4 +1,8 @@
-export const readSessionState = <T>(key: string, fallback: T): T => {
+export const readSessionState = <T>(
+  key: string,
+  fallback: T,
+  normalize: (value: unknown) => T
+): T => {
   try {
     if (typeof sessionStorage === "undefined") {
       return fallback
@@ -7,8 +11,7 @@ export const readSessionState = <T>(key: string, fallback: T): T => {
     if (!raw) {
       return fallback
     }
-    // oxlint-disable-next-line no-unsafe-type-assertion
-    return JSON.parse(raw) as T
+    return normalize(JSON.parse(raw))
   } catch {
     return fallback
   }

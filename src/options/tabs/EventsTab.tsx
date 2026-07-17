@@ -16,6 +16,11 @@ import { useSessionState } from "../hooks/useSessionState"
 import { buildCategoryOptions } from "../utils/categories"
 import { buildEventExportRows, filterEvents } from "../utils/events"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
+import {
+  DEFAULT_EVENT_SESSION_STATE,
+  isEventVerdict,
+  normalizeEventSessionState
+} from "../utils/sessionState"
 
 interface EventsTabProps {
   snapshot: OptionsSnapshot
@@ -28,15 +33,6 @@ interface EventsTabProps {
     categoryId: string
     requestKey: number
   } | null
-}
-
-interface EventSessionState {
-  search: string
-  verdict: string
-  includeDeleted: boolean
-  categoryId: string
-  showCategoryOps: boolean
-  page: number
 }
 
 const SESSION_KEY = "nc_options_event_state"
@@ -54,14 +50,6 @@ const EXPORT_HEADERS = [
   "比較投稿者",
   "評価"
 ]
-const DEFAULT_EVENT_SESSION_STATE: EventSessionState = {
-  search: "",
-  verdict: "all",
-  includeDeleted: false,
-  categoryId: "",
-  showCategoryOps: false,
-  page: 1
-}
 export const EventsTab = ({
   snapshot,
   eventShowThumbnails,
@@ -72,7 +60,8 @@ export const EventsTab = ({
 }: EventsTabProps): ReactElement => {
   const { initialState, persistState } = useSessionState(
     SESSION_KEY,
-    DEFAULT_EVENT_SESSION_STATE
+    DEFAULT_EVENT_SESSION_STATE,
+    normalizeEventSessionState
   )
   const [exportMenuOpen, setExportMenuOpen] = useState(false)
   const [eventSearch, setEventSearch] = useState(initialState.search)
@@ -437,7 +426,10 @@ export const EventsTab = ({
           <select
             value={eventVerdict}
             onChange={(event) => {
-              setEventVerdict(event.target.value)
+              const verdict = event.target.value
+              if (isEventVerdict(verdict)) {
+                setEventVerdict(verdict)
+              }
               resetToFirstPage()
             }}
             className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">

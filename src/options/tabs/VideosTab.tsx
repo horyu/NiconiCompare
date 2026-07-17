@@ -13,6 +13,11 @@ import { useSessionState } from "../hooks/useSessionState"
 import { buildCategoryOptions } from "../utils/categories"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
 import {
+  DEFAULT_VIDEO_SESSION_STATE,
+  isVideoSortKey,
+  normalizeVideoSessionState
+} from "../utils/sessionState"
+import {
   buildLastEventByVideo,
   buildVerdictCountsByVideo,
   buildVideoExportRows,
@@ -25,15 +30,6 @@ interface VideosTabProps {
   refreshState: (silent?: boolean) => Promise<void>
   showToast: (tone: "success" | "error", text: string) => void
   onOpenEventsForVideo?: (videoId: string, categoryId: string) => void
-}
-
-interface VideoSessionState {
-  search: string
-  author: string
-  categoryId: string
-  sort: string
-  order: VideoSortOrder
-  page: number
 }
 
 const SESSION_KEY = "nc_options_video_state"
@@ -51,22 +47,14 @@ const EXPORT_HEADERS = [
   "負け数",
   "最終判定日時"
 ]
-const DEFAULT_VIDEO_SESSION_STATE: VideoSessionState = {
-  search: "",
-  author: "all",
-  categoryId: "",
-  sort: "rating",
-  order: "desc",
-  page: 1
-}
-
 export const VideosTab = ({
   snapshot,
   onOpenEventsForVideo
 }: VideosTabProps): ReactElement => {
   const { initialState, persistState } = useSessionState(
     SESSION_KEY,
-    DEFAULT_VIDEO_SESSION_STATE
+    DEFAULT_VIDEO_SESSION_STATE,
+    normalizeVideoSessionState
   )
   const [exportMenuOpen, setExportMenuOpen] = useState(false)
   const [videoSearch, setVideoSearch] = useState(initialState.search)
@@ -310,7 +298,10 @@ export const VideosTab = ({
           <select
             value={videoSort}
             onChange={(event) => {
-              setVideoSort(event.target.value)
+              const sort = event.target.value
+              if (isVideoSortKey(sort)) {
+                setVideoSort(sort)
+              }
               resetToFirstPage()
             }}
             className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
