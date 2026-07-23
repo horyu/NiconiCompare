@@ -27,8 +27,8 @@
   "dependencies": {
     "glicko2-lite": "6.0.0",
     "immer": "11.1.15",
-    "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@storybook/addon-themes": "10.5.0",
