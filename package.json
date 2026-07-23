@@ -46,7 +46,7 @@
     "npm-run-all2": "9.0.2",
     "oxfmt": "0.59.0",
     "oxlint": "1.74.0",
-    "oxlint-tsgolint": "0.25.0",
+    "oxlint-tsgolint": "7.0.2001",
     "storybook": "10.5.0",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
