@@ -6,6 +6,7 @@ import {
   DEFAULT_SETTINGS,
   DEFAULT_STATE
 } from "../../lib/constants"
+import { assertDefined } from "../../lib/testUtils"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { buildShareExportFilename, buildShareHtml } from "./buildHtml"
 
@@ -124,7 +125,9 @@ const extractEmbeddedPayload = (html: string): Record<string, unknown> => {
   if (!matched) {
     throw new Error("payload script not found")
   }
-  return JSON.parse(matched[1]) as Record<string, unknown>
+  const [, payload] = matched
+  assertDefined(payload, "payload script is empty")
+  return JSON.parse(payload) as Record<string, unknown>
 }
 
 describe("buildShareHtml", () => {

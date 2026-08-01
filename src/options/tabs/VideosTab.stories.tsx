@@ -103,6 +103,10 @@ const buildSnapshotWithVideos = (count: number): OptionsSnapshot => {
   const authors: NcAuthors = {}
   const ratings: NcRatings = { [DEFAULT_CATEGORY_ID]: {} }
   const events: CompareEvent[] = []
+  const defaultRatings = ratings[DEFAULT_CATEGORY_ID]
+  if (!defaultRatings) {
+    throw new Error("Default category ratings are missing")
+  }
 
   for (let index = 1; index <= count; index += 1) {
     const videoId = `sm${1000000 + index}`
@@ -112,7 +116,7 @@ const buildSnapshotWithVideos = (count: number): OptionsSnapshot => {
     const title = `評価済み動画 ${index}`
     videos[videoId] = createVideo(videoId, title, authorUrl)
     authors[authorUrl] = createAuthor(authorUrl, authorName)
-    ratings[DEFAULT_CATEGORY_ID][videoId] = createRating(
+    defaultRatings[videoId] = createRating(
       videoId,
       1500 + index * 3,
       200 + (index % 50),
@@ -165,7 +169,11 @@ const buildSnapshotForCategorySwitch = (): OptionsSnapshot => {
     const videoId = `sm${2000000 + index}`
     const categoryId =
       index <= 3 ? DEFAULT_CATEGORY_ID : "11111111-1111-1111-1111-111111111111"
-    ratings[categoryId][videoId] = createRating(
+    const categoryRatings = ratings[categoryId]
+    if (!categoryRatings) {
+      throw new Error("Category ratings are missing")
+    }
+    categoryRatings[videoId] = createRating(
       videoId,
       1500 + index * 10,
       220 + index,

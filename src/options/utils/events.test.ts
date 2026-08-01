@@ -5,6 +5,7 @@ import {
   DEFAULT_SETTINGS,
   DEFAULT_STATE
 } from "../../lib/constants"
+import { assertDefined } from "../../lib/testUtils"
 import type {
   AuthorProfile,
   CompareEvent,
@@ -119,8 +120,11 @@ describe("filterEvents", () => {
 
 describe("buildEventExportRows", () => {
   it("イベント一覧の export 行を生成すること", () => {
+    const [firstEvent, , thirdEvent] = events
+    assertDefined(firstEvent, "Test first event is missing")
+    assertDefined(thirdEvent, "Test third event is missing")
     const rows = buildEventExportRows({
-      events: [events[0], events[2]],
+      events: [firstEvent, thirdEvent],
       snapshot: createSnapshot()
     })
 

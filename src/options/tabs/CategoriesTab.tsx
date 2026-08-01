@@ -33,9 +33,10 @@ export const CategoriesTab = ({
   const [moveTargets, setMoveTargets] = useState<Record<string, string>>({})
 
   const orderedCategories = useMemo(() => {
-    return snapshot.categories.order
-      .map((id) => snapshot.categories.items[id])
-      .filter(Boolean)
+    return snapshot.categories.order.flatMap((id) => {
+      const category = snapshot.categories.items[id]
+      return category ? [category] : []
+    })
   }, [snapshot.categories])
 
   const handleCreateCategory = async (): Promise<void> => {
@@ -152,6 +153,9 @@ export const CategoriesTab = ({
     }
     const nextOrder = [...order]
     const [removed] = nextOrder.splice(index, 1)
+    if (!removed) {
+      return
+    }
     nextOrder.splice(targetIndex, 0, removed)
     await runNcAction(
       () =>

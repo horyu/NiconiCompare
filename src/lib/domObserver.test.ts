@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { OVERLAY_STATUS_MESSAGES } from "./constants"
 import type { VideoData } from "./domObserver"
 import { extractVideoDataFromLdJson, observeLdJsonChanges } from "./domObserver"
+import { assertDefined } from "./testUtils"
 
 const setLdJson = (payload: unknown): void => {
   const script = document.createElement("script")
@@ -101,7 +102,9 @@ describe("observeLdJsonChanges", () => {
     })
 
     expect(onVideoDataChange).toHaveBeenCalledTimes(1)
-    const [[payload]] = onVideoDataChange.mock.calls
+    const [firstCall] = onVideoDataChange.mock.calls
+    assertDefined(firstCall, "Video callback was not called")
+    const [payload] = firstCall
     expect(payload.video.videoId).toBe("sm3333333")
     cleanup?.()
   })
@@ -137,6 +140,8 @@ describe("observeLdJsonChanges", () => {
     expect(onVideoDataChange).toHaveBeenCalledTimes(2)
     const firstCall = onVideoDataChange.mock.calls[0]?.[0]
     const secondCall = onVideoDataChange.mock.calls[1]?.[0]
+    assertDefined(firstCall, "First video callback was not called")
+    assertDefined(secondCall, "Second video callback was not called")
     expect(firstCall.video.videoId).toBe("sm4444444")
     expect(secondCall.video.videoId).toBe("sm5555555")
     cleanup?.()
@@ -229,7 +234,7 @@ describe("observeLdJsonChanges", () => {
       })
 
       const [firstCall] = onVideoDataChange.mock.calls
-      expect(firstCall).toBeDefined()
+      assertDefined(firstCall, "Video callback was not called")
       const [payload] = firstCall
       expect(payload.video.videoId).toBe("sm8888888")
       cleanup?.()

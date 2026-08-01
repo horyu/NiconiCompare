@@ -59,7 +59,7 @@ export function rebuildRecentWindowFromEvents(
   ) {
     const event = events[i]
     inspected++
-    if (event.disabled) {
+    if (!event || event.disabled) {
       continue
     }
     const candidates = [event.currentVideoId, event.opponentVideoId]

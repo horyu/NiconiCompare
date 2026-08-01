@@ -5,6 +5,7 @@ import {
   DEFAULT_SETTINGS,
   DEFAULT_STATE
 } from "../../lib/constants"
+import { assertDefined } from "../../lib/testUtils"
 import type {
   AuthorProfile,
   CompareEvent,
@@ -22,7 +23,7 @@ import {
   type VideoSortOrder
 } from "./videos"
 
-const videos: VideoSnapshot[] = [
+const videos: [VideoSnapshot, VideoSnapshot, VideoSnapshot, VideoSnapshot] = [
   createVideo("v3", "Charlie", "author-c"),
   createVideo("v1", "Alpha", "author-a"),
   createVideo("v2", "Bravo", "author-b"),
@@ -182,8 +183,11 @@ describe("filterVideos", () => {
 describe("buildVideoExportRows", () => {
   it("動画一覧の export 行を生成すること", () => {
     const snapshot = createSnapshot()
+    const { v1, v2 } = snapshot.videos
+    assertDefined(v1, "Test video v1 is missing")
+    assertDefined(v2, "Test video v2 is missing")
     const rows = buildVideoExportRows({
-      videos: [snapshot.videos.v1, snapshot.videos.v2],
+      videos: [v1, v2],
       snapshot,
       ratingsByCategory,
       lastEventByVideo: new Map([
@@ -302,15 +306,16 @@ function createEvent({
 }
 
 function createSnapshot(): OptionsSnapshot {
+  const [, v1, v2] = videos
   return {
     settings: DEFAULT_SETTINGS,
     state: DEFAULT_STATE,
     videos: {
       v1: {
-        ...videos[1],
+        ...v1,
         thumbnailUrls: ["https://example.com/v1.jpg"]
       },
-      v2: videos[2]
+      v2
     },
     authors,
     events: { items: events, nextId: 5 },

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { DEFAULT_CATEGORY_ID, DEFAULT_SETTINGS } from "../../lib/constants"
+import { assertDefined } from "../../lib/testUtils"
 import type { CompareEvent, NcEventsBucket } from "../../lib/types"
 import { buildEventMutationUpdates } from "./eventMutation"
 
@@ -52,12 +53,12 @@ describe("buildEventMutationUpdates", () => {
       items: [buildEvent(1), buildEvent(2)],
       nextId: 3
     }
+    const [firstEvent, secondEvent] = currentEvents.items
+    assertDefined(firstEvent, "Test first event is missing")
+    assertDefined(secondEvent, "Test second event is missing")
     const nextEvents: NcEventsBucket = {
       ...currentEvents,
-      items: [
-        currentEvents.items[0],
-        { ...currentEvents.items[1], disabled: true }
-      ]
+      items: [firstEvent, { ...secondEvent, disabled: true }]
     }
 
     const updates = buildEventMutationUpdates({

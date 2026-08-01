@@ -36,10 +36,7 @@ export function rebuildRatingsFromEvents(
 
   for (const event of orderedEvents) {
     const categoryId = event.categoryId ?? DEFAULT_CATEGORY_ID
-    if (!nextRatings[categoryId]) {
-      nextRatings[categoryId] = {}
-    }
-    const categoryRatings = nextRatings[categoryId]
+    const categoryRatings = (nextRatings[categoryId] ??= {})
     const leftRating = getOrCreateRatingSnapshot(
       categoryRatings,
       event.currentVideoId,

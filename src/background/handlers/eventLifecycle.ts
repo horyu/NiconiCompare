@@ -14,12 +14,19 @@ export async function handleDeleteEvent(eventId: number): Promise<boolean> {
         return { updates: {}, result: false }
       }
 
-      if (events.items[index].disabled) {
+      const event = events.items[index]
+      if (!event) {
+        return { updates: {}, result: false }
+      }
+      if (event.disabled) {
         return { updates: {}, result: true }
       }
 
       const updatedEvents = produce(events, (draft) => {
-        draft.items[index] = { ...draft.items[index], disabled: true }
+        const target = draft.items[index]
+        if (target) {
+          draft.items[index] = { ...target, disabled: true }
+        }
       })
 
       return {
@@ -47,12 +54,19 @@ export async function handleRestoreEvent(eventId: number): Promise<boolean> {
         return { updates: {}, result: false }
       }
 
-      if (!events.items[index].disabled) {
+      const event = events.items[index]
+      if (!event) {
+        return { updates: {}, result: false }
+      }
+      if (!event.disabled) {
         return { updates: {}, result: true }
       }
 
       const updatedEvents = produce(events, (draft) => {
-        draft.items[index] = { ...draft.items[index], disabled: false }
+        const target = draft.items[index]
+        if (target) {
+          draft.items[index] = { ...target, disabled: false }
+        }
       })
 
       return {
@@ -79,12 +93,13 @@ export async function handlePurgeEvent(eventId: number): Promise<boolean> {
         return { updates: {}, result: false }
       }
 
-      if (!events.items[index].disabled) {
+      const event = events.items[index]
+      if (!event || !event.disabled) {
         return { updates: {}, result: false }
       }
 
       const updatedEvents: NcEventsBucket = {
-        items: events.items.filter((event) => event.id !== eventId),
+        items: events.items.filter((item) => item.id !== eventId),
         nextId: events.nextId
       }
 

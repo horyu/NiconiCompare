@@ -21,7 +21,7 @@ export const STORAGE_KEYS = {
 export const DEFAULT_CATEGORY_ID = "00000000-0000-0000-0000-000000000000"
 export const DEFAULT_CATEGORY_NAME = "総合"
 
-export const DEFAULT_CATEGORIES: NcCategories = {
+export const DEFAULT_CATEGORIES = {
   items: {
     [DEFAULT_CATEGORY_ID]: {
       id: DEFAULT_CATEGORY_ID,
@@ -32,7 +32,7 @@ export const DEFAULT_CATEGORIES: NcCategories = {
   order: [DEFAULT_CATEGORY_ID],
   overlayVisibleIds: [DEFAULT_CATEGORY_ID],
   defaultId: DEFAULT_CATEGORY_ID
-}
+} satisfies NcCategories
 
 export const DEFAULT_SETTINGS: NcSettings = {
   recentWindowSize: 5,
