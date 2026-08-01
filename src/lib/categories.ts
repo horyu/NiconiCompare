@@ -7,11 +7,8 @@ export function normalizeCategories(categories?: NcCategories): NcCategories {
   }
 
   const items = { ...categories.items }
-  if (!items[DEFAULT_CATEGORY_ID]) {
-    items[DEFAULT_CATEGORY_ID] = {
-      ...DEFAULT_CATEGORIES.items[DEFAULT_CATEGORY_ID]
-    }
-  }
+  const defaultCategory = DEFAULT_CATEGORIES.items[DEFAULT_CATEGORY_ID]
+  items[DEFAULT_CATEGORY_ID] ??= { ...defaultCategory }
 
   const order = categories.order.filter((id) => items[id])
   if (!order.includes(DEFAULT_CATEGORY_ID)) {

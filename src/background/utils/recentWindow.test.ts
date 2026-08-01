@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { assertDefined } from "../../lib/testUtils"
 import type { CompareEvent, NcVideos } from "../../lib/types"
 import {
   rebuildRecentWindowFromEvents,
@@ -146,7 +147,9 @@ describe("rebuildRecentWindowFromEvents", () => {
       })
     )
     // 101件目以降（index >= 100）は走査されないため、index 19 の v1 は含まれない
-    longEvents[19] = { ...longEvents[19], currentVideoId: "v1" }
+    const event = longEvents.at(19)
+    assertDefined(event, "Test event is missing")
+    longEvents[19] = { ...event, currentVideoId: "v1" }
 
     const result = rebuildRecentWindowFromEvents(longEvents, 2, videos)
 

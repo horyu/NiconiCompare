@@ -38,11 +38,12 @@ function parseSchemaVersion(version: string): [number, number, number] {
 function compareSchemaVersion(left: string, right: string): number {
   const leftParts = parseSchemaVersion(left)
   const rightParts = parseSchemaVersion(right)
-  for (let i = 0; i < leftParts.length; i++) {
-    if (leftParts[i] > rightParts[i]) {
+  for (const index of [0, 1, 2] as const) {
+    const difference = leftParts[index] - rightParts[index]
+    if (difference > 0) {
       return 1
     }
-    if (leftParts[i] < rightParts[i]) {
+    if (difference < 0) {
       return -1
     }
   }

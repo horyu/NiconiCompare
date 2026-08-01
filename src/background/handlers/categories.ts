@@ -39,7 +39,11 @@ export async function handleUpdateCategoryName(
         throw new Error("Category not found")
       }
       const updated = produce(nextCategories, (draft) => {
-        draft.items[categoryId].name = name
+        const category = draft.items[categoryId]
+        if (!category) {
+          throw new Error("Category not found")
+        }
+        category.name = name
       })
       return { updates: { categories: updated } }
     }

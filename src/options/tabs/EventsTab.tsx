@@ -97,8 +97,12 @@ export const EventsTab = ({
     if (bulkMoveTargets.length === 0) {
       return
     }
-    if (!bulkMoveTargets.some((option) => option.id === bulkMoveTargetId)) {
-      setBulkMoveTargetId(bulkMoveTargets[0].id)
+    const [firstTarget] = bulkMoveTargets
+    if (
+      firstTarget &&
+      !bulkMoveTargets.some((option) => option.id === bulkMoveTargetId)
+    ) {
+      setBulkMoveTargetId(firstTarget.id)
     }
   }, [bulkMoveTargetId, bulkMoveTargets])
 

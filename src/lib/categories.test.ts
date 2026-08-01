@@ -32,6 +32,7 @@ describe("normalizeCategories", () => {
   })
 
   it("既存のカテゴリのみを残しつつ、表示対象が空にならないこと", () => {
+    const defaultCategory = DEFAULT_CATEGORIES.items[DEFAULT_CATEGORY_ID]
     const categories: NcCategories = {
       items: {
         cat1: {
@@ -39,9 +40,7 @@ describe("normalizeCategories", () => {
           name: "作画",
           createdAt: 456
         },
-        [DEFAULT_CATEGORY_ID]: {
-          ...DEFAULT_CATEGORIES.items[DEFAULT_CATEGORY_ID]
-        }
+        [DEFAULT_CATEGORY_ID]: { ...defaultCategory }
       },
       order: ["cat1", "missing"],
       overlayVisibleIds: ["cat1", "missing"],
@@ -55,11 +54,10 @@ describe("normalizeCategories", () => {
   })
 
   it("順序と表示対象が空の場合はデフォルトを補うこと", () => {
+    const defaultCategory = DEFAULT_CATEGORIES.items[DEFAULT_CATEGORY_ID]
     const categories: NcCategories = {
       items: {
-        [DEFAULT_CATEGORY_ID]: {
-          ...DEFAULT_CATEGORIES.items[DEFAULT_CATEGORY_ID]
-        }
+        [DEFAULT_CATEGORY_ID]: { ...defaultCategory }
       },
       order: [],
       overlayVisibleIds: [],

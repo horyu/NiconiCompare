@@ -114,12 +114,14 @@ function updateEventVerdict(
 ): NcEventsBucket {
   return produce(events, (draft) => {
     const index = draft.items.findIndex((event) => event.id === eventId)
-    if (index !== -1) {
-      draft.items[index] = {
-        ...draft.items[index],
-        verdict,
-        timestamp: Date.now()
-      }
+    const targetEvent = draft.items[index]
+    if (!targetEvent) {
+      return
+    }
+    draft.items[index] = {
+      ...targetEvent,
+      verdict,
+      timestamp: Date.now()
     }
   })
 }
@@ -170,10 +172,7 @@ function updateRatingsForNewEvent(
   )
 
   return produce(ratings, (draft) => {
-    if (!draft[categoryId]) {
-      draft[categoryId] = {}
-    }
-    const draftCategory = draft[categoryId]
+    const draftCategory = (draft[categoryId] ??= {})
     const { left, right } = updatePairRatings({
       settings,
       left: leftRating,

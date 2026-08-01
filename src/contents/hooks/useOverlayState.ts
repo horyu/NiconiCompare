@@ -53,26 +53,27 @@ export function useOverlayState(): OverlayStateResult {
     ): void => {
       if (areaName !== "local") return
 
-      if (changes[STORAGE_KEYS.settings]?.newValue) {
+      const settingsChange = changes[STORAGE_KEYS.settings]
+      if (settingsChange?.newValue) {
         // oxlint-disable-next-line no-unsafe-type-assertion
-        const nextSettings = changes[STORAGE_KEYS.settings]
-          .newValue as NcSettings
+        const nextSettings = settingsChange.newValue as NcSettings
         setOverlaySettings(nextSettings ?? DEFAULT_SETTINGS)
       }
 
-      if (changes[STORAGE_KEYS.videos]?.newValue) {
+      const videosChange = changes[STORAGE_KEYS.videos]
+      if (videosChange?.newValue) {
         // oxlint-disable-next-line no-unsafe-type-assertion
-        const nextVideos = changes[STORAGE_KEYS.videos].newValue as Record<
+        const nextVideos = videosChange.newValue as Record<
           string,
           VideoSnapshot
         >
         setVideoSnapshots(nextVideos ?? {})
       }
 
-      if (changes[STORAGE_KEYS.categories]?.newValue) {
+      const categoriesChange = changes[STORAGE_KEYS.categories]
+      if (categoriesChange?.newValue) {
         // oxlint-disable-next-line no-unsafe-type-assertion
-        const nextCategories = changes[STORAGE_KEYS.categories]
-          .newValue as NcCategories
+        const nextCategories = categoriesChange.newValue as NcCategories
         setCategories(normalizeCategories(nextCategories))
       }
     }

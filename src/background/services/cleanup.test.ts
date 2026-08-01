@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
+import { assertDefined } from "../../lib/testUtils"
 import { performCleanup } from "./cleanup"
 import type { StorageDataByKey } from "./storage"
 
@@ -120,6 +121,8 @@ describe("performCleanup", () => {
 
     await performCleanup()
 
+    const categoryRatings = storage.ratings.cat1
+    assertDefined(categoryRatings, "Test category ratings are missing")
     expect(withStorageUpdatesMock).toHaveBeenCalledTimes(1)
     expect(capturedUpdates).toEqual({
       videos: {
@@ -128,8 +131,8 @@ describe("performCleanup", () => {
       },
       ratings: {
         cat1: {
-          v1: storage.ratings.cat1.v1,
-          v2: storage.ratings.cat1.v2
+          v1: categoryRatings.v1,
+          v2: categoryRatings.v2
         }
       },
       authors: {
