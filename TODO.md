@@ -221,7 +221,8 @@ Background の `chrome.runtime.onMessage` は複数メッセージを並行処�
 - `src/options/utils/events.test.ts` にイベント検索、カテゴリ、判定、無効化済みフィルタ、export 行の単体テストを追加。
 - `VideosTab` は約 419 行まで縮小済み。
 - `EventsTab` は約 614 行まで縮小し、`max-lines` 無効化を削除済み。
-- 残課題は操作系 hook 分離と、必要ならフィルタ UI 分離。
+- `EventsTab` の Background 操作と busy 状態管理を `useEventActions` へ分離。
+- 残課題は、必要に応じたフィルタ UI 分離。
 
 ---
 
@@ -631,4 +632,12 @@ WXT build は Vite 8.0.14、ルートと Storybook は Vite 8.0.16 を使用し�
 - 実施した変更: 選択式の値とページ番号を検証し、部分的に古い状態でも有効なフィールドは維持するようにした。
 - 実行した検証: `pnpm check`、session state の単体テスト。
 - 残課題: なし。
+- 次に着手する項目: 不要な Props と重複 UI 処理を削減する。
+
+### 2026-08-02: Events の操作系 hook 分離
+
+- 変更方針: Background へのイベント操作と busy 状態管理を UI から切り離す。
+- 実施した変更: `useEventActions` に一括移動、個別移動、評価変更、無効化、復活、完全削除を集約した。
+- 実行した検証: lint、全テスト、`useEventActions` の単体テスト。
+- 残課題: フィルタ UI の分離は必要性を見て判断する。
 - 次に着手する項目: 不要な Props と重複 UI 処理を削減する。

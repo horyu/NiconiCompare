@@ -1,15 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type ReactElement } from "react"
 
-import { EVENT_PAGE_SIZE, MESSAGE_TYPES } from "../../lib/constants"
-import { sendNcMessage } from "../../lib/messages"
-import { runNcAction } from "../../lib/ncAction"
-import type { CompareEvent, Verdict } from "../../lib/types"
+import { EVENT_PAGE_SIZE } from "../../lib/constants"
 import { CategorySelect } from "../components/CategorySelect"
 import { ClearableTextInput } from "../components/ClearableTextInput"
 import { EventRow } from "../components/EventRow"
 import { ExportMenu } from "../components/ExportMenu"
 import { Pagination } from "../components/Pagination"
 import { ScrollToTopButton } from "../components/ScrollToTopButton"
+import { useEventActions } from "../hooks/useEventActions"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { usePagination } from "../hooks/usePagination"
 import { useSessionState } from "../hooks/useSessionState"
@@ -77,7 +75,6 @@ export const EventsTab = ({
   )
   const sectionTopRef = useRef<HTMLDivElement | null>(null)
   const paginationTopRef = useRef<HTMLDivElement | null>(null)
-  const [eventBusyId, setEventBusyId] = useState<number | null>(null)
   const [moveTargets, setMoveTargets] = useState<Record<number, string>>({})
   const [bulkMoveTargetId, setBulkMoveTargetId] = useState(
     snapshot.categories.defaultId
@@ -86,6 +83,15 @@ export const EventsTab = ({
   const bulkMoveTargets = categoryOptions.filter(
     (option) => option.id !== eventCategoryId
   )
+  const {
+    eventBusyId,
+    handleBulkMove,
+    handleDeleteEvent,
+    handleEventVerdictChange,
+    handleMoveEvent,
+    handlePurgeEvent,
+    handleRestoreEvent
+  } = useEventActions({ refreshState, showToast })
 
   useEffect(() => {
     if (!snapshot.categories.items[eventCategoryId]) {
@@ -217,7 +223,7 @@ export const EventsTab = ({
     setExportMenuOpen(false)
   }
 
-  const handleBulkMove = async (targetCategoryId: string): Promise<void> => {
+  const requestBulkMove = async (targetCategoryId: string): Promise<void> => {
     if (!targetCategoryId) {
       return
     }
@@ -232,157 +238,18 @@ export const EventsTab = ({
     if (!confirmed) {
       return
     }
-    await runNcAction(
-      () =>
-        sendNcMessage({
-          type: MESSAGE_TYPES.bulkMoveEvents,
-          payload: {
-            eventIds: filteredEvents.map((event) => event.id),
-            targetCategoryId
-          }
-        }),
-      {
-        context: "ui:options:events:bulk-move",
-        errorMessage: "一括移動に失敗しました。",
-        successMessage: "カテゴリを一括移動しました。",
-        showToast,
-        refreshState: () => refreshState(true)
-      }
+    await handleBulkMove(
+      filteredEvents.map((event) => event.id),
+      targetCategoryId
     )
   }
 
-  const handleMoveEvent = async (
-    eventId: number,
-    targetCategoryId: string
-  ): Promise<void> => {
-    if (!targetCategoryId) {
-      return
-    }
-    setEventBusyId(eventId)
-    try {
-      await runNcAction(
-        () =>
-          sendNcMessage({
-            type: MESSAGE_TYPES.bulkMoveEvents,
-            payload: {
-              eventIds: [eventId],
-              targetCategoryId
-            }
-          }),
-        {
-          context: "ui:options:events:move",
-          errorMessage: "カテゴリの移動に失敗しました。",
-          successMessage: "カテゴリを移動しました。",
-          showToast,
-          refreshState: () => refreshState(true)
-        }
-      )
-    } finally {
-      setEventBusyId(null)
-    }
-  }
-
-  const handleEventVerdictChange = async (
-    target: CompareEvent,
-    verdict: Verdict
-  ): Promise<void> => {
-    if (target.disabled) {
-      return
-    }
-    setEventBusyId(target.id)
-    try {
-      await runNcAction(
-        () =>
-          sendNcMessage({
-            type: MESSAGE_TYPES.recordEvent,
-            payload: {
-              currentVideoId: target.currentVideoId,
-              opponentVideoId: target.opponentVideoId,
-              verdict,
-              eventId: target.id
-            }
-          }),
-        {
-          context: "ui:options:events:update",
-          errorMessage: "評価の更新に失敗しました。",
-          successMessage: "評価を更新しました。",
-          showToast,
-          refreshState: () => refreshState(true)
-        }
-      )
-    } finally {
-      setEventBusyId(null)
-    }
-  }
-
-  const handleDeleteEvent = async (eventId: number): Promise<void> => {
-    setEventBusyId(eventId)
-    try {
-      await runNcAction(
-        () =>
-          sendNcMessage({
-            type: MESSAGE_TYPES.deleteEvent,
-            payload: { eventId }
-          }),
-        {
-          context: "ui:options:events:disable",
-          errorMessage: "評価の無効化に失敗しました。",
-          successMessage: "評価を無効化しました。",
-          showToast,
-          refreshState: () => refreshState(true)
-        }
-      )
-    } finally {
-      setEventBusyId(null)
-    }
-  }
-
-  const handleRestoreEvent = async (eventId: number): Promise<void> => {
-    setEventBusyId(eventId)
-    try {
-      await runNcAction(
-        () =>
-          sendNcMessage({
-            type: MESSAGE_TYPES.restoreEvent,
-            payload: { eventId }
-          }),
-        {
-          context: "ui:options:events:restore",
-          errorMessage: "評価の有効化に失敗しました。",
-          successMessage: "評価を有効化しました。",
-          showToast,
-          refreshState: () => refreshState(true)
-        }
-      )
-    } finally {
-      setEventBusyId(null)
-    }
-  }
-
-  const handlePurgeEvent = async (eventId: number): Promise<void> => {
+  const requestPurgeEvent = async (eventId: number): Promise<void> => {
     const confirmed = confirm(
       "無効化済み評価を削除します。元に戻せません。続行しますか？"
     )
     if (!confirmed) return
-    setEventBusyId(eventId)
-    try {
-      await runNcAction(
-        () =>
-          sendNcMessage({
-            type: MESSAGE_TYPES.purgeEvent,
-            payload: { eventId }
-          }),
-        {
-          context: "ui:options:events:purge",
-          errorMessage: "評価の削除に失敗しました。",
-          successMessage: "評価を削除しました。",
-          showToast,
-          refreshState: () => refreshState(true)
-        }
-      )
-    } finally {
-      setEventBusyId(null)
-    }
+    await handlePurgeEvent(eventId)
   }
 
   return (
@@ -484,7 +351,7 @@ export const EventsTab = ({
           </div>
           <button
             type="button"
-            onClick={() => handleBulkMove(bulkMoveTargetId)}
+            onClick={() => requestBulkMove(bulkMoveTargetId)}
             disabled={
               filteredEvents.length === 0 || bulkMoveTargets.length === 0
             }
@@ -573,7 +440,7 @@ export const EventsTab = ({
                   onMoveEvent={handleMoveEvent}
                   onDeleteEvent={handleDeleteEvent}
                   onRestoreEvent={handleRestoreEvent}
-                  onPurgeEvent={handlePurgeEvent}
+                  onPurgeEvent={requestPurgeEvent}
                 />
               )
             })
