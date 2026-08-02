@@ -1,9 +1,6 @@
 import type { ReactElement } from "react"
 
-interface CategoryOption {
-  id: string
-  name: string
-}
+import type { CategoryOption } from "../utils/categories"
 
 interface CategorySelectProps {
   value: string

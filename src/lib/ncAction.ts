@@ -1,8 +1,6 @@
-import { handleUIError, NcError } from "./errorHandler"
+import { handleUIError, NcError, type ShowToast } from "./errorHandler"
 import { logger } from "./logger"
 
-type ToastTone = "success" | "error"
-type ShowToast = (tone: ToastTone, text: string) => void
 type NcActionResponse = { ok: true } | { ok: false; error: string }
 
 interface NcActionOptions<TResponse extends NcActionResponse> {

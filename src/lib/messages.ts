@@ -1,4 +1,4 @@
-import type { MESSAGE_TYPES } from "./constants"
+import type { MESSAGE_TYPES, MessageType } from "./constants"
 import type {
   AuthorProfile,
   NcAuthors,
@@ -192,12 +192,9 @@ export type Message =
   | RequestStateMessage
 
 // Message ユニオン型が MESSAGE_TYPES のすべてのキーをカバーしていることを確認
-type MessageTypeValues = (typeof MESSAGE_TYPES)[keyof typeof MESSAGE_TYPES]
 type MessageUnionTypes = Message["type"]
 
-type _AssertAllMessageTypes = Assert<
-  Equals<MessageTypeValues, MessageUnionTypes>
->
+type _AssertAllMessageTypes = Assert<Equals<MessageType, MessageUnionTypes>>
 const _assertAllMessageTypes: _AssertAllMessageTypes = true
 
 export type BackgroundResponse<TData = unknown> =

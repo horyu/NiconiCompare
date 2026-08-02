@@ -3,15 +3,10 @@ import { useEffect } from "react"
 import { OVERLAY_STATUS_MESSAGES } from "../../lib/constants"
 import {
   extractVideoDataFromLdJson,
-  observeLdJsonChanges
+  observeLdJsonChanges,
+  type VideoData
 } from "../../lib/domObserver"
 import { logger } from "../../lib/logger"
-import type { AuthorProfile, VideoSnapshot } from "../../lib/types"
-
-interface VideoData {
-  video: VideoSnapshot
-  author: AuthorProfile
-}
 
 interface UseVideoObserverParams {
   enabled: boolean
