@@ -54,7 +54,7 @@ export const MAX_RECENT_WINDOW_SIZE = 50
 export const MAX_POPUP_RECENT_COUNT = 20
 export const MAX_OVERLAY_AUTO_CLOSE_MS = 60_000
 export const EVENT_PAGE_SIZE = 100
-export const VIDEO_PAGE_SIZE = 50
+export const VIDEO_PAGE_SIZE = 100
 
 export const DEFAULT_STATE: NcState = {
   currentVideoId: "",
