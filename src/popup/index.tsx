@@ -185,7 +185,7 @@ export default function Popup(): ReactElement {
     snapshot.categories.defaultId
   )
   return (
-    <main className="w-80 p-4 flex flex-col gap-4 font-sans bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <main className="w-80 p-4 flex flex-col gap-2 font-sans bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-1">
           <strong className="shrink-0 text-sm">NiconiCompare</strong>
@@ -206,7 +206,7 @@ export default function Popup(): ReactElement {
             checked={snapshot.settings.overlayAndCaptureEnabled}
             onChange={(e) => toggleOverlay(e.target.checked)}
           />
-          オーバーレイ・動画情報取得
+          オーバーレイ
         </label>
       </header>
 
