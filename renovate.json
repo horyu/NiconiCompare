@@ -21,10 +21,10 @@
       "ignoreTests": true
     },
     {
-      "groupName": "automerge @types/node v25",
-      "description": "Automerge @types/node updates only for v25.x",
+      "groupName": "automerge @types/node v26",
+      "description": "Automerge @types/node updates only for v26.x",
       "matchPackageNames": ["@types/node"],
-      "allowedVersions": "/^25\\./",
+      "allowedVersions": "/^26\\./",
       "automerge": true,
       "automergeType": "branch",
       "ignoreTests": true
