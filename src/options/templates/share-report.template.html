@@ -39,10 +39,20 @@
 
       .meta-grid {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 8px 12px;
         margin-top: 10px;
         font-size: 13px;
+      }
+
+      .meta-latest-event {
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: 4px;
+      }
+
+      .meta-latest-event > span {
+        white-space: nowrap;
       }
 
       .meta-wide {
@@ -95,12 +105,30 @@
         white-space: nowrap;
       }
 
-      .toolbar input {
+      .toolbar input,
+      .toolbar select {
         border: 1px solid #cbd5e1;
         border-radius: 6px;
+        background: #ffffff;
+        color: #0f172a;
         padding: 6px 8px;
+      }
+
+      .toolbar input {
         width: min(560px, 100%);
         min-width: 210px;
+      }
+
+      .toolbar input[type="date"] {
+        width: auto;
+        min-width: 0;
+      }
+
+      .video-last-verdict-filter {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
       }
 
       table {
@@ -176,7 +204,9 @@
       <section class="card">
         <h1>NiconiCompare 共有レポート</h1>
         <div class="meta-grid">
-          <div>生成日時: <span id="meta-generated-at"></span></div>
+          <div class="meta-latest-event">
+            最終評価日時: <span id="meta-latest-event-at"></span>
+          </div>
           <div>カテゴリ: <span id="meta-category-name"></span></div>
           <div>動画件数: <span id="meta-video-count"></span></div>
           <div>評価件数: <span id="meta-event-count"></span></div>
@@ -207,6 +237,21 @@
               id="video-search"
               placeholder="タイトル・動画ID・投稿者" />
           </label>
+          <div class="video-last-verdict-filter">
+            <label for="video-last-verdict-period">最終判定日時:</label>
+            <select id="video-last-verdict-period">
+              <option value="all">指定なし</option>
+              <option value="30d">最新評価から30日以内</option>
+              <option value="90d">最新評価から90日以内</option>
+              <option value="1y">最新評価から1年以内</option>
+              <option value="custom">指定日以降</option>
+            </select>
+            <input
+              type="date"
+              id="video-last-verdict-date"
+              aria-label="最終判定日時の下限日" />
+            <span>以降</span>
+          </div>
           <span id="video-count"></span>
         </div>
         <table>
@@ -313,7 +358,18 @@
         const tabs = document.querySelectorAll("[data-tab-target]")
         const panels = document.querySelectorAll("[data-tab-panel]")
 
-        const videoState = { query: "", sortKey: "rating", direction: "desc" }
+        const videoState = {
+          query: "",
+          lastVerdictDate: "",
+          sortKey: "rating",
+          direction: "desc"
+        }
+        const latestEventTimestamp = data.events.reduce(
+          (latest, event) => Math.max(latest, event.timestamp),
+          0
+        )
+        const defaultVideoLastVerdictPeriod =
+          latestEventTimestamp > 0 ? "30d" : "all"
         const eventState = {
           query: "",
           sortKey: "timestamp",
@@ -321,7 +377,10 @@
         }
 
         const setMeta = () => {
-          setText("meta-generated-at", formatDate(data.meta.generatedAt))
+          setText(
+            "meta-latest-event-at",
+            latestEventTimestamp > 0 ? formatDate(latestEventTimestamp) : "-"
+          )
           setText("meta-category-name", data.meta.categoryName)
           setText("meta-video-count", String(data.meta.videoCount))
           setText("meta-event-count", String(data.meta.eventCount))
@@ -360,6 +419,18 @@
           )
         }
 
+        const formatDateInput = (timestamp) => {
+          if (!Number.isFinite(timestamp)) return ""
+          const date = new Date(timestamp)
+          return (
+            String(date.getFullYear()) +
+            "-" +
+            pad2(date.getMonth() + 1) +
+            "-" +
+            pad2(date.getDate())
+          )
+        }
+
         const escapeHtml = (value) =>
           String(value ?? "")
             .replaceAll("&", "&amp;")
@@ -388,6 +459,17 @@
           )
         }
 
+        const applyLastVerdictDate = (rows, dateValue) => {
+          if (!dateValue) return rows
+          const cutoff = new Date(dateValue + "T00:00:00").getTime()
+          if (!Number.isFinite(cutoff)) return rows
+          return rows.filter(
+            (row) =>
+              typeof row.lastVerdictAt === "number" &&
+              row.lastVerdictAt >= cutoff
+          )
+        }
+
         const applySort = (rows, sortKey, direction) => {
           return [...rows].sort((left, right) =>
             compareValues(left[sortKey], right[sortKey], direction)
@@ -397,11 +479,11 @@
         const renderVideos = () => {
           const body = document.getElementById("videos-body")
           if (!body) return
-          const filtered = applyFilter(data.videos, videoState.query, [
-            "videoId",
-            "title",
-            "authorName"
-          ])
+          const filtered = applyFilter(
+            applyLastVerdictDate(data.videos, videoState.lastVerdictDate),
+            videoState.query,
+            ["videoId", "title", "authorName"]
+          )
           const sorted = applySort(
             filtered,
             videoState.sortKey,
@@ -542,12 +624,50 @@
 
         const bindFilters = () => {
           const videoSearch = document.getElementById("video-search")
+          const videoLastVerdictPeriod = document.getElementById(
+            "video-last-verdict-period"
+          )
+          const videoLastVerdictDate = document.getElementById(
+            "video-last-verdict-date"
+          )
           const eventSearch = document.getElementById("event-search")
           if (videoSearch) {
             videoSearch.addEventListener("input", (event) => {
               videoState.query = event.target.value
               renderVideos()
             })
+          }
+          if (videoLastVerdictPeriod && videoLastVerdictDate) {
+            const durations = {
+              "30d": 30 * 24 * 60 * 60 * 1000,
+              "90d": 90 * 24 * 60 * 60 * 1000,
+              "1y": 365 * 24 * 60 * 60 * 1000
+            }
+            const updateLastVerdictDate = (period) => {
+              if (period === "custom") {
+                videoState.lastVerdictDate = videoLastVerdictDate.value
+                renderVideos()
+                return
+              }
+              const duration = durations[period]
+              const dateValue = duration
+                ? formatDateInput(latestEventTimestamp - duration)
+                : ""
+              videoLastVerdictDate.value = dateValue
+              videoState.lastVerdictDate = dateValue
+              renderVideos()
+            }
+            videoLastVerdictPeriod.addEventListener("change", (event) => {
+              updateLastVerdictDate(event.target.value)
+            })
+            videoLastVerdictDate.addEventListener("change", (event) => {
+              videoState.lastVerdictDate = event.target.value
+              videoLastVerdictPeriod.value =
+                event.target.value.length > 0 ? "custom" : "all"
+              renderVideos()
+            })
+            videoLastVerdictPeriod.value = defaultVideoLastVerdictPeriod
+            updateLastVerdictDate(defaultVideoLastVerdictPeriod)
           }
           if (eventSearch) {
             eventSearch.addEventListener("input", (event) => {

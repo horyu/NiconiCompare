@@ -1,3 +1,4 @@
+import { Window } from "happy-dom"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
@@ -172,6 +173,126 @@ describe("buildShareHtml", () => {
     expect(sm1?.thumbnailUrl).toBe("https://example.com/a.jpg")
     expect(sm1?.videoUrl).toBe("https://www.nicovideo.jp/watch/sm1")
     expect(html).toContain('id="nc-share-data"')
+  })
+
+  it("動画の期間フィルターを HTML 内に埋め込み、全動画を保持すること", () => {
+    const html = buildShareHtml({ snapshot: baseSnapshot, categoryId: "cat-a" })
+    const payload = extractEmbeddedPayload(html)
+    const videos = payload.videos as Record<string, unknown>[]
+
+    expect(
+      videos
+        .map((video) => String(video.videoId))
+        .sort((left, right) => left.localeCompare(right))
+    ).toEqual(["sm1", "sm2", "sm3"])
+    expect(html).toContain('id="video-last-verdict-period"')
+    expect(html).toContain('id="video-last-verdict-date"')
+    expect(html).toContain("最新評価から30日以内")
+  })
+
+  it("判定がないカテゴリでは動画フィルターを指定なしで初期化すること", () => {
+    const window = new Window()
+    const html = buildShareHtml({
+      snapshot: {
+        ...baseSnapshot,
+        categories: {
+          ...baseSnapshot.categories,
+          items: {
+            ...baseSnapshot.categories.items,
+            "cat-c": { id: "cat-c", name: "カテゴリC", createdAt: 3 }
+          },
+          order: [...baseSnapshot.categories.order, "cat-c"]
+        }
+      },
+      categoryId: "cat-c"
+    })
+    window.document.write(html)
+    const [, reportScript] = window.document.querySelectorAll("script")
+    assertDefined(reportScript, "report script not found")
+    window.eval(reportScript.textContent)
+
+    expect(
+      window.eval('document.getElementById("video-last-verdict-period").value')
+    ).toBe("all")
+    expect(
+      window.eval('document.getElementById("video-last-verdict-date").value')
+    ).toBe("")
+    expect(
+      window.document.querySelector("#meta-latest-event-at")?.textContent
+    ).toBe("-")
+  })
+
+  it("HTML 内で最終判定日時の期間を変更すると動画一覧を絞り込むこと", () => {
+    const window = new Window()
+    const generatedAt = Date.now()
+    const [firstEvent, secondEvent] = baseSnapshot.events.items
+    assertDefined(firstEvent, "first event not found")
+    assertDefined(secondEvent, "second event not found")
+    const html = buildShareHtml({
+      snapshot: {
+        ...baseSnapshot,
+        events: {
+          ...baseSnapshot.events,
+          items: [
+            {
+              ...firstEvent,
+              timestamp: generatedAt - 31 * 24 * 60 * 60 * 1000
+            },
+            {
+              ...secondEvent,
+              timestamp: generatedAt - 29 * 24 * 60 * 60 * 1000
+            }
+          ]
+        }
+      },
+      categoryId: "cat-a"
+    })
+    window.document.write(html)
+    const [, reportScript] = window.document.querySelectorAll("script")
+    assertDefined(reportScript, "report script not found")
+    window.eval(reportScript.textContent)
+
+    const periodSelect = window.document.querySelector(
+      "#video-last-verdict-period"
+    )
+    const dateInput = window.document.querySelector("#video-last-verdict-date")
+    assertDefined(periodSelect, "period select not found")
+    assertDefined(dateInput, "date input not found")
+    expect(window.document.querySelectorAll("#videos-body tr")).toHaveLength(3)
+    expect(
+      window.eval('document.getElementById("video-last-verdict-period").value')
+    ).toBe("30d")
+    expect(
+      window.eval('document.getElementById("video-last-verdict-date").value')
+    ).not.toBe("")
+    expect(
+      window.document.querySelector("#meta-latest-event-at")?.textContent
+    ).not.toBe("-")
+    const dateValue = new Date(generatedAt - 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10)
+    window.eval(
+      `document.getElementById("video-last-verdict-date").value = "${dateValue}"`
+    )
+    dateInput.dispatchEvent(new window.Event("change"))
+
+    expect(window.document.querySelectorAll("#videos-body tr")).toHaveLength(2)
+    expect(window.document.querySelector("#video-count")?.textContent).toBe(
+      "表示 2 件"
+    )
+    expect(
+      window.eval('document.getElementById("video-last-verdict-period").value')
+    ).toBe("custom")
+
+    window.eval(
+      'document.getElementById("video-last-verdict-period").value = "30d"'
+    )
+    periodSelect.dispatchEvent(new window.Event("change"))
+    expect(
+      window.eval('document.getElementById("video-last-verdict-date").value')
+    ).not.toBe("")
+    expect(html).toContain("formatDateInput(latestEventTimestamp - duration)")
+    expect(window.document.querySelectorAll("#videos-body tr")).toHaveLength(3)
   })
 })
 
