@@ -26,6 +26,8 @@ interface VideoSessionState {
   search: string
   author: string
   categoryId: string
+  lastVerdictPeriod: "all" | "30d" | "90d" | "1y" | "custom"
+  lastVerdictDate: string
   sort: string
   order: "desc" | "asc"
   page: number
@@ -36,6 +38,8 @@ const DEFAULT_SESSION_STATE: VideoSessionState = {
   search: "",
   author: "all",
   categoryId: DEFAULT_CATEGORY_ID,
+  lastVerdictPeriod: "30d",
+  lastVerdictDate: "",
   sort: "rating",
   order: "desc",
   page: 1

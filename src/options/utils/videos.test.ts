@@ -178,6 +178,23 @@ describe("filterVideos", () => {
 
     expect(result.map((video) => video.videoId)).toEqual(["v1"])
   })
+
+  it("最終判定日時の下限日で絞り込むこと", () => {
+    const result = filterVideos({
+      videos: Object.fromEntries(videos.map((video) => [video.videoId, video])),
+      authors,
+      ratingsByCategory,
+      lastEventByVideo,
+      verdictCountsByVideo,
+      search: "",
+      author: "all",
+      lastVerdictAtOrAfter: 200,
+      sort: "title",
+      order: "asc"
+    })
+
+    expect(result.map((video) => video.videoId)).toEqual(["v1", "v3"])
+  })
 })
 
 describe("buildVideoExportRows", () => {

@@ -17,10 +17,22 @@ export interface VideoSessionState {
   search: string
   author: string
   categoryId: string
+  lastVerdictPeriod: VideoLastVerdictPeriod
+  lastVerdictDate: string
   sort: VideoSortKey
   order: VideoSortOrder
   page: number
 }
+
+export const VIDEO_LAST_VERDICT_PERIODS = [
+  "all",
+  "30d",
+  "90d",
+  "1y",
+  "custom"
+] as const
+
+export type VideoLastVerdictPeriod = (typeof VIDEO_LAST_VERDICT_PERIODS)[number]
 
 export const DEFAULT_EVENT_SESSION_STATE: EventSessionState = {
   search: "",
@@ -35,6 +47,8 @@ export const DEFAULT_VIDEO_SESSION_STATE: VideoSessionState = {
   search: "",
   author: "all",
   categoryId: "",
+  lastVerdictPeriod: "30d",
+  lastVerdictDate: "",
   sort: "rating",
   order: "desc",
   page: 1
@@ -71,6 +85,13 @@ export function normalizeVideoSessionState(value: unknown): VideoSessionState {
     categoryId: getString(
       state.categoryId,
       DEFAULT_VIDEO_SESSION_STATE.categoryId
+    ),
+    lastVerdictPeriod: isVideoLastVerdictPeriod(state.lastVerdictPeriod)
+      ? state.lastVerdictPeriod
+      : DEFAULT_VIDEO_SESSION_STATE.lastVerdictPeriod,
+    lastVerdictDate: getString(
+      state.lastVerdictDate,
+      DEFAULT_VIDEO_SESSION_STATE.lastVerdictDate
     ),
     sort: isVideoSortKey(state.sort)
       ? state.sort
@@ -116,6 +137,15 @@ export function isEventVerdict(
 export function isVideoSortKey(value: unknown): value is VideoSortKey {
   return (
     typeof value === "string" && VIDEO_SORT_KEYS.some((key) => key === value)
+  )
+}
+
+export function isVideoLastVerdictPeriod(
+  value: unknown
+): value is VideoLastVerdictPeriod {
+  return (
+    typeof value === "string" &&
+    VIDEO_LAST_VERDICT_PERIODS.some((period) => period === value)
   )
 }
 

@@ -47,6 +47,7 @@ interface FilterVideosParams {
   >
   search: string
   author: string
+  lastVerdictAtOrAfter?: number
   sort: string
   order: VideoSortOrder
 }
@@ -146,6 +147,7 @@ export function filterVideos({
   verdictCountsByVideo,
   search,
   author,
+  lastVerdictAtOrAfter,
   sort,
   order
 }: FilterVideosParams): VideoSnapshot[] {
@@ -160,7 +162,11 @@ export function filterVideos({
     const authorName = authors[video.authorUrl]?.name?.toLowerCase() ?? ""
     const matchesAuthor =
       normalizedAuthor.length === 0 || authorName.includes(normalizedAuthor)
-    return hasRating && matchesSearch && matchesAuthor
+    const lastVerdictAt = lastEventByVideo.get(video.videoId)
+    const matchesLastVerdict =
+      lastVerdictAtOrAfter === undefined ||
+      (lastVerdictAt !== undefined && lastVerdictAt >= lastVerdictAtOrAfter)
+    return hasRating && matchesSearch && matchesAuthor && matchesLastVerdict
   })
 
   return sortVideos({

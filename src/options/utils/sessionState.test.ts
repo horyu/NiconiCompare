@@ -48,6 +48,8 @@ describe("normalizeVideoSessionState", () => {
         search: "test",
         author: "Alice",
         categoryId: "category-a",
+        lastVerdictPeriod: "90d",
+        lastVerdictDate: "2026-08-01",
         sort: "wins",
         order: "asc",
         page: 3
@@ -56,6 +58,8 @@ describe("normalizeVideoSessionState", () => {
       search: "test",
       author: "Alice",
       categoryId: "category-a",
+      lastVerdictPeriod: "90d",
+      lastVerdictDate: "2026-08-01",
       sort: "wins",
       order: "asc",
       page: 3
@@ -67,12 +71,15 @@ describe("normalizeVideoSessionState", () => {
       normalizeVideoSessionState({
         sort: "unknown",
         order: "up",
+        lastVerdictPeriod: "unknown",
         page: "3"
       })
     ).toEqual({
       search: "",
       author: "all",
       categoryId: "",
+      lastVerdictPeriod: "30d",
+      lastVerdictDate: "",
       sort: "rating",
       order: "desc",
       page: 1

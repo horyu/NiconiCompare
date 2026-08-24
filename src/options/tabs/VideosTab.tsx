@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactElement } from "react"
 
 import { VIDEO_PAGE_SIZE } from "../../lib/constants"
+import { formatDateInput, parseDateStart } from "../../lib/date"
 import { CategorySelect } from "../components/CategorySelect"
 import { ClearableTextInput } from "../components/ClearableTextInput"
 import { ExportMenu } from "../components/ExportMenu"
@@ -14,8 +15,10 @@ import { buildCategoryOptions } from "../utils/categories"
 import { buildDelimitedText, downloadDelimitedFile } from "../utils/export"
 import {
   DEFAULT_VIDEO_SESSION_STATE,
+  isVideoLastVerdictPeriod,
   isVideoSortKey,
-  normalizeVideoSessionState
+  normalizeVideoSessionState,
+  type VideoLastVerdictPeriod
 } from "../utils/sessionState"
 import {
   buildLastEventByVideo,
@@ -47,6 +50,15 @@ const EXPORT_HEADERS = [
   "負け数",
   "最終判定日時"
 ]
+const LAST_VERDICT_DURATIONS: Record<
+  Exclude<VideoLastVerdictPeriod, "all" | "custom">,
+  number
+> = {
+  "30d": 30 * 24 * 60 * 60 * 1000,
+  "90d": 90 * 24 * 60 * 60 * 1000,
+  "1y": 365 * 24 * 60 * 60 * 1000
+}
+
 export const VideosTab = ({
   snapshot,
   onOpenEventsForVideo
@@ -61,6 +73,12 @@ export const VideosTab = ({
   const [videoAuthor, setVideoAuthor] = useState(initialState.author)
   const [videoCategoryId, setVideoCategoryId] = useState(
     initialState.categoryId || snapshot.settings.activeCategoryId
+  )
+  const [videoLastVerdictPeriod, setVideoLastVerdictPeriod] = useState(
+    initialState.lastVerdictPeriod
+  )
+  const [videoLastVerdictDate, setVideoLastVerdictDate] = useState(
+    initialState.lastVerdictDate
   )
   const [videoSort, setVideoSort] = useState(initialState.sort)
   const [videoSortOrder, setVideoSortOrder] = useState<VideoSortOrder>(
@@ -100,6 +118,16 @@ export const VideosTab = ({
     [snapshot.events.items, snapshot.categories.defaultId, effectiveCategoryId]
   )
 
+  const latestEventTimestamp = Math.max(...lastEventByVideo.values(), 0)
+  const displayedLastVerdictPeriod =
+    latestEventTimestamp > 0 ? videoLastVerdictPeriod : "all"
+  const displayedLastVerdictDate = getLastVerdictDate({
+    period: displayedLastVerdictPeriod,
+    customDate: videoLastVerdictDate,
+    latestEventTimestamp
+  })
+  const lastVerdictAtOrAfter = parseDateStart(displayedLastVerdictDate)
+
   const filteredVideos = useMemo(
     () =>
       filterVideos({
@@ -110,6 +138,7 @@ export const VideosTab = ({
         verdictCountsByVideo,
         search: videoSearch,
         author: videoAuthor,
+        lastVerdictAtOrAfter,
         sort: videoSort,
         order: videoSortOrder
       }),
@@ -122,6 +151,7 @@ export const VideosTab = ({
       verdictCountsByVideo,
       videoSearch,
       videoAuthor,
+      lastVerdictAtOrAfter,
       videoSort,
       videoSortOrder
     ]
@@ -146,6 +176,8 @@ export const VideosTab = ({
       search: videoSearch,
       author: videoAuthor,
       categoryId: effectiveCategoryId,
+      lastVerdictPeriod: videoLastVerdictPeriod,
+      lastVerdictDate: videoLastVerdictDate,
       sort: videoSort,
       order: videoSortOrder,
       page: videoPage
@@ -154,6 +186,8 @@ export const VideosTab = ({
     persistState,
     videoSearch,
     videoAuthor,
+    videoLastVerdictPeriod,
+    videoLastVerdictDate,
     videoSort,
     videoSortOrder,
     videoPage,
@@ -212,6 +246,17 @@ export const VideosTab = ({
     resetToFirstPage()
   }
 
+  const handleLastVerdictPeriodChange = (value: string): void => {
+    if (!isVideoLastVerdictPeriod(value)) return
+    if (value === "custom") {
+      setVideoLastVerdictDate(displayedLastVerdictDate)
+    } else if (value === "all") {
+      setVideoLastVerdictDate("")
+    }
+    setVideoLastVerdictPeriod(value)
+    resetToFirstPage()
+  }
+
   return (
     <section
       ref={sectionTopRef}
@@ -247,8 +292,8 @@ export const VideosTab = ({
         </div>
       )}
 
-      <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-3">
-        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+      <div className="flex flex-wrap gap-3">
+        <label className="w-48 shrink-0 text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           タイトル・ID
           <ClearableTextInput
             value={videoSearch}
@@ -260,7 +305,7 @@ export const VideosTab = ({
             clearLabel="動画検索条件をクリア"
           />
         </label>
-        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+        <label className="w-32 shrink-0 text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           投稿者
           <div className="relative">
             <input
@@ -293,7 +338,38 @@ export const VideosTab = ({
             ))}
           </datalist>
         </label>
-        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+        <div className="shrink-0 text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+          <label htmlFor="video-last-verdict-period">最終判定日時</label>
+          <div className="flex min-w-0 items-center gap-1">
+            <select
+              id="video-last-verdict-period"
+              value={displayedLastVerdictPeriod}
+              onChange={(event) => {
+                handleLastVerdictPeriodChange(event.target.value)
+              }}
+              className="w-44 shrink-0 border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+              <option value="all">指定なし</option>
+              <option value="30d">最新評価から30日以内</option>
+              <option value="90d">最新評価から90日以内</option>
+              <option value="1y">最新評価から1年以内</option>
+              <option value="custom">指定日以降</option>
+            </select>
+            <input
+              type="date"
+              value={displayedLastVerdictDate}
+              onChange={(event) => {
+                const date = event.target.value
+                setVideoLastVerdictDate(date)
+                setVideoLastVerdictPeriod(date.length === 0 ? "all" : "custom")
+                resetToFirstPage()
+              }}
+              aria-label="最終判定日時の下限日"
+              className="shrink-0 border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            />
+            <span className="shrink-0">以降</span>
+          </div>
+        </div>
+        <label className="w-32 shrink-0 text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           ソート
           <select
             value={videoSort}
@@ -315,7 +391,7 @@ export const VideosTab = ({
             <option value="lastVerdict">最終判定日時</option>
           </select>
         </label>
-        <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+        <label className="shrink-0 text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
           並び順
           <button
             type="button"
@@ -323,7 +399,7 @@ export const VideosTab = ({
               setVideoSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
               resetToFirstPage()
             }}
-            className="border border-slate-200 rounded-md px-2 py-1 text-left bg-white text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+            className="self-start border border-slate-200 rounded-md px-2 py-1 text-left bg-white text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
             {videoSortOrder === "asc" ? "昇順" : "降順"}
           </button>
         </label>
@@ -390,4 +466,21 @@ export const VideosTab = ({
       <ScrollToTopButton targetRef={sectionTopRef} />
     </section>
   )
+}
+
+function getLastVerdictDate({
+  period,
+  customDate,
+  latestEventTimestamp
+}: {
+  period: VideoLastVerdictPeriod
+  customDate: string
+  latestEventTimestamp: number
+}): string {
+  if (period === "all") return ""
+  if (period === "custom") return customDate
+  const duration = LAST_VERDICT_DURATIONS[period]
+  return latestEventTimestamp > 0
+    ? formatDateInput(new Date(latestEventTimestamp - duration))
+    : ""
 }
