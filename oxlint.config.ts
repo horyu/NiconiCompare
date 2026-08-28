@@ -98,29 +98,10 @@ export default defineConfig({
     "react/jsx-filename-extension": ["error", { extensions: [".tsx"] }],
     // oxlint 1.70+ で実装されたが、このプロジェクトは i18n 前提ではない
     "react/jsx-no-literals": "off",
-    // React Compiler 導入方針を決めるまで、分割された同ルール群を無効化する
-    "react/error-boundaries": "off",
+    // React Compiler 導入方針を決めるまで、現行コードで診断が出るルールだけを無効化する
     "react/exhaustive-effect-dependencies": "off",
-    "react/globals": "off",
-    "react/hooks": "off",
-    "react/immutability": "off",
-    "react/incompatible-library": "off",
-    "react/invariant": "off",
-    "react/memo-dependencies": "off",
-    "react/no-deriving-state-in-effects": "off",
-    "react/preserve-manual-memoization": "off",
-    "react/purity": "off",
-    "react/refs": "off",
-    "react/rule-suppression": "off",
     "react/set-state-in-effect": "off",
-    "react/set-state-in-render": "off",
-    "react/static-components": "off",
-    "react/unsupported-syntax": "off",
-    "react/use-memo": "off",
-    "react/void-use-memo": "off",
-    "react/syntax": "off",
     "react/todo": "off",
-    "react/capitalized-calls": "off",
     "typescript/explicit-function-return-type": [
       "error",
       {
