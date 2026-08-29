@@ -117,8 +117,6 @@ export default defineConfig({
         checkArrowFunctions: false
       }
     ],
-    "unicorn/no-array-for-each": "off",
-    "unicorn/no-array-reduce": "off",
     // validation ライブラリ導入後に有効化する
     "typescript/no-unnecessary-condition": "off"
   },

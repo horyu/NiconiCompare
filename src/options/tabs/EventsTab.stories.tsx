@@ -111,7 +111,7 @@ const createAuthor = (authorUrl: string, name: string): AuthorProfile => ({
 const buildSnapshotWithEvents = (events: CompareEvent[]): OptionsSnapshot => {
   const videos: NcVideos = {}
   const authors: NcAuthors = {}
-  events.forEach((event) => {
+  for (const event of events) {
     const currentTitle = `基準動画 ${event.id}`
     const opponentTitle = `比較動画 ${event.id}`
     const currentVideo = createVideo(event.currentVideoId, currentTitle)
@@ -126,7 +126,7 @@ const buildSnapshotWithEvents = (events: CompareEvent[]): OptionsSnapshot => {
       opponentVideo.authorUrl,
       `投稿者 ${event.id + 100}`
     )
-  })
+  }
   return {
     ...baseSnapshot,
     videos,

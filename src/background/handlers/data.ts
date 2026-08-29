@@ -147,6 +147,7 @@ export async function handleImportData(data: unknown): Promise<void> {
           : nextCategories.defaultId
       }))
     : []
+  // oxlint-disable-next-line unicorn/no-array-reduce
   const maxEventId = eventItems.reduce(
     (max, event) => Math.max(max, event.id),
     0

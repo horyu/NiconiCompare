@@ -54,7 +54,7 @@ const withUnsavedSettings = () => {
           "input[type='number']"
         )
         if (!inputs || inputs.length === 0) return
-        inputs.forEach((input, index) => {
+        for (const [index, input] of inputs.entries()) {
           const value = values[index]
           if (!value) return
           const setter = Object.getOwnPropertyDescriptor(
@@ -64,7 +64,7 @@ const withUnsavedSettings = () => {
           setter?.(value)
           input.dispatchEvent(new Event("input", { bubbles: true }))
           input.dispatchEvent(new Event("change", { bubbles: true }))
-        })
+        }
       })
       return () => {
         window.cancelAnimationFrame(rafId)

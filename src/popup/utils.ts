@@ -59,14 +59,14 @@ export function buildVideoVerdictStats(
     (event) =>
       !event.disabled && (event.categoryId ?? defaultCategoryId) === categoryId
   )
-  activeEvents.forEach((event) => {
+  for (const event of activeEvents) {
     applyVerdictStats(stats, event.currentVideoId, event.verdict)
     applyVerdictStats(
       stats,
       event.opponentVideoId,
       invertVerdict(event.verdict)
     )
-  })
+  }
   return stats
 }
 
@@ -83,7 +83,7 @@ export function buildRecentEventVideoVerdictStats(
   )
   const perEventStats: Record<number, Record<string, VideoVerdictStats>> = {}
 
-  recentEvents.forEach((event) => {
+  for (const event of recentEvents) {
     perEventStats[event.id] = {
       [event.currentVideoId]: cloneVerdictStats(
         latestStats[event.currentVideoId]
@@ -100,7 +100,7 @@ export function buildRecentEventVideoVerdictStats(
       invertVerdict(event.verdict),
       -1
     )
-  })
+  }
 
   return perEventStats
 }

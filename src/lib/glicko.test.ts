@@ -40,7 +40,7 @@ describe("glicko", () => {
       // Test all verdict types: better, worse, same
       const verdicts = ["better", "worse", "same"] as const
 
-      verdicts.forEach((verdict) => {
+      for (const verdict of verdicts) {
         const result = updatePairRatings({
           settings: defaultSettings,
           left,
@@ -60,7 +60,7 @@ describe("glicko", () => {
         expect(typeof result.right.volatility).toBe("number")
         expect(result.left.updatedFromEventId).toBe(1)
         expect(result.right.updatedFromEventId).toBe(1)
-      })
+      }
     })
   })
 })

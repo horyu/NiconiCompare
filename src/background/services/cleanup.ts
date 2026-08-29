@@ -37,36 +37,35 @@ function buildCleanupUpdates(
   const referencedVideos = new Set<string>()
   const referencedAuthors = new Set<string>()
 
-  events.items
-    .filter((event) => !event.disabled)
-    .forEach((event) => {
-      if (event.currentVideoId) {
-        referencedVideos.add(event.currentVideoId)
-      }
-      if (event.opponentVideoId) {
-        referencedVideos.add(event.opponentVideoId)
-      }
-    })
+  for (const event of events.items) {
+    if (event.disabled) continue
+    if (event.currentVideoId) {
+      referencedVideos.add(event.currentVideoId)
+    }
+    if (event.opponentVideoId) {
+      referencedVideos.add(event.opponentVideoId)
+    }
+  }
   if (state.currentVideoId) {
     referencedVideos.add(state.currentVideoId)
   }
   if (state.pinnedOpponentVideoId) {
     referencedVideos.add(state.pinnedOpponentVideoId)
   }
-  state.recentWindow.forEach((videoId) => {
+  for (const videoId of state.recentWindow) {
     if (videoId) {
       referencedVideos.add(videoId)
     }
-  })
+  }
 
   const cleanedVideos = Object.fromEntries(
     Object.entries(videos).filter(([videoId]) => referencedVideos.has(videoId))
   )
-  Object.values(cleanedVideos).forEach((video) => {
+  for (const video of Object.values(cleanedVideos)) {
     if (video.authorUrl) {
       referencedAuthors.add(video.authorUrl)
     }
-  })
+  }
   const cleanedRatings = Object.fromEntries(
     Object.entries(ratings).map(([categoryId, categoryRatings]) => [
       categoryId,
