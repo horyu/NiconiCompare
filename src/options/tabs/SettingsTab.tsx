@@ -273,7 +273,7 @@ export const SettingsTab = ({
           <button
             type="submit"
             disabled={savingSettings}
-            className="px-4 py-2 rounded-md bg-slate-900 text-white text-sm disabled:opacity-50 dark:bg-white dark:text-slate-900">
+            className="px-4 py-2 rounded-md bg-slate-900 text-white text-sm hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
             保存
           </button>
           <button
@@ -285,14 +285,14 @@ export const SettingsTab = ({
                 ? "保存せずに変更を破棄します。"
                 : "変更がありません。"
             }
-            className="px-4 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+            className="px-4 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
             変更を破棄
           </button>
           <button
             type="button"
             onClick={handleResetSettings}
             disabled={savingSettings}
-            className="px-4 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+            className="px-4 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
             デフォルト設定に戻す
           </button>
           <button

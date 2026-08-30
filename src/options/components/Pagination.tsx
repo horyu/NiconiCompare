@@ -20,7 +20,7 @@ export const Pagination = ({
         type="button"
         disabled={!canGoPrev}
         onClick={() => onChange(current - 1)}
-        className="px-3 py-1 rounded border border-slate-200 bg-white text-slate-900 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+        className="px-3 py-1 rounded border border-slate-200 bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
         前へ
       </button>
       <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
@@ -40,7 +40,7 @@ export const Pagination = ({
         type="button"
         disabled={!canGoNext}
         onClick={() => onChange(current + 1)}
-        className="px-3 py-1 rounded border border-slate-200 bg-white text-slate-900 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+        className="px-3 py-1 rounded border border-slate-200 bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
         次へ
       </button>
     </div>
