@@ -247,7 +247,7 @@ export default function Overlay(): ReactElement | null {
       : ""
   return (
     <div
-      className="fixed top-0 right-0 z-[2147483647] bg-black/75 text-white p-3 rounded-lg shadow-lg max-w-[320px] flex flex-col gap-2"
+      className="fixed top-0 right-0 bg-black/75 text-white p-3 rounded-lg shadow-lg max-w-[320px] flex flex-col gap-2"
       onMouseEnter={() => {
         setIsHovered(true)
       }}
