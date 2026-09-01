@@ -255,9 +255,9 @@ export const EventsTab = ({
   return (
     <section
       ref={sectionTopRef}
-      className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4 dark:bg-slate-900 dark:border-slate-700">
+      className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
       <header className="flex min-h-8 items-center justify-between gap-4">
-        <h2 className="text-lg font-semibold leading-7 text-slate-900 dark:text-slate-100">
+        <h2 className="text-lg leading-7 font-semibold text-slate-900 dark:text-slate-100">
           評価一覧
         </h2>
         <div className="flex h-8 items-center gap-3">
@@ -279,8 +279,8 @@ export const EventsTab = ({
         </div>
       </header>
 
-      <div className="flex items-end gap-3 flex-nowrap">
-        <label className="text-sm flex flex-col gap-1 min-w-[220px] text-slate-700 dark:text-slate-200">
+      <div className="flex flex-nowrap items-end gap-3">
+        <label className="flex min-w-[220px] flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           検索
           <ClearableTextInput
             value={eventSearch}
@@ -292,7 +292,7 @@ export const EventsTab = ({
             clearLabel="評価一覧検索条件をクリア"
           />
         </label>
-        <label className="text-sm flex flex-col gap-1 min-w-[140px] text-slate-700 dark:text-slate-200">
+        <label className="flex min-w-[140px] flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           評価
           <select
             value={eventVerdict}
@@ -303,14 +303,14 @@ export const EventsTab = ({
               }
               resetToFirstPage()
             }}
-            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+            className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
             <option value="all">全て</option>
             <option value="better">勝ち</option>
             <option value="same">引き分け</option>
             <option value="worse">負け</option>
           </select>
         </label>
-        <label className="text-sm flex items-center gap-2 mb-1 text-slate-700 dark:text-slate-200">
+        <label className="mb-1 flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
           <input
             type="checkbox"
             checked={eventIncludeDeleted}
@@ -321,7 +321,7 @@ export const EventsTab = ({
           />
           無効化済みも表示
         </label>
-        <label className="text-sm flex items-center gap-2 mb-1 text-slate-700 dark:text-slate-200">
+        <label className="mb-1 flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
           <input
             type="checkbox"
             checked={showCategoryOps}
@@ -329,7 +329,7 @@ export const EventsTab = ({
           />
           カテゴリ操作
         </label>
-        <label className="text-sm flex items-center gap-2 mb-1 text-slate-700 dark:text-slate-200">
+        <label className="mb-1 flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
           <input
             type="checkbox"
             checked={eventShowThumbnails}
@@ -355,7 +355,7 @@ export const EventsTab = ({
             disabled={
               filteredEvents.length === 0 || bulkMoveTargets.length === 0
             }
-            className="px-3 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+            className="rounded border border-slate-200 bg-white px-3 py-1 text-xs text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
             現在の条件で移動
           </button>
         </div>
@@ -369,13 +369,13 @@ export const EventsTab = ({
         />
       </div>
 
-      <div className="border border-slate-200 rounded-lg overflow-hidden dark:border-slate-700">
+      <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
         <div
           className={`grid ${
             showCategoryOps
               ? "grid-cols-[40px_70px_1fr_1fr_90px_160px_90px]"
               : "grid-cols-[40px_70px_1fr_1fr_90px_90px]"
-          } gap-2 bg-slate-100 text-xs font-semibold px-3 py-2 text-slate-700 dark:bg-slate-800 dark:text-slate-200`}>
+          } gap-2 bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200`}>
           <div>ID</div>
           <div>日時</div>
           <div>基準</div>

@@ -247,7 +247,7 @@ export default function Overlay(): ReactElement | null {
       : ""
   return (
     <div
-      className="fixed top-0 right-0 bg-black/75 text-white p-3 rounded-lg shadow-lg max-w-[320px] flex flex-col gap-2"
+      className="fixed top-0 right-0 flex max-w-[320px] flex-col gap-2 rounded-lg bg-black/75 p-3 text-white shadow-lg"
       onMouseEnter={() => {
         setIsHovered(true)
       }}
@@ -257,7 +257,7 @@ export default function Overlay(): ReactElement | null {
       <div className="flex h-[25px] min-w-0 items-center gap-1">
         {showControls && (
           <>
-            <div className="min-w-0 flex-1 max-w-[180px]">
+            <div className="max-w-[180px] min-w-0 flex-1">
               <CategorySelector
                 activeCategoryId={activeCategoryId}
                 categories={categories}
@@ -281,7 +281,7 @@ export default function Overlay(): ReactElement | null {
       </div>
 
       {displayStatus && (
-        <span className="text-xs opacity-80 text-right w-full">
+        <span className="w-full text-right text-xs opacity-80">
           {displayStatus}
         </span>
       )}

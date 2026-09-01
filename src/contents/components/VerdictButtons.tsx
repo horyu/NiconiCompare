@@ -22,7 +22,7 @@ export function VerdictButtons({
     ].join(" ")
 
   return (
-    <div className="grid grid-cols-[105px_70px_105px] gap-2 items-center">
+    <div className="grid grid-cols-[105px_70px_105px] items-center gap-2">
       <button
         type="button"
         onClick={() => onSubmit("better")}

@@ -8,6 +8,9 @@
   "trailingComma": "none",
   "bracketSpacing": true,
   "bracketSameLine": true,
+  "sortTailwindcss": {
+    "stylesheet": "./src/style.css"
+  },
   "experimentalSortImports": {
     "groups": [
       ["builtin"],

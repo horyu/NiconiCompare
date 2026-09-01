@@ -16,7 +16,7 @@ const meta: Meta<typeof EventVideoLabel> = {
   component: EventVideoLabel,
   decorators: [
     (Story) => (
-      <div className="bg-white p-4 rounded-lg border border-slate-200 max-w-[360px]">
+      <div className="max-w-[360px] rounded-lg border border-slate-200 bg-white p-4">
         <Story />
       </div>
     )

@@ -155,7 +155,7 @@ const withSessionState = (state: Partial<EventSessionState>) => {
 const withLoadingOverlay = (Story: () => ReactElement): ReactElement => (
   <div className="relative">
     <Story />
-    <div className="absolute inset-0 bg-white/70 flex items-center justify-center text-sm font-semibold text-slate-700">
+    <div className="absolute inset-0 flex items-center justify-center bg-white/70 text-sm font-semibold text-slate-700">
       読み込み中...
     </div>
   </div>
@@ -166,7 +166,7 @@ const meta: Meta<typeof EventsTab> = {
   component: EventsTab,
   decorators: [
     (Story) => (
-      <div className="bg-white p-4 rounded-lg border border-slate-200">
+      <div className="rounded-lg border border-slate-200 bg-white p-4">
         <Story />
       </div>
     )

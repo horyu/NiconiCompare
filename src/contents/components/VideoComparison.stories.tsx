@@ -26,7 +26,7 @@ const meta: Meta<typeof VideoComparison> = {
   component: VideoComparison,
   decorators: [
     (Story) => (
-      <div className="bg-black/75 text-white text-sm p-3 rounded-lg shadow-lg max-w-[320px]">
+      <div className="max-w-[320px] rounded-lg bg-black/75 p-3 text-sm text-white shadow-lg">
         <Story />
       </div>
     )

@@ -159,10 +159,12 @@ const meta: Meta<typeof Overlay> = {
   decorators: [
     (Story) => <WithLdJsonDecorator Story={Story} />,
     (Story) => (
-      <div className="overlay-story-sandbox relative h-[320px] w-[400px] bg-slate-900 p-4">
+      <div
+        data-overlay-story-sandbox
+        className="relative h-[320px] w-[400px] bg-slate-900 p-4">
         <style>
           {`
-            .overlay-story-sandbox .fixed.top-0.right-0 {
+            [data-overlay-story-sandbox] .fixed.top-0.right-0 {
               position: absolute !important;
             }
           `}

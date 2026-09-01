@@ -260,9 +260,9 @@ export const VideosTab = ({
   return (
     <section
       ref={sectionTopRef}
-      className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4 dark:bg-slate-900 dark:border-slate-700">
+      className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
       <header className="flex min-h-8 items-center justify-between gap-4">
-        <h2 className="text-lg font-semibold leading-7 text-slate-900 dark:text-slate-100">
+        <h2 className="text-lg leading-7 font-semibold text-slate-900 dark:text-slate-100">
           評価済み動画一覧
         </h2>
         <div className="flex h-8 items-center gap-3">
@@ -285,7 +285,7 @@ export const VideosTab = ({
       </header>
 
       {(hasMissingVideoData || hasMissingAuthorData) && (
-        <div className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 dark:text-amber-200 dark:bg-amber-900/30 dark:border-amber-900/50">
+        <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:border-amber-900/50 dark:bg-amber-900/30 dark:text-amber-200">
           {hasMissingVideoData && "nc_videos のデータ未取得"}
           {hasMissingVideoData && hasMissingAuthorData && " / "}
           {hasMissingAuthorData && "nc_authors のデータ未取得"}
@@ -293,7 +293,7 @@ export const VideosTab = ({
       )}
 
       <div className="flex flex-wrap gap-3">
-        <label className="w-48 shrink-0 text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+        <label className="flex w-48 shrink-0 flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           タイトル・ID
           <ClearableTextInput
             value={videoSearch}
@@ -305,7 +305,7 @@ export const VideosTab = ({
             clearLabel="動画検索条件をクリア"
           />
         </label>
-        <label className="w-32 shrink-0 text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+        <label className="flex w-32 shrink-0 flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           投稿者
           <div className="relative">
             <input
@@ -316,7 +316,7 @@ export const VideosTab = ({
                 setVideoAuthor(next.length === 0 ? "all" : next)
                 resetToFirstPage()
               }}
-              className="border border-slate-200 rounded-md px-2 py-1 w-full bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              className="w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               placeholder="投稿者で検索"
             />
             {videoAuthor !== "all" && (
@@ -326,7 +326,7 @@ export const VideosTab = ({
                   setVideoAuthor("all")
                   resetToFirstPage()
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 bg-white px-1 text-base leading-none z-10 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+                className="absolute top-1/2 right-2 z-10 -translate-y-1/2 bg-white px-1 text-base leading-none text-slate-500 hover:text-slate-700 dark:bg-slate-900 dark:text-slate-400 hover:dark:text-slate-200"
                 aria-label="投稿者フィルタをクリア">
                 ×
               </button>
@@ -338,7 +338,7 @@ export const VideosTab = ({
             ))}
           </datalist>
         </label>
-        <div className="shrink-0 text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+        <div className="flex shrink-0 flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           <label htmlFor="video-last-verdict-period">最終判定日時</label>
           <div className="flex min-w-0 items-center gap-1">
             <select
@@ -347,7 +347,7 @@ export const VideosTab = ({
               onChange={(event) => {
                 handleLastVerdictPeriodChange(event.target.value)
               }}
-              className="w-44 shrink-0 border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+              className="w-44 shrink-0 rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
               <option value="all">指定なし</option>
               <option value="30d">最新評価から30日以内</option>
               <option value="90d">最新評価から90日以内</option>
@@ -364,12 +364,12 @@ export const VideosTab = ({
                 resetToFirstPage()
               }}
               aria-label="最終判定日時の下限日"
-              className="shrink-0 border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              className="shrink-0 rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
             <span className="shrink-0">以降</span>
           </div>
         </div>
-        <label className="w-32 shrink-0 text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+        <label className="flex w-32 shrink-0 flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           ソート
           <select
             value={videoSort}
@@ -380,7 +380,7 @@ export const VideosTab = ({
               }
               resetToFirstPage()
             }}
-            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+            className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
             <option value="title">タイトル</option>
             <option value="author">投稿者</option>
             <option value="rating">Rating</option>
@@ -391,7 +391,7 @@ export const VideosTab = ({
             <option value="lastVerdict">最終判定日時</option>
           </select>
         </label>
-        <label className="shrink-0 text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+        <label className="flex shrink-0 flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           並び順
           <button
             type="button"
@@ -399,7 +399,7 @@ export const VideosTab = ({
               setVideoSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
               resetToFirstPage()
             }}
-            className="self-start border border-slate-200 rounded-md px-2 py-1 text-left bg-white text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+            className="self-start rounded-md border border-slate-200 bg-white px-2 py-1 text-left text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
             {videoSortOrder === "asc" ? "昇順" : "降順"}
           </button>
         </label>
@@ -413,8 +413,8 @@ export const VideosTab = ({
         />
       </div>
 
-      <div className="border border-slate-200 rounded-lg overflow-hidden dark:border-slate-700">
-        <div className="grid grid-cols-[28px_90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 bg-slate-100 text-xs font-semibold px-3 py-2 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+      <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+        <div className="grid grid-cols-[28px_90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
           <div>#</div>
           <div>サムネ</div>
           <div>タイトル</div>

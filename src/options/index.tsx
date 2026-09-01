@@ -98,7 +98,7 @@ export default function OptionsPage(): ReactElement {
 
   if (loading) {
     return (
-      <main className="min-h-screen p-8 font-sans bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <main className="min-h-screen bg-slate-50 p-8 font-sans text-slate-900 dark:bg-slate-950 dark:text-slate-100">
         <p>読込中...</p>
       </main>
     )
@@ -106,7 +106,7 @@ export default function OptionsPage(): ReactElement {
 
   if (!snapshot) {
     return (
-      <main className="min-h-screen p-8 font-sans bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <main className="min-h-screen bg-slate-50 p-8 font-sans text-slate-900 dark:bg-slate-950 dark:text-slate-100">
         <p>状態を取得できませんでした。</p>
         {error && (
           <small className="text-rose-500 dark:text-rose-300">{error}</small>
@@ -117,7 +117,7 @@ export default function OptionsPage(): ReactElement {
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <div className="max-w-6xl mx-auto p-6 flex flex-col gap-6 font-sans">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6 font-sans">
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold">NiconiCompare</h1>
@@ -135,7 +135,7 @@ export default function OptionsPage(): ReactElement {
                   "px-4 py-2 rounded-md text-sm font-medium border",
                   activeTab === tab.key
                     ? "bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white"
-                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-800"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-700 hover:dark:bg-slate-800"
                 ].join(" ")}>
                 {tab.label}
               </button>

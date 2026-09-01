@@ -201,9 +201,9 @@ export const DataTab = ({
   }
 
   return (
-    <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-6 dark:bg-slate-900 dark:border-slate-700">
+    <section className="flex flex-col gap-6 rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
       <header className="flex min-h-8 items-center">
-        <h2 className="text-lg font-semibold leading-7 text-slate-900 dark:text-slate-100">
+        <h2 className="text-lg leading-7 font-semibold text-slate-900 dark:text-slate-100">
           データ操作
         </h2>
       </header>
@@ -223,7 +223,7 @@ export const DataTab = ({
             type="button"
             onClick={handleExport}
             disabled={exporting}
-            className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+            className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
             JSON バックアップ
           </button>
           <div className="flex flex-col gap-2">
@@ -240,7 +240,7 @@ export const DataTab = ({
               type="button"
               onClick={() => importFileRef.current?.click()}
               disabled={importing}
-              className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+              className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
               JSON 復元
             </button>
           </div>
@@ -256,7 +256,7 @@ export const DataTab = ({
               type="button"
               onClick={handleDeleteAllData}
               disabled={deletingAll}
-              className="px-3 py-2 rounded-md border border-rose-200 text-sm text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-200 dark:hover:bg-rose-950/40">
+              className="rounded-md border border-rose-200 px-3 py-2 text-sm text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-200 hover:dark:bg-rose-950/40">
               全データ削除
             </button>
           </div>
@@ -275,7 +275,7 @@ export const DataTab = ({
             type="button"
             onClick={handleShareHtmlExport}
             disabled={exportingHtml}
-            className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+            className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
             共有HTML エクスポート
           </button>
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
@@ -286,7 +286,7 @@ export const DataTab = ({
           </div>
           <button
             type="button"
-            className="px-3 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+            className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800"
             onClick={handleCleanup}>
             孤立データ（動画・投稿者）を削除
           </button>

@@ -41,7 +41,7 @@ const meta: Meta<typeof CategorySelector> = {
   component: CategorySelector,
   decorators: [
     (Story) => (
-      <div className="bg-slate-900 p-4 rounded-lg text-white">
+      <div className="rounded-lg bg-slate-900 p-4 text-white">
         <Story />
       </div>
     )

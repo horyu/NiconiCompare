@@ -10,6 +10,7 @@ export default defineConfig({
     "unicorn",
     "vitest"
   ],
+  jsPlugins: ["oxlint-tailwindcss"],
   categories: {
     correctness: "error",
     suspicious: "warn",
@@ -28,6 +29,11 @@ export default defineConfig({
   options: {
     typeAware: true,
     typeCheck: true
+  },
+  settings: {
+    tailwindcss: {
+      entryPoint: "src/style.css"
+    }
   },
   ignorePatterns: [".output/**", ".wxt/**", "dist/**", "storybook-static/**"],
   rules: {
@@ -102,6 +108,17 @@ export default defineConfig({
     "react/exhaustive-effect-dependencies": "off",
     "react/set-state-in-effect": "off",
     "react/todo": "off",
+    // tailwindcss
+    "tailwindcss/no-conflicting-classes": "error",
+    "tailwindcss/no-deprecated-classes": "error",
+    "tailwindcss/no-duplicate-classes": "warn",
+    "tailwindcss/no-unknown-classes": "error",
+    "tailwindcss/enforce-canonical": "warn",
+    "tailwindcss/no-unnecessary-arbitrary-value": "warn",
+    "tailwindcss/enforce-sort-order": "warn",
+    "tailwindcss/consistent-variant-order": "warn",
+    "tailwindcss/enforce-consistent-important-position": "warn",
+    "tailwindcss/no-unnecessary-whitespace": "warn",
     "typescript/explicit-function-return-type": [
       "error",
       {

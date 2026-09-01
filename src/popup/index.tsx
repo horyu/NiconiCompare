@@ -148,7 +148,7 @@ export default function Popup(): ReactElement {
 
   if (loading) {
     return (
-      <main className="w-80 p-4 flex flex-col gap-4 font-sans bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <main className="flex w-80 flex-col gap-4 bg-white p-4 font-sans text-slate-900 dark:bg-slate-950 dark:text-slate-100">
         <p>読込中...</p>
       </main>
     )
@@ -156,7 +156,7 @@ export default function Popup(): ReactElement {
 
   if (!snapshot) {
     return (
-      <main className="w-80 p-4 flex flex-col gap-4 font-sans bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <main className="flex w-80 flex-col gap-4 bg-white p-4 font-sans text-slate-900 dark:bg-slate-950 dark:text-slate-100">
         <p>状態を取得できませんでした。</p>
         {error && (
           <small className="text-rose-500 dark:text-rose-300">{error}</small>
@@ -185,7 +185,7 @@ export default function Popup(): ReactElement {
     snapshot.categories.defaultId
   )
   return (
-    <main className="w-80 p-4 flex flex-col gap-2 font-sans bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <main className="flex w-80 flex-col gap-2 bg-white p-4 font-sans text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-1">
           <strong className="shrink-0 text-sm">NiconiCompare</strong>
@@ -194,13 +194,13 @@ export default function Popup(): ReactElement {
             onClick={() => {
               void openOptionsPage()
             }}
-            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-slate-300 bg-white text-xs text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-slate-300 bg-white text-xs text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 hover:dark:bg-slate-700"
             title="オプションを開く"
             aria-label="オプションを開く">
             ⚙
           </button>
         </div>
-        <label className="text-xs flex items-center gap-2">
+        <label className="flex items-center gap-2 text-xs">
           <input
             type="checkbox"
             checked={snapshot.settings.overlayAndCaptureEnabled}
@@ -212,10 +212,10 @@ export default function Popup(): ReactElement {
 
       <section>
         <div className="mb-2 flex items-center justify-between gap-2">
-          <h3 className="text-sm truncate">
+          <h3 className="truncate text-sm">
             直近の評価（{activeCategoryName}）
           </h3>
-          <label className="text-xs flex items-center gap-1 whitespace-nowrap">
+          <label className="flex items-center gap-1 text-xs whitespace-nowrap">
             <input
               type="checkbox"
               checked={snapshot.settings.showPopupVideoVerdictCounts}
@@ -228,17 +228,17 @@ export default function Popup(): ReactElement {
           </label>
         </div>
         {lastEvents.length === 0 ? (
-          <p className="text-xs opacity-70 text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-slate-500 opacity-70 dark:text-slate-400">
             評価なし
           </p>
         ) : (
-          <ul className="list-none p-0 m-0 flex flex-col gap-1 text-[13px]">
+          <ul className="m-0 flex list-none flex-col gap-1 p-0 text-[13px]">
             {lastEvents.map((event) => {
               const timestamp = formatPaddedDateTime(new Date(event.timestamp))
               return (
                 <li
                   key={event.id}
-                  className="grid grid-cols-[auto_96px_auto_96px] items-center gap-0 p-2 rounded-lg bg-slate-900/10 dark:bg-white/10">
+                  className="grid grid-cols-[auto_96px_auto_96px] items-center gap-0 rounded-lg bg-slate-900/10 p-2 dark:bg-white/10">
                   <div className="flex flex-col gap-0.5 text-[10px]">
                     <strong>#{event.id}</strong>
                     <span>{timestamp}</span>
@@ -255,7 +255,7 @@ export default function Popup(): ReactElement {
                       ? verdictToStatKey(event.verdict)
                       : undefined
                   )}
-                  <span className="w-fit justify-self-center text-base font-bold text-center text-slate-700 dark:text-slate-200">
+                  <span className="w-fit justify-self-center text-center text-base font-bold text-slate-700 dark:text-slate-200">
                     {labelVerdict(event.verdict)}
                   </span>
                   {renderVideoCard(
@@ -314,15 +314,15 @@ function renderVideoCard(
       href={watchUrl}
       target="_blank"
       rel="noreferrer"
-      className="flex flex-col items-center gap-1 w-24">
+      className="flex w-24 flex-col items-center gap-1">
       {thumbnailUrl ? (
         <img
           src={thumbnailUrl}
           alt={`${videoId} thumbnail`}
-          className="w-24 h-[54px] rounded-md object-cover bg-slate-200 dark:bg-slate-700"
+          className="h-[54px] w-24 rounded-md bg-slate-200 object-cover dark:bg-slate-700"
         />
       ) : (
-        <div className="w-24 h-[54px] rounded-md bg-slate-200 dark:bg-slate-700" />
+        <div className="h-[54px] w-24 rounded-md bg-slate-200 dark:bg-slate-700" />
       )}
       {verdictStats && (
         <span className="w-full text-center text-[11px] text-slate-700 dark:text-slate-300">

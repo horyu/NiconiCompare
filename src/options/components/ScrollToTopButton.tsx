@@ -34,7 +34,7 @@ export const ScrollToTopButton = ({
           block: "start"
         })
       }
-      className="fixed bottom-6 right-6 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+      className="fixed right-6 bottom-6 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800"
       aria-label="一覧の先頭へスクロール"
       title="一番上へ">
       ↑

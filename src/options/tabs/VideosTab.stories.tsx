@@ -241,7 +241,7 @@ const meta: Meta<typeof VideosTab> = {
   component: VideosTab,
   decorators: [
     (Story) => (
-      <div className="bg-white p-4 rounded-lg border border-slate-200">
+      <div className="rounded-lg border border-slate-200 bg-white p-4">
         <Story />
       </div>
     )

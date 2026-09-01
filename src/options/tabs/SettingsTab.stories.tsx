@@ -83,7 +83,7 @@ const meta: Meta<typeof SettingsTab> = {
   component: SettingsTab,
   decorators: [
     (Story) => (
-      <div className="bg-white p-4 rounded-lg border border-slate-200">
+      <div className="rounded-lg border border-slate-200 bg-white p-4">
         <Story />
       </div>
     )

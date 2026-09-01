@@ -59,11 +59,11 @@ export function EventRow({
         showCategoryOps
           ? "grid-cols-[40px_70px_1fr_1fr_90px_160px_90px]"
           : "grid-cols-[40px_70px_1fr_1fr_90px_90px]"
-      } gap-2 items-center px-3 py-2 text-sm text-slate-700 dark:text-slate-200`}>
-      <div className="font-medium flex flex-col gap-1 items-center">
+      } items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-200`}>
+      <div className="flex flex-col items-center gap-1 font-medium">
         <span>#{event.id}</span>
         {event.disabled && (
-          <span className="text-[10px] px-2 py-[1px] rounded-full bg-slate-100 text-slate-500 border border-slate-200 w-fit dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">
+          <span className="w-fit rounded-full border border-slate-200 bg-slate-100 px-2 py-px text-[10px] text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
             無効
           </span>
         )}
@@ -100,7 +100,7 @@ export function EventRow({
             onVerdictChange(event, value)
           }
         }}
-        className="border border-slate-200 rounded-md px-2 py-1 text-sm bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+        className="rounded-md border border-slate-200 bg-white px-2 py-1 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
         <option value="better">勝ち</option>
         <option value="same">引き分け</option>
         <option value="worse">負け</option>
@@ -125,7 +125,7 @@ export function EventRow({
                 type="button"
                 onClick={() => onMoveEvent(event.id, rowMoveTargetId)}
                 disabled={!rowMoveTargetId || isBusy}
-                className="px-2 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+                className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
                 移動
               </button>
             </>
@@ -138,7 +138,7 @@ export function EventRow({
             type="button"
             onClick={() => onDeleteEvent(event.id)}
             disabled={isBusy}
-            className="px-3 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+            className="rounded border border-slate-200 bg-white px-3 py-1 text-xs text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
             無効化
           </button>
         ) : (
@@ -147,14 +147,14 @@ export function EventRow({
               type="button"
               onClick={() => onRestoreEvent(event.id)}
               disabled={isBusy}
-              className="px-3 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+              className="rounded border border-slate-200 bg-white px-3 py-1 text-xs text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
               有効化
             </button>
             <button
               type="button"
               onClick={() => onPurgeEvent(event.id)}
               disabled={isBusy}
-              className="px-3 py-1 rounded border border-rose-200 text-xs text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-200 dark:hover:bg-rose-950/40">
+              className="rounded border border-rose-200 px-3 py-1 text-xs text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-200 hover:dark:bg-rose-950/40">
               削除
             </button>
           </>

@@ -170,9 +170,9 @@ export const SettingsTab = ({
   }
 
   return (
-    <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-6 dark:bg-slate-900 dark:border-slate-700">
+    <section className="flex flex-col gap-6 rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
       <header className="flex min-h-8 items-center">
-        <h2 className="text-lg font-semibold leading-7 text-slate-900 dark:text-slate-100">
+        <h2 className="text-lg leading-7 font-semibold text-slate-900 dark:text-slate-100">
           設定
         </h2>
       </header>
@@ -183,7 +183,7 @@ export const SettingsTab = ({
               <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                 オーバーレイ
               </h3>
-              <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+              <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
                 比較候補数 (1-{MAX_RECENT_WINDOW_SIZE})
                 <input
                   type="number"
@@ -191,10 +191,10 @@ export const SettingsTab = ({
                   max={MAX_RECENT_WINDOW_SIZE}
                   value={settingsForm.recentWindowSize}
                   onChange={handleSettingsChange("recentWindowSize")}
-                  className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                 />
               </label>
-              <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+              <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
                 自動非表示 (ms, 0-{MAX_OVERLAY_AUTO_CLOSE_MS})
                 <input
                   type="number"
@@ -202,10 +202,10 @@ export const SettingsTab = ({
                   max={MAX_OVERLAY_AUTO_CLOSE_MS}
                   value={settingsForm.overlayAutoCloseMs}
                   onChange={handleSettingsChange("overlayAutoCloseMs")}
-                  className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                 />
               </label>
-              <label className="text-sm flex items-center gap-2 text-slate-700 dark:text-slate-200">
+              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
                 <input
                   type="checkbox"
                   checked={settingsForm.showClosedOverlayVerdict}
@@ -220,7 +220,7 @@ export const SettingsTab = ({
               <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                 ポップアップ
               </h3>
-              <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+              <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
                 表示する直近評価数 (1-{MAX_POPUP_RECENT_COUNT})
                 <input
                   type="number"
@@ -228,7 +228,7 @@ export const SettingsTab = ({
                   max={MAX_POPUP_RECENT_COUNT}
                   value={settingsForm.popupRecentCount}
                   onChange={handleSettingsChange("popupRecentCount")}
-                  className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                 />
               </label>
             </div>
@@ -238,32 +238,32 @@ export const SettingsTab = ({
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
               Glicko
             </h3>
-            <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+            <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
               初期 rating
               <input
                 type="number"
                 value={settingsForm.glickoRating}
                 onChange={handleSettingsChange("glickoRating")}
-                className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               />
             </label>
-            <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+            <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
               初期 RD
               <input
                 type="number"
                 value={settingsForm.glickoRd}
                 onChange={handleSettingsChange("glickoRd")}
-                className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               />
             </label>
-            <label className="text-sm flex flex-col gap-1 text-slate-700 dark:text-slate-200">
+            <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
               初期 volatility
               <input
                 type="number"
                 step="0.01"
                 value={settingsForm.glickoVolatility}
                 onChange={handleSettingsChange("glickoVolatility")}
-                className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               />
             </label>
           </div>
@@ -273,7 +273,7 @@ export const SettingsTab = ({
           <button
             type="submit"
             disabled={savingSettings}
-            className="px-4 py-2 rounded-md bg-slate-900 text-white text-sm hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+            className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 hover:dark:bg-slate-100">
             保存
           </button>
           <button
@@ -285,14 +285,14 @@ export const SettingsTab = ({
                 ? "保存せずに変更を破棄します。"
                 : "変更がありません。"
             }
-            className="px-4 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
             変更を破棄
           </button>
           <button
             type="button"
             onClick={handleResetSettings}
             disabled={savingSettings}
-            className="px-4 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
             デフォルト設定に戻す
           </button>
           <button
@@ -300,7 +300,7 @@ export const SettingsTab = ({
             onClick={handleRebuildRatings}
             disabled={rebuildingRatings || hasUnsavedSettings}
             title={hasUnsavedSettings ? "保存してから再計算してください。" : ""}
-            className="px-4 py-2 rounded-md border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
             レーティング再計算
           </button>
         </div>

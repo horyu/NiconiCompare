@@ -178,9 +178,9 @@ export const CategoriesTab = ({
   }))
 
   return (
-    <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col gap-4 dark:bg-slate-900 dark:border-slate-700">
+    <section className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
       <header className="flex min-h-8 items-center justify-between gap-4">
-        <h2 className="text-lg font-semibold leading-7 text-slate-900 dark:text-slate-100">
+        <h2 className="text-lg leading-7 font-semibold text-slate-900 dark:text-slate-100">
           カテゴリ
         </h2>
         <div className="text-sm text-slate-500 dark:text-slate-400">
@@ -189,25 +189,25 @@ export const CategoriesTab = ({
       </header>
 
       <div className="flex items-end gap-3">
-        <label className="text-sm flex flex-col gap-1 min-w-[240px] text-slate-700 dark:text-slate-200">
+        <label className="flex min-w-[240px] flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           新規カテゴリ
           <input
             value={newCategoryName}
             onChange={(event) => setNewCategoryName(event.target.value)}
-            className="border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             placeholder="カテゴリ名を入力"
           />
         </label>
         <button
           type="button"
           onClick={handleCreateCategory}
-          className="px-3 py-2 rounded border border-slate-200 text-sm bg-white text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+          className="rounded border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
           追加
         </button>
       </div>
 
-      <div className="border border-slate-200 rounded-lg overflow-hidden dark:border-slate-700">
-        <div className="grid grid-cols-[1fr_140px_100px_100px_100px_190px] gap-2 bg-slate-100 text-xs font-semibold px-3 py-2 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+      <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+        <div className="grid grid-cols-[1fr_140px_100px_100px_100px_190px] gap-2 bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
           <div>カテゴリ名</div>
           <div>作成日時</div>
           <div>状態</div>
@@ -227,9 +227,9 @@ export const CategoriesTab = ({
             return (
               <div
                 key={category.id}
-                className="grid grid-cols-[1fr_140px_100px_100px_100px_190px] gap-2 items-center px-3 py-2 text-sm">
-                <div className="flex flex-col gap-1 min-w-0">
-                  <span className="font-medium text-slate-900 break-words whitespace-normal dark:text-slate-100">
+                className="grid grid-cols-[1fr_140px_100px_100px_100px_190px] items-center gap-2 px-3 py-2 text-sm">
+                <div className="flex min-w-0 flex-col gap-1">
+                  <span className="font-medium wrap-break-word whitespace-normal text-slate-900 dark:text-slate-100">
                     {category.name}
                   </span>
                   <span className="text-xs text-slate-500 dark:text-slate-400">
@@ -241,11 +241,11 @@ export const CategoriesTab = ({
                 </div>
                 <div className="text-xs">
                   {isActive ? (
-                    <span className="px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-100">
+                    <span className="rounded-full bg-emerald-100 px-2 py-1 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-100">
                       アクティブ
                     </span>
                   ) : (
-                    <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+                    <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-500 dark:bg-slate-800 dark:text-slate-300">
                       非アクティブ
                     </span>
                   )}
@@ -270,14 +270,14 @@ export const CategoriesTab = ({
                     type="button"
                     onClick={() => handleMove(category.id, -1)}
                     disabled={index === 0}
-                    className="px-2 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+                    className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
                     ↑
                   </button>
                   <button
                     type="button"
                     onClick={() => handleMove(category.id, 1)}
                     disabled={index === orderedCategories.length - 1}
-                    className="px-2 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+                    className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
                     ↓
                   </button>
                 </div>
@@ -298,7 +298,7 @@ export const CategoriesTab = ({
                       }
                       void handleUpdateName(category.id, trimmed)
                     }}
-                    className="px-2 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+                    className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
                     名称変更
                   </button>
                   {!isDefault && (
@@ -324,14 +324,14 @@ export const CategoriesTab = ({
                           onClick={() =>
                             handleDeleteCategory(category.id, moveTarget)
                           }
-                          className="px-2 py-1 rounded border border-slate-200 text-xs bg-white text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+                          className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
                           移動して削除
                         </button>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleDeleteCategory(category.id)}
-                        className="px-2 py-1 rounded border border-rose-200 text-xs text-rose-700 hover:bg-rose-50 dark:border-rose-900/60 dark:text-rose-200 dark:hover:bg-rose-950/40">
+                        className="rounded border border-rose-200 px-2 py-1 text-xs text-rose-700 hover:bg-rose-50 dark:border-rose-900/60 dark:text-rose-200 hover:dark:bg-rose-950/40">
                         破棄して削除
                       </button>
                     </div>

@@ -20,14 +20,14 @@ export const Pagination = ({
         type="button"
         disabled={!canGoPrev}
         onClick={() => onChange(current - 1)}
-        className="px-3 py-1 rounded border border-slate-200 bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+        className="rounded border border-slate-200 bg-white px-3 py-1 text-slate-900 hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
         前へ
       </button>
       <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
         <select
           value={current}
           onChange={(event) => onChange(Number(event.target.value))}
-          className="border border-slate-200 rounded-md px-2 py-1 text-sm bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+          className="rounded-md border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
           {pageOptions.map((page) => (
             <option key={page} value={page}>
               {page}
@@ -40,7 +40,7 @@ export const Pagination = ({
         type="button"
         disabled={!canGoNext}
         onClick={() => onChange(current + 1)}
-        className="px-3 py-1 rounded border border-slate-200 bg-white text-slate-900 hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+        className="rounded border border-slate-200 bg-white px-3 py-1 text-slate-900 hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
         次へ
       </button>
     </div>

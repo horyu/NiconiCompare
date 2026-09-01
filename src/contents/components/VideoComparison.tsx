@@ -38,18 +38,18 @@ export function VideoComparison({
     : ""
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2 items-start">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2">
       <div className="flex flex-col gap-2">
         {getThumbnailUrl(currentVideoId) ? (
           <img
             src={getThumbnailUrl(currentVideoId)}
             alt="現在の動画"
-            className="w-full aspect-video object-cover rounded-md bg-white/10"
+            className="aspect-video w-full rounded-md bg-white/10 object-cover"
           />
         ) : (
-          <div className="w-full aspect-video rounded-md bg-white/10" />
+          <div className="aspect-video w-full rounded-md bg-white/10" />
         )}
-        <div className="text-[14px] opacity-90 text-right break-all overflow-hidden w-full">
+        <div className="w-full overflow-hidden text-right text-[14px] break-all opacity-90">
           {currentVideoId
             ? formatVideoLabel(currentVideoId)
             : "再生中動画を検出できません"}
@@ -67,26 +67,26 @@ export function VideoComparison({
               <img
                 src={getThumbnailUrl(opponentVideoId)}
                 alt="選択中の動画"
-                className="w-full aspect-video object-cover rounded-md bg-white/10"
+                className="aspect-video w-full rounded-md bg-white/10 object-cover"
               />
             ) : (
-              <div className="w-full aspect-video rounded-md bg-white/10" />
+              <div className="aspect-video w-full rounded-md bg-white/10" />
             )}
           </a>
         ) : getThumbnailUrl(opponentVideoId) ? (
           <img
             src={getThumbnailUrl(opponentVideoId)}
             alt="選択中の動画"
-            className="w-full aspect-video object-cover rounded-md bg-white/10"
+            className="aspect-video w-full rounded-md bg-white/10 object-cover"
           />
         ) : (
-          <div className="w-full aspect-video rounded-md bg-white/10" />
+          <div className="aspect-video w-full rounded-md bg-white/10" />
         )}
         {/* Wrapper to avoid inserting a gap between the selector row and title */}
         <div>
           {opponentSelector}
           {/* -mt-px で隙間を調整 */}
-          <div className="text-[14px] opacity-90 self-stretch text-left break-all overflow-hidden -mt-px">
+          <div className="-mt-px self-stretch overflow-hidden text-left text-[14px] break-all opacity-90">
             {opponentTitle}
           </div>
         </div>

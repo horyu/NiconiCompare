@@ -21,7 +21,7 @@ export function CategorySelector({
 
   return (
     <select
-      className="w-full min-w-0 bg-black/60 text-white text-xs border border-white/30 rounded px-2 py-1 truncate"
+      className="w-full min-w-0 truncate rounded border border-white/30 bg-black/60 px-2 py-1 text-xs text-white"
       value={activeCategoryId}
       onChange={(event) => onChange(event.target.value)}>
       {options.map((id) => (

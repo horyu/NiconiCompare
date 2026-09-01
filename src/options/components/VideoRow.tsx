@@ -28,7 +28,7 @@ export function VideoRow({
   const verdictTotal =
     verdictCounts.wins + verdictCounts.draws + verdictCounts.losses
   return (
-    <div className="grid grid-cols-[28px_90px_1fr_130px_40px_30px_40px_50px_110px] gap-2 items-center px-3 py-2">
+    <div className="grid grid-cols-[28px_90px_1fr_130px_40px_30px_40px_50px_110px] items-center gap-2 px-3 py-2">
       <div className="text-xs text-slate-600 dark:text-slate-400">
         {rowNumber}
       </div>
@@ -36,12 +36,12 @@ export function VideoRow({
         href={createWatchUrl(video.videoId)}
         target="_blank"
         rel="noreferrer"
-        className="w-20 h-12 bg-slate-200 rounded overflow-hidden block dark:bg-slate-700">
+        className="block h-12 w-20 overflow-hidden rounded bg-slate-200 dark:bg-slate-700">
         {video.thumbnailUrls?.[0] ? (
           <img
             src={video.thumbnailUrls[0]}
             alt={video.title}
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
           />
         ) : null}
       </a>
@@ -67,7 +67,7 @@ export function VideoRow({
           <button
             type="button"
             onClick={() => onOpenEventsForVideo(video.videoId, categoryId)}
-            className="text-sky-700 underline decoration-sky-500 decoration-1 underline-offset-2 hover:text-sky-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:text-sky-300 dark:hover:text-sky-200">
+            className="text-sky-700 underline decoration-sky-500 decoration-1 underline-offset-2 hover:text-sky-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 focus-visible:outline-solid dark:text-sky-300 hover:dark:text-sky-200">
             {verdictTotal}
           </button>
         ) : (
