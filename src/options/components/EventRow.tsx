@@ -6,6 +6,7 @@ import { VERDICTS } from "../../lib/types"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { CategorySelect } from "./CategorySelect"
 import { EventVideoLabel } from "./EventVideoLabel"
+import { OptionButton } from "./OptionButton"
 
 interface EventRowProps {
   event: CompareEvent
@@ -121,42 +122,39 @@ export function EventRow({
                   size="sm"
                 />
               </div>
-              <button
-                type="button"
+              <OptionButton
                 onClick={() => onMoveEvent(event.id, rowMoveTargetId)}
                 disabled={!rowMoveTargetId || isBusy}
-                className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+                size="compact">
                 移動
-              </button>
+              </OptionButton>
             </>
           )}
         </div>
       )}
       <div className="flex flex-col gap-2">
         {!event.disabled ? (
-          <button
-            type="button"
+          <OptionButton
             onClick={() => onDeleteEvent(event.id)}
             disabled={isBusy}
-            className="rounded border border-slate-200 bg-white px-3 py-1 text-xs text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+            size="sm">
             無効化
-          </button>
+          </OptionButton>
         ) : (
           <>
-            <button
-              type="button"
+            <OptionButton
               onClick={() => onRestoreEvent(event.id)}
               disabled={isBusy}
-              className="rounded border border-slate-200 bg-white px-3 py-1 text-xs text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+              size="sm">
               有効化
-            </button>
-            <button
-              type="button"
+            </OptionButton>
+            <OptionButton
               onClick={() => onPurgeEvent(event.id)}
               disabled={isBusy}
-              className="rounded border border-rose-200 px-3 py-1 text-xs text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-200 hover:dark:bg-rose-950/40">
+              variant="danger"
+              size="sm">
               削除
-            </button>
+            </OptionButton>
           </>
         )}
       </div>

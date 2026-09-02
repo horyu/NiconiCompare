@@ -1,5 +1,7 @@
 import type { ReactElement } from "react"
 
+import { OptionButton } from "./OptionButton"
+
 interface ExportMenuProps {
   open: boolean
   onToggle: () => void
@@ -13,12 +15,9 @@ export const ExportMenu = ({
 }: ExportMenuProps): ReactElement => {
   return (
     <div className="relative">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="inline-flex h-8 items-center rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+      <OptionButton onClick={onToggle} size="toolbar">
         エクスポート
-      </button>
+      </OptionButton>
       {open && (
         <div className="absolute right-0 z-10 mt-2 w-44 rounded-md border border-slate-200 bg-white text-slate-700 shadow-lg dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
           <button

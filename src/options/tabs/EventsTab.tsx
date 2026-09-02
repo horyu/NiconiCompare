@@ -5,6 +5,7 @@ import { CategorySelect } from "../components/CategorySelect"
 import { ClearableTextInput } from "../components/ClearableTextInput"
 import { EventRow } from "../components/EventRow"
 import { ExportMenu } from "../components/ExportMenu"
+import { OptionButton } from "../components/OptionButton"
 import { Pagination } from "../components/Pagination"
 import { ScrollToTopButton } from "../components/ScrollToTopButton"
 import { useEventActions } from "../hooks/useEventActions"
@@ -349,15 +350,14 @@ export const EventsTab = ({
               options={bulkMoveTargets}
             />
           </div>
-          <button
-            type="button"
+          <OptionButton
             onClick={() => requestBulkMove(bulkMoveTargetId)}
             disabled={
               filteredEvents.length === 0 || bulkMoveTargets.length === 0
             }
-            className="rounded border border-slate-200 bg-white px-3 py-1 text-xs text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+            size="sm">
             現在の条件で移動
-          </button>
+          </OptionButton>
         </div>
       )}
 

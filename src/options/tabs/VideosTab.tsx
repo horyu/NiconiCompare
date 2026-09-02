@@ -5,6 +5,7 @@ import { formatDateInput, parseDateStart } from "../../lib/date"
 import { CategorySelect } from "../components/CategorySelect"
 import { ClearableTextInput } from "../components/ClearableTextInput"
 import { ExportMenu } from "../components/ExportMenu"
+import { OptionButton } from "../components/OptionButton"
 import { Pagination } from "../components/Pagination"
 import { ScrollToTopButton } from "../components/ScrollToTopButton"
 import { VideoRow } from "../components/VideoRow"
@@ -393,15 +394,15 @@ export const VideosTab = ({
         </label>
         <label className="flex shrink-0 flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
           並び順
-          <button
-            type="button"
+          <OptionButton
             onClick={() => {
               setVideoSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
               resetToFirstPage()
             }}
-            className="self-start rounded-md border border-slate-200 bg-white px-2 py-1 text-left text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+            size="compact"
+            align="start">
             {videoSortOrder === "asc" ? "昇順" : "降順"}
-          </button>
+          </OptionButton>
         </label>
       </div>
 

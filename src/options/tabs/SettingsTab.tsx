@@ -16,6 +16,7 @@ import {
 import { sendNcMessage } from "../../lib/messages"
 import { runNcAction } from "../../lib/ncAction"
 import type { NcSettings } from "../../lib/types"
+import { OptionButton } from "../components/OptionButton"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 
 interface SettingsTabProps {
@@ -270,14 +271,14 @@ export const SettingsTab = ({
         </div>
 
         <div className="col-span-2 flex items-center gap-3">
-          <button
+          <OptionButton
             type="submit"
             disabled={savingSettings}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 hover:dark:bg-slate-100">
+            variant="primary"
+            size="lg">
             保存
-          </button>
-          <button
-            type="button"
+          </OptionButton>
+          <OptionButton
             onClick={handleDiscardSettings}
             disabled={!hasUnsavedSettings || savingSettings}
             title={
@@ -285,24 +286,22 @@ export const SettingsTab = ({
                 ? "保存せずに変更を破棄します。"
                 : "変更がありません。"
             }
-            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+            size="lg">
             変更を破棄
-          </button>
-          <button
-            type="button"
+          </OptionButton>
+          <OptionButton
             onClick={handleResetSettings}
             disabled={savingSettings}
-            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+            size="lg">
             デフォルト設定に戻す
-          </button>
-          <button
-            type="button"
+          </OptionButton>
+          <OptionButton
             onClick={handleRebuildRatings}
             disabled={rebuildingRatings || hasUnsavedSettings}
             title={hasUnsavedSettings ? "保存してから再計算してください。" : ""}
-            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+            size="lg">
             レーティング再計算
-          </button>
+          </OptionButton>
         </div>
       </form>
     </section>

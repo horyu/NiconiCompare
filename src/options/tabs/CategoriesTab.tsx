@@ -5,6 +5,7 @@ import { formatPaddedDateTime } from "../../lib/date"
 import { sendNcMessage } from "../../lib/messages"
 import { runNcAction } from "../../lib/ncAction"
 import { CategorySelect } from "../components/CategorySelect"
+import { OptionButton } from "../components/OptionButton"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 
 interface CategoriesTabProps {
@@ -188,22 +189,17 @@ export const CategoriesTab = ({
         </div>
       </header>
 
-      <div className="flex items-end gap-3">
-        <label className="flex min-w-[240px] flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
-          新規カテゴリ
-          <input
-            value={newCategoryName}
-            onChange={(event) => setNewCategoryName(event.target.value)}
-            className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            placeholder="カテゴリ名を入力"
-          />
-        </label>
-        <button
-          type="button"
-          onClick={handleCreateCategory}
-          className="rounded border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+      <div className="flex items-center gap-3">
+        <input
+          value={newCategoryName}
+          onChange={(event) => setNewCategoryName(event.target.value)}
+          aria-label="新規カテゴリ名"
+          className="min-w-[240px] rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          placeholder="カテゴリ名を入力"
+        />
+        <OptionButton onClick={handleCreateCategory} size="md">
           追加
-        </button>
+        </OptionButton>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
@@ -266,24 +262,21 @@ export const CategoriesTab = ({
                   </label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
+                  <OptionButton
                     onClick={() => handleMove(category.id, -1)}
                     disabled={index === 0}
-                    className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+                    size="compact">
                     ↑
-                  </button>
-                  <button
-                    type="button"
+                  </OptionButton>
+                  <OptionButton
                     onClick={() => handleMove(category.id, 1)}
                     disabled={index === orderedCategories.length - 1}
-                    className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+                    size="compact">
                     ↓
-                  </button>
+                  </OptionButton>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <button
-                    type="button"
+                  <OptionButton
                     onClick={() => {
                       const nextName = window.prompt(
                         "カテゴリ名を入力してください。",
@@ -298,9 +291,9 @@ export const CategoriesTab = ({
                       }
                       void handleUpdateName(category.id, trimmed)
                     }}
-                    className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+                    size="compact">
                     名称変更
-                  </button>
+                  </OptionButton>
                   {!isDefault && (
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center gap-2">
@@ -319,21 +312,20 @@ export const CategoriesTab = ({
                             size="sm"
                           />
                         </div>
-                        <button
-                          type="button"
+                        <OptionButton
                           onClick={() =>
                             handleDeleteCategory(category.id, moveTarget)
                           }
-                          className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+                          size="compact">
                           移動して削除
-                        </button>
+                        </OptionButton>
                       </div>
-                      <button
-                        type="button"
+                      <OptionButton
                         onClick={() => handleDeleteCategory(category.id)}
-                        className="rounded border border-rose-200 px-2 py-1 text-xs text-rose-700 hover:bg-rose-50 dark:border-rose-900/60 dark:text-rose-200 hover:dark:bg-rose-950/40">
+                        variant="danger"
+                        size="compact">
                         破棄して削除
-                      </button>
+                      </OptionButton>
                     </div>
                   )}
                 </div>

@@ -1,5 +1,7 @@
 import type { ReactElement } from "react"
 
+import { OptionButton } from "./OptionButton"
+
 interface PaginationProps {
   current: number
   total: number
@@ -16,13 +18,12 @@ export const Pagination = ({
   const pageOptions = Array.from({ length: total }, (_, index) => index + 1)
   return (
     <div className="flex items-center justify-between text-sm">
-      <button
-        type="button"
+      <OptionButton
         disabled={!canGoPrev}
         onClick={() => onChange(current - 1)}
-        className="rounded border border-slate-200 bg-white px-3 py-1 text-slate-900 hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+        size="sm">
         前へ
-      </button>
+      </OptionButton>
       <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
         <select
           value={current}
@@ -36,13 +37,12 @@ export const Pagination = ({
         </select>
         <span>/ {total}</span>
       </div>
-      <button
-        type="button"
+      <OptionButton
         disabled={!canGoNext}
         onClick={() => onChange(current + 1)}
-        className="rounded border border-slate-200 bg-white px-3 py-1 text-slate-900 hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+        size="sm">
         次へ
-      </button>
+      </OptionButton>
     </div>
   )
 }

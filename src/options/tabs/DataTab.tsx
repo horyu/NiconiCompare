@@ -6,6 +6,7 @@ import { handleUIError } from "../../lib/errorHandler"
 import { sendNcMessage } from "../../lib/messages"
 import { runNcAction } from "../../lib/ncAction"
 import { CategorySelect } from "../components/CategorySelect"
+import { OptionButton } from "../components/OptionButton"
 import type { OptionsSnapshot } from "../hooks/useOptionsData"
 import { buildShareExportFilename, buildShareHtml } from "../utils/buildHtml"
 import { buildCategoryOptions } from "../utils/categories"
@@ -219,13 +220,9 @@ export const DataTab = ({
               {(chrome.storage.local.QUOTA_BYTES / 1024 / 1024).toFixed(0)} MB
             </div>
           )}
-          <button
-            type="button"
-            onClick={handleExport}
-            disabled={exporting}
-            className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+          <OptionButton onClick={handleExport} disabled={exporting} size="md">
             JSON バックアップ
-          </button>
+          </OptionButton>
           <div className="flex flex-col gap-2">
             <input
               ref={importFileRef}
@@ -236,13 +233,12 @@ export const DataTab = ({
               }}
               className="hidden"
             />
-            <button
-              type="button"
+            <OptionButton
               onClick={() => importFileRef.current?.click()}
               disabled={importing}
-              className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+              size="md">
               JSON 復元
-            </button>
+            </OptionButton>
           </div>
 
           <div className="mt-3 flex flex-col gap-3">
@@ -252,13 +248,13 @@ export const DataTab = ({
             <p className="text-sm text-slate-600 dark:text-slate-400">
               設定・カテゴリ・評価履歴・レーティング・動画・投稿者データ・メタ情報を初期化します。
             </p>
-            <button
-              type="button"
+            <OptionButton
               onClick={handleDeleteAllData}
               disabled={deletingAll}
-              className="rounded-md border border-rose-200 px-3 py-2 text-sm text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-200 hover:dark:bg-rose-950/40">
+              variant="danger"
+              size="md">
               全データ削除
-            </button>
+            </OptionButton>
           </div>
         </div>
 
@@ -271,25 +267,21 @@ export const DataTab = ({
             options={categoryOptions}
             onChange={setHtmlExportCategoryId}
           />
-          <button
-            type="button"
+          <OptionButton
             onClick={handleShareHtmlExport}
             disabled={exportingHtml}
-            className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800">
+            size="md">
             共有HTML エクスポート
-          </button>
+          </OptionButton>
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
             クリーンアップ
           </h3>
           <div className="text-sm text-slate-600 dark:text-slate-400">
             最終実行: {lastCleanupLabel}
           </div>
-          <button
-            type="button"
-            className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:dark:bg-slate-800"
-            onClick={handleCleanup}>
+          <OptionButton onClick={handleCleanup} size="md">
             孤立データ（動画・投稿者）を削除
-          </button>
+          </OptionButton>
         </div>
       </div>
     </section>
