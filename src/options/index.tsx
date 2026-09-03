@@ -177,8 +177,6 @@ export default function OptionsPage(): ReactElement {
         {activeTab === "videos" && (
           <VideosTab
             snapshot={snapshot}
-            refreshState={refreshState}
-            showToast={showToast}
             onOpenEventsForVideo={handleOpenEventsForVideo}
           />
         )}

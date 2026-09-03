@@ -247,9 +247,7 @@ const meta: Meta<typeof VideosTab> = {
     )
   ],
   args: {
-    snapshot: baseSnapshot,
-    refreshState: async () => {},
-    showToast: () => {}
+    snapshot: baseSnapshot
   }
 }
 

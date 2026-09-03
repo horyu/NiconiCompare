@@ -31,8 +31,6 @@ import {
 
 interface VideosTabProps {
   snapshot: OptionsSnapshot
-  refreshState: (silent?: boolean) => Promise<void>
-  showToast: (tone: "success" | "error", text: string) => void
   onOpenEventsForVideo?: (videoId: string, categoryId: string) => void
 }
 
