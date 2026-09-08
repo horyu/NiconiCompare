@@ -17,7 +17,7 @@
     "test:run": "vitest run",
     "fix": "pnpm format && pnpm lint:fix",
     "check": "run-p lint format:check",
-    "lint": "oxlint --deny-warnings .",
+    "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "format": "oxfmt",
     "format:check": "oxfmt --check",

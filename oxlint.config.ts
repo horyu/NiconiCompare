@@ -27,6 +27,7 @@ export default defineConfig({
     webextensions: true
   },
   options: {
+    denyWarnings: true,
     typeAware: true,
     typeCheck: true
   },
