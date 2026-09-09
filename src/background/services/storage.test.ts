@@ -6,6 +6,7 @@ import {
   DEFAULT_STATE,
   STORAGE_KEYS
 } from "../../lib/constants"
+import { logger } from "../../lib/logger"
 import { handleRecordEvent } from "../handlers/event"
 import type { StorageDataByKey } from "./storage"
 import { getStorageData, setStorageData, withStorageUpdates } from "./storage"
@@ -90,30 +91,41 @@ describe("storage transaction queue", () => {
   })
 
   it("失敗した transaction の後も後続 transaction を実行すること", async () => {
-    await expect(
-      withStorageUpdates({
-        keys: ["settings"],
-        context: "test:failure",
-        update: () => {
-          throw new Error("expected failure")
-        }
-      })
-    ).rejects.toThrow("expected failure")
+    const error = new Error("expected failure")
+    const loggerError = vi
+      .spyOn(logger, "error")
+      .mockImplementation(() => undefined)
 
-    await withStorageUpdates({
-      keys: ["settings"],
-      context: "test:after-failure",
-      update: ({ settings }) => ({
-        updates: {
-          settings: {
-            ...settings,
-            popupRecentCount: 10
+    try {
+      await expect(
+        withStorageUpdates({
+          keys: ["settings"],
+          context: "test:failure",
+          update: () => {
+            throw error
           }
-        }
-      })
-    })
+        })
+      ).rejects.toThrow(error)
 
-    expect(getStoredSettings().popupRecentCount).toBe(10)
+      expect(loggerError).toHaveBeenCalledWith("[test:failure]", error)
+
+      await withStorageUpdates({
+        keys: ["settings"],
+        context: "test:after-failure",
+        update: ({ settings }) => ({
+          updates: {
+            settings: {
+              ...settings,
+              popupRecentCount: 10
+            }
+          }
+        })
+      })
+
+      expect(getStoredSettings().popupRecentCount).toBe(10)
+    } finally {
+      loggerError.mockRestore()
+    }
   })
 
   it("更新がない transaction では Storage へ書き込まないこと", async () => {

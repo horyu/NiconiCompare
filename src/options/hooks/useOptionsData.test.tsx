@@ -8,6 +8,7 @@ import {
   DEFAULT_SETTINGS,
   DEFAULT_STATE
 } from "../../lib/constants"
+import { logger } from "../../lib/logger"
 import type * as MessagesModule from "../../lib/messages"
 import type { BackgroundResponse } from "../../lib/messages"
 import type { OptionsSnapshot } from "./useOptionsData"
@@ -73,25 +74,37 @@ describe("useOptionsData", () => {
 
   it("状態再取得の通信失敗時にも既存 snapshot を維持すること", async () => {
     const snapshot = createSnapshot()
+    const error = new Error("runtime disconnected")
+    const loggerError = vi
+      .spyOn(logger, "error")
+      .mockImplementation(() => undefined)
     sendNcMessageMock
       .mockResolvedValueOnce({
         ok: true,
         data: snapshot
       } satisfies BackgroundResponse<OptionsSnapshot>)
-      .mockRejectedValueOnce(new Error("runtime disconnected"))
+      .mockRejectedValueOnce(error)
 
-    const { result } = renderHook(() => useOptionsData())
+    try {
+      const { result } = renderHook(() => useOptionsData())
 
-    await waitFor(() => {
+      await waitFor(() => {
+        expect(result.current.snapshot).toBe(snapshot)
+      })
+
+      await act(async () => {
+        await result.current.refreshState(true)
+      })
+
       expect(result.current.snapshot).toBe(snapshot)
-    })
-
-    await act(async () => {
-      await result.current.refreshState(true)
-    })
-
-    expect(result.current.snapshot).toBe(snapshot)
-    expect(result.current.error).toBe("runtime disconnected")
+      expect(result.current.error).toBe("runtime disconnected")
+      expect(loggerError).toHaveBeenCalledWith(
+        "[ui:options:request-state]",
+        error
+      )
+    } finally {
+      loggerError.mockRestore()
+    }
   })
 })
 

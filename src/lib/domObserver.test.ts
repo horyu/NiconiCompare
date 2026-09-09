@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { OVERLAY_STATUS_MESSAGES } from "./constants"
 import type { VideoData } from "./domObserver"
 import { extractVideoDataFromLdJson, observeLdJsonChanges } from "./domObserver"
+import { logger } from "./logger"
 import { assertDefined } from "./testUtils"
 
 const setLdJson = (payload: unknown): void => {
@@ -151,6 +152,9 @@ describe("observeLdJsonChanges", () => {
     const originalHead = document.head
     const onVideoDataChange = vi.fn<(data: VideoData) => void>()
     const onError = vi.fn()
+    const loggerError = vi
+      .spyOn(logger, "error")
+      .mockImplementation(() => undefined)
 
     try {
       // document.head を一時的に削除
@@ -166,6 +170,10 @@ describe("observeLdJsonChanges", () => {
       expect(onError).toHaveBeenCalledWith(
         OVERLAY_STATUS_MESSAGES.jsonLdUnavailable
       )
+      expect(loggerError).toHaveBeenCalledWith(
+        "[ui:domObserver:missing-head]",
+        "document.head is missing; ld+json observer disabled."
+      )
     } finally {
       // 元に戻す
       Object.defineProperty(document, "head", {
@@ -173,6 +181,7 @@ describe("observeLdJsonChanges", () => {
         writable: true,
         value: originalHead
       })
+      loggerError.mockRestore()
     }
   })
 
