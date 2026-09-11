@@ -21,8 +21,7 @@ pnpm install
 | `pnpm build:firefox`   | Firefox 向け本番ビルド         |
 | `pnpm package`         | Chrome 向け zip 作成           |
 | `pnpm zip:firefox`     | Firefox 向け zip 作成          |
-| `pnpm test`            | Vitest watch                   |
-| `pnpm test:run`        | Vitest 一括実行                |
+| `pnpm test`            | Vitest 一括実行                |
 | `pnpm storybook`       | Storybook 開発サーバー         |
 | `pnpm storybook:build` | Storybook ビルド               |
 | `pnpm lint`            | Oxlint と TypeScript typecheck |
@@ -32,7 +31,7 @@ pnpm install
 | `pnpm fix`             | Oxfmt と Oxlint の自動修正     |
 | `pnpm check`           | lint とフォーマット確認        |
 
-コミット前に `pnpm fix` と `pnpm check` を実行します。変更内容に応じて `pnpm test:run` と `pnpm storybook:build` も実行してください。
+コミット前に `pnpm fix` と `pnpm check` を実行します。変更内容に応じて `pnpm test` と `pnpm storybook:build` も実行してください。
 
 ## 開発ビルドの読み込み
 
