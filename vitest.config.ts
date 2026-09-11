@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "happy-dom",
+    pool: "vmThreads",
     include: ["src/**/*.test.{ts,tsx}"]
   }
 })
