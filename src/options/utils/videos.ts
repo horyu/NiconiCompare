@@ -251,6 +251,10 @@ function isVideoSortKey(sort: string): sort is VideoSortKey {
   return VIDEO_SORT_KEYS.some((key) => key === sort)
 }
 
+function compareByTitle(left: VideoSnapshot, right: VideoSnapshot): number {
+  return compareString(left.title, right.title)
+}
+
 function getVideoPrimaryComparator({
   sort,
   authors,
@@ -272,8 +276,6 @@ function getVideoPrimaryComparator({
       ratingsByCategory[left.videoId]?.rating ?? 0,
       ratingsByCategory[right.videoId]?.rating ?? 0
     )
-  const compareByTitle = (left: VideoSnapshot, right: VideoSnapshot): number =>
-    compareString(left.title, right.title)
   const compareByAuthor = (left: VideoSnapshot, right: VideoSnapshot): number =>
     compareString(
       authors[left.authorUrl]?.name ?? "",
