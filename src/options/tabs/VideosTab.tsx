@@ -325,7 +325,7 @@ export const VideosTab = ({
                   setVideoAuthor("all")
                   resetToFirstPage()
                 }}
-                className="absolute top-1/2 right-2 z-10 -translate-y-1/2 bg-white px-1 text-base leading-none text-slate-500 hover:text-slate-700 dark:bg-slate-900 dark:text-slate-400 hover:dark:text-slate-200"
+                className="absolute top-1/2 right-2 z-10 -translate-y-1/2 bg-white px-1 text-base leading-none text-slate-500 hover:text-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
                 aria-label="投稿者フィルタをクリア">
                 ×
               </button>
