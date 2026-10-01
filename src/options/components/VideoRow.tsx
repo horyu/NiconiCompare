@@ -67,7 +67,7 @@ export function VideoRow({
           <button
             type="button"
             onClick={() => onOpenEventsForVideo(video.videoId, categoryId)}
-            className="text-sky-700 underline decoration-sky-500 decoration-1 underline-offset-2 hover:text-sky-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 focus-visible:outline-solid dark:text-sky-300 hover:dark:text-sky-200">
+            className="text-sky-700 underline decoration-sky-500 decoration-1 underline-offset-2 hover:text-sky-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 focus-visible:outline-solid dark:text-sky-300 dark:hover:text-sky-200">
             {verdictTotal}
           </button>
         ) : (

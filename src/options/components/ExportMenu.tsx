@@ -23,19 +23,19 @@ export const ExportMenu = ({
           <button
             type="button"
             onClick={() => onExport("csv", false)}
-            className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 hover:dark:bg-slate-800">
+            className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-800">
             CSV
           </button>
           <button
             type="button"
             onClick={() => onExport("csv", true)}
-            className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 hover:dark:bg-slate-800">
+            className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-800">
             CSV (BOM)
           </button>
           <button
             type="button"
             onClick={() => onExport("tsv", false)}
-            className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 hover:dark:bg-slate-800">
+            className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-800">
             TSV
           </button>
         </div>

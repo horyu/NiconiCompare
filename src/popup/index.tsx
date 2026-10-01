@@ -194,7 +194,7 @@ export default function Popup(): ReactElement {
             onClick={() => {
               void openOptionsPage()
             }}
-            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-slate-300 bg-white text-xs text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 hover:dark:bg-slate-700"
+            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-slate-300 bg-white text-xs text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
             title="オプションを開く"
             aria-label="オプションを開く">
             ⚙
