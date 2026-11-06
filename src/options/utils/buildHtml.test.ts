@@ -261,7 +261,7 @@ describe("buildShareHtml", () => {
     expect(window.document.querySelectorAll("#videos-body tr")).toHaveLength(3)
     expect(
       window.eval('document.getElementById("video-last-verdict-period").value')
-    ).toBe("30d")
+    ).toBe("90d")
     expect(
       window.eval('document.getElementById("video-last-verdict-date").value')
     ).not.toBe("")

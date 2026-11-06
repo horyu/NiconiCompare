@@ -38,7 +38,7 @@ const DEFAULT_SESSION_STATE: VideoSessionState = {
   search: "",
   author: "all",
   categoryId: DEFAULT_CATEGORY_ID,
-  lastVerdictPeriod: "30d",
+  lastVerdictPeriod: "90d",
   lastVerdictDate: "",
   sort: "rating",
   order: "desc",

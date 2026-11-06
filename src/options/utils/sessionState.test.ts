@@ -78,7 +78,7 @@ describe("normalizeVideoSessionState", () => {
       search: "",
       author: "all",
       categoryId: "",
-      lastVerdictPeriod: "30d",
+      lastVerdictPeriod: "90d",
       lastVerdictDate: "",
       sort: "rating",
       order: "desc",
